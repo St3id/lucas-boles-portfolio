@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucas BOLES - Interactive Portfolio v1</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Lucas BOLES - Gaming Universe Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,176 +13,347 @@
         }
 
         body {
-            font-family: 'Rajdhani', sans-serif;
-            background: #0a0e1a;
-            color: #fff;
+            font-family: 'Exo 2', sans-serif;
             overflow-x: hidden;
-            cursor: crosshair;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="rgba(255,255,255,0.5)" stroke="white" stroke-width="2"/></svg>'), auto;
         }
 
-        /* Main Interactive Scene */
-        #game-world {
+        /* Main Gaming World Container */
+        #gaming-world {
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
-                linear-gradient(135deg, #0a0e1a 0%, #1a1e3a 100%);
             overflow: hidden;
+            background: 
+                linear-gradient(135deg, 
+                    #1a472a 0%,    /* Zelda green */
+                    #2d3436 25%,   /* Overwatch dark */
+                    #0a1929 50%,   /* Warframe blue-black */
+                    #4a5f35 75%,   /* Minecraft green */
+                    #e74c3c 100%   /* Marvel red */
+                );
         }
 
-        /* Animated Grid Background */
-        .grid-background {
+        /* Animated background layers */
+        .bg-layer {
             position: absolute;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
             pointer-events: none;
         }
 
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        /* Floating Particles */
-        .particle {
+        /* Zelda BOTW section - Top Left */
+        .zelda-zone {
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #00ffff;
-            border-radius: 50%;
-            animation: float 10s infinite;
-            pointer-events: none;
-            box-shadow: 0 0 10px #00ffff;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-            50% { transform: translateY(-100px) translateX(50px); opacity: 1; }
-        }
-
-        /* HUD - Heads Up Display */
-        .hud {
-            position: fixed;
             top: 0;
             left: 0;
+            width: 40%;
+            height: 40%;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(52, 152, 219, 0.3), transparent 70%),
+                linear-gradient(135deg, rgba(46, 204, 113, 0.4), transparent);
+            filter: blur(30px);
+            animation: zeldaGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes zeldaGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Overwatch section - Top Right */
+        .overwatch-zone {
+            position: absolute;
+            top: 0;
             right: 0;
-            padding: 2rem;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(180deg, rgba(10, 14, 26, 0.9) 0%, transparent 100%);
-            pointer-events: none;
+            width: 40%;
+            height: 40%;
+            background: 
+                radial-gradient(circle at 70% 30%, rgba(243, 156, 18, 0.3), transparent 70%),
+                linear-gradient(225deg, rgba(230, 126, 34, 0.4), transparent);
+            filter: blur(30px);
+            animation: overwatchPulse 3s ease-in-out infinite;
         }
 
-        .player-info {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: #00ffff;
-            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
-            letter-spacing: 3px;
-            animation: glitch 3s infinite;
+        @keyframes overwatchPulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
         }
 
-        @keyframes glitch {
-            0%, 90%, 100% { transform: translate(0); }
-            92% { transform: translate(-2px, 2px); }
-            94% { transform: translate(2px, -2px); }
-        }
-
-        .status-bar {
-            display: flex;
-            gap: 2rem;
-            pointer-events: all;
-        }
-
-        .stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #00ffff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        /* Interactive Zones - Clickable Areas */
-        .zone {
-            position: absolute;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid rgba(0, 255, 255, 0.3);
-            background: rgba(0, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-        }
-
-        .zone:hover {
-            border-color: #00ffff;
-            background: rgba(0, 255, 255, 0.15);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-            transform: scale(1.05);
-        }
-
-        .zone-label {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #00ffff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            white-space: nowrap;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-            border: 1px solid #00ffff;
-        }
-
-        .zone:hover .zone-label {
-            opacity: 1;
-        }
-
-        /* Zone Icons */
-        .zone-icon {
+        /* Warframe section - Center */
+        .warframe-zone {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 3rem;
-            animation: pulse 2s infinite;
+            width: 50%;
+            height: 50%;
+            background: 
+                radial-gradient(circle, rgba(52, 152, 219, 0.4), transparent 60%),
+                radial-gradient(circle, rgba(155, 89, 182, 0.3), transparent 70%);
+            filter: blur(40px);
+            animation: warframeRotate 6s linear infinite;
+        }
+
+        @keyframes warframeRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Minecraft section - Bottom Left */
+        .minecraft-zone {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40%;
+            height: 40%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(76, 175, 80, 0.3) 0px,
+                    rgba(76, 175, 80, 0.3) 10px,
+                    transparent 10px,
+                    transparent 20px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(139, 69, 19, 0.3) 0px,
+                    rgba(139, 69, 19, 0.3) 10px,
+                    transparent 10px,
+                    transparent 20px
+                );
+            filter: blur(20px);
+        }
+
+        /* Marvel Rivals section - Bottom Right */
+        .marvel-zone {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40%;
+            height: 40%;
+            background: 
+                radial-gradient(circle at 70% 70%, rgba(231, 76, 60, 0.4), transparent 70%),
+                radial-gradient(circle at 80% 80%, rgba(52, 73, 94, 0.3), transparent 60%);
+            filter: blur(30px);
+            animation: marvelEnergy 2s ease-in-out infinite;
+        }
+
+        @keyframes marvelEnergy {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; filter: blur(25px); }
+        }
+
+        /* Particle effects */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 15s linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* HUD styled like game UI */
+        .game-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8), transparent);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             pointer-events: none;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
+        .player-name {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 
+                0 0 10px rgba(52, 152, 219, 0.8),
+                2px 2px 0 #000,
+                -2px -2px 0 #000;
+            animation: nameGlitch 5s infinite;
         }
 
-        /* Modal / Info Panel */
-        .modal {
+        @keyframes nameGlitch {
+            0%, 90%, 100% { transform: translate(0); }
+            92% { transform: translate(-2px, 2px); color: #3498db; }
+            94% { transform: translate(2px, -2px); color: #e74c3c; }
+            96% { transform: translate(0); color: #fff; }
+        }
+
+        .health-bar {
+            width: 300px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid #2ecc71;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+        }
+
+        .health-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            animation: healthPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes healthPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 900;
+            color: white;
+            font-size: 1.1rem;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Interactive Clickable Zones - Game Style */
+        .click-zone {
+            position: absolute;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .click-zone:hover {
+            transform: scale(1.15) rotate(2deg);
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                0 0 50px rgba(255, 255, 255, 0.5),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .zone-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: iconBounce 2s ease-in-out infinite;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .zone-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: #fff;
+            text-transform: uppercase;
+            text-align: center;
+            text-shadow: 
+                2px 2px 0 #000,
+                -2px -2px 0 #000,
+                0 0 10px rgba(255, 255, 255, 0.8);
+            letter-spacing: 2px;
+            pointer-events: none;
+        }
+
+        .zone-subtext {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.5rem;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        /* Zelda themed zone */
+        .zelda-themed {
+            border-color: #2ecc71;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(52, 152, 219, 0.2));
+        }
+
+        .zelda-themed:hover {
+            border-color: #2ecc71;
+            box-shadow: 0 0 50px rgba(46, 204, 113, 0.8);
+        }
+
+        /* Overwatch themed zone */
+        .overwatch-themed {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.2));
+        }
+
+        .overwatch-themed:hover {
+            border-color: #f39c12;
+            box-shadow: 0 0 50px rgba(243, 156, 18, 0.8);
+        }
+
+        /* Warframe themed zone */
+        .warframe-themed {
+            border-color: #9b59b6;
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(52, 152, 219, 0.2));
+            border-radius: 50%;
+        }
+
+        .warframe-themed:hover {
+            border-color: #9b59b6;
+            box-shadow: 0 0 50px rgba(155, 89, 182, 0.8);
+        }
+
+        /* Minecraft themed zone */
+        .minecraft-themed {
+            border-color: #4caf50;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    rgba(76, 175, 80, 0.2) 0px,
+                    rgba(76, 175, 80, 0.2) 10px,
+                    rgba(139, 69, 19, 0.2) 10px,
+                    rgba(139, 69, 19, 0.2) 20px
+                );
+            border-width: 5px;
+            border-style: solid;
+            image-rendering: pixelated;
+        }
+
+        .minecraft-themed:hover {
+            border-color: #4caf50;
+            box-shadow: 0 0 50px rgba(76, 175, 80, 0.8);
+        }
+
+        /* Marvel themed zone */
+        .marvel-themed {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(192, 57, 43, 0.2));
+        }
+
+        .marvel-themed:hover {
+            border-color: #e74c3c;
+            box-shadow: 0 0 50px rgba(231, 76, 60, 0.8);
+        }
+
+        /* Modal - Game Menu Style */
+        .game-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -192,533 +363,644 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s;
+            z-index: 2000;
+            animation: modalFade 0.3s;
         }
 
-        .modal.active {
+        .game-modal.active {
             display: flex;
         }
 
-        @keyframes fadeIn {
+        @keyframes modalFade {
             from { opacity: 0; }
             to { opacity: 1; }
         }
 
-        .modal-content {
-            background: linear-gradient(135deg, #1a1e3a 0%, #0a0e1a 100%);
-            border: 2px solid #00ffff;
+        .modal-panel {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border: 5px solid #ecf0f1;
             border-radius: 20px;
             max-width: 900px;
-            max-height: 80vh;
+            max-height: 85vh;
+            width: 90%;
             overflow-y: auto;
             padding: 3rem;
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
-            animation: slideUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 
+                0 0 100px rgba(236, 240, 241, 0.5),
+                inset 0 0 50px rgba(0, 0, 0, 0.5);
+            animation: panelSlide 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        @keyframes panelSlide {
+            from { transform: translateY(-100px) scale(0.8); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
 
-        .close-btn {
+        .modal-close {
             position: absolute;
             top: 1rem;
             right: 1rem;
-            width: 40px;
-            height: 40px;
-            border: 2px solid #ff00ff;
-            background: rgba(255, 0, 255, 0.1);
-            color: #ff00ff;
-            font-size: 1.5rem;
-            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            background: #e74c3c;
+            border: 3px solid #fff;
             border-radius: 50%;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
+            font-family: 'Press Start 2P', cursive;
         }
 
-        .close-btn:hover {
-            background: #ff00ff;
-            color: #fff;
-            transform: rotate(90deg);
+        .modal-close:hover {
+            background: #c0392b;
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
         }
 
         .modal-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #00ffff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            color: #ecf0f1;
             margin-bottom: 2rem;
+            text-align: center;
             text-transform: uppercase;
+            text-shadow: 
+                3px 3px 0 #2c3e50,
+                -3px -3px 0 #2c3e50,
+                0 0 20px rgba(52, 152, 219, 0.8);
             letter-spacing: 3px;
-            text-shadow: 0 0 20px #00ffff;
         }
 
-        .modal-section {
+        .modal-content-section {
             margin-bottom: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid rgba(236, 240, 241, 0.3);
         }
 
-        .modal-section h3 {
-            font-family: 'Orbitron', monospace;
+        .section-title {
+            font-family: 'Exo 2', sans-serif;
             font-size: 1.5rem;
-            color: #ff00ff;
+            color: #3498db;
             margin-bottom: 1rem;
             text-transform: uppercase;
+            font-weight: 900;
         }
 
-        .modal-section p {
+        .section-text {
+            color: #ecf0f1;
             line-height: 1.8;
-            color: #ccc;
             font-size: 1.1rem;
         }
 
-        .skill-grid {
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
 
-        .skill-item {
-            background: rgba(0, 255, 255, 0.1);
-            padding: 1rem;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            text-align: center;
-        }
-
-        .skill-name {
-            font-weight: 700;
-            color: #00ffff;
-            margin-bottom: 0.5rem;
-        }
-
-        .skill-level {
-            font-size: 0.9rem;
-            color: #999;
-        }
-
-        .project-card {
-            background: rgba(255, 0, 255, 0.1);
+        .stat-box {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(155, 89, 182, 0.2));
             padding: 1.5rem;
             border-radius: 10px;
-            border: 1px solid rgba(255, 0, 255, 0.3);
-            margin-bottom: 1rem;
+            border: 2px solid rgba(52, 152, 219, 0.5);
+            text-align: center;
+            transition: all 0.3s;
         }
 
-        .project-card h4 {
-            color: #ff00ff;
-            font-size: 1.3rem;
+        .stat-box:hover {
+            transform: translateY(-5px);
+            border-color: #3498db;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #3498db;
+            text-transform: uppercase;
             margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            color: #ecf0f1;
+            font-weight: 700;
+        }
+
+        .project-block {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(52, 152, 219, 0.2));
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid rgba(46, 204, 113, 0.5);
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .project-block:hover {
+            transform: translateX(10px);
+            border-color: #2ecc71;
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.5);
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            color: #2ecc71;
+            margin-bottom: 0.5rem;
+            font-weight: 900;
         }
 
         .project-date {
-            color: #00ffff;
             font-size: 0.9rem;
+            color: #3498db;
             margin-bottom: 1rem;
         }
 
-        .tag-list {
+        .project-desc {
+            color: #ecf0f1;
+            line-height: 1.7;
+        }
+
+        .tag-container {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
             margin-top: 1rem;
         }
 
-        .tag {
-            background: rgba(0, 255, 255, 0.2);
-            padding: 0.3rem 0.8rem;
+        .tech-tag {
+            background: rgba(52, 152, 219, 0.3);
+            padding: 0.4rem 1rem;
             border-radius: 20px;
             font-size: 0.85rem;
-            color: #00ffff;
-            border: 1px solid rgba(0, 255, 255, 0.5);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.6);
+            font-weight: 600;
         }
 
-        .contact-links {
+        .contact-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
-            margin-top: 1rem;
         }
 
-        .contact-link {
-            background: rgba(0, 255, 255, 0.1);
-            padding: 1rem;
+        .contact-card {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(192, 57, 43, 0.2));
+            padding: 1.5rem;
             border-radius: 10px;
-            border: 1px solid rgba(0, 255, 255, 0.3);
+            border: 2px solid rgba(231, 76, 60, 0.5);
             text-align: center;
             text-decoration: none;
-            color: #00ffff;
+            color: #ecf0f1;
             transition: all 0.3s;
         }
 
-        .contact-link:hover {
-            background: rgba(0, 255, 255, 0.3);
-            border-color: #00ffff;
-            transform: translateY(-5px);
+        .contact-card:hover {
+            transform: scale(1.05);
+            border-color: #e74c3c;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.5);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Scrollbar styling */
+        .modal-panel::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .modal-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-panel::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 5px;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .zone {
-                font-size: 0.8rem;
+            .player-name {
+                font-size: 0.7rem;
             }
-            .modal-content {
-                padding: 2rem;
-                max-width: 95%;
+            .click-zone {
+                padding: 1rem;
             }
-            .hud {
-                flex-direction: column;
-                gap: 1rem;
+            .zone-icon {
+                font-size: 2.5rem;
             }
-        }
-
-        /* Scanline effect */
-        .scanline {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(0, 255, 255, 0.03) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            animation: scan 8s linear infinite;
-            z-index: 9999;
-        }
-
-        @keyframes scan {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 100%; }
+            .zone-label {
+                font-size: 0.6rem;
+            }
+            .modal-panel {
+                padding: 2rem 1.5rem;
+            }
+            .modal-title {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="scanline"></div>
-    
-    <!-- HUD -->
-    <div class="hud">
-        <div class="player-info">LUCAS_BOLES.exe</div>
-        <div class="status-bar">
-            <div class="stat">
-                <span class="stat-label">Level</span>
-                <span class="stat-value">19</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Skills</span>
-                <span class="stat-value">10+</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Projects</span>
-                <span class="stat-value">6</span>
-            </div>
-        </div>
-    </div>
+    <!-- Main Gaming World -->
+    <div id="gaming-world">
+        <!-- Animated Background Layers -->
+        <div class="bg-layer zelda-zone"></div>
+        <div class="bg-layer overwatch-zone"></div>
+        <div class="bg-layer warframe-zone"></div>
+        <div class="bg-layer minecraft-zone"></div>
+        <div class="bg-layer marvel-zone"></div>
 
-    <!-- Main Game World -->
-    <div id="game-world">
-        <div class="grid-background"></div>
-
-        <!-- Interactive Zones -->
-        <div class="zone" style="top: 15%; left: 10%; width: 200px; height: 200px;" onclick="openModal('about')">
-            <div class="zone-icon">👤</div>
-            <div class="zone-label">À Propos</div>
+        <!-- HUD -->
+        <div class="game-hud">
+            <div class="player-name">LUCAS_BOLES</div>
+            <div class="health-bar">
+                <div class="health-fill"></div>
+            </div>
+            <div class="level-badge">LVL 19</div>
         </div>
 
-        <div class="zone" style="top: 15%; right: 10%; width: 200px; height: 200px;" onclick="openModal('skills')">
+        <!-- Interactive Clickable Zones -->
+        
+        <!-- Zone 1: About (Zelda themed - Top Left) -->
+        <div class="click-zone zelda-themed" style="top: 15%; left: 8%; width: 220px; height: 220px; border-radius: 15px;" onclick="openGameModal('about')">
+            <div class="zone-icon">🗡️</div>
+            <div class="zone-label">PROFIL</div>
+            <div class="zone-subtext">Zelda BOTW</div>
+        </div>
+
+        <!-- Zone 2: Skills (Overwatch themed - Top Right) -->
+        <div class="click-zone overwatch-themed" style="top: 15%; right: 8%; width: 220px; height: 220px; border-radius: 15px;" onclick="openGameModal('skills')">
             <div class="zone-icon">⚡</div>
-            <div class="zone-label">Compétences</div>
+            <div class="zone-label">ABILITIES</div>
+            <div class="zone-subtext">Overwatch</div>
         </div>
 
-        <div class="zone" style="bottom: 15%; left: 10%; width: 200px; height: 200px;" onclick="openModal('projects')">
+        <!-- Zone 3: Projects (Warframe themed - Center) -->
+        <div class="click-zone warframe-themed" style="top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px;" onclick="openGameModal('projects')">
             <div class="zone-icon">🚀</div>
-            <div class="zone-label">Projets</div>
+            <div class="zone-label">MISSIONS</div>
+            <div class="zone-subtext">Warframe</div>
         </div>
 
-        <div class="zone" style="bottom: 15%; right: 10%; width: 200px; height: 200px;" onclick="openModal('contact')">
-            <div class="zone-icon">📡</div>
-            <div class="zone-label">Contact</div>
-        </div>
-
-        <div class="zone" style="top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border-radius: 50%;" onclick="openModal('goals')">
+        <!-- Zone 4: Goals (Minecraft themed - Bottom Left) -->
+        <div class="click-zone minecraft-themed" style="bottom: 12%; left: 8%; width: 220px; height: 220px;" onclick="openGameModal('goals')">
             <div class="zone-icon">🎯</div>
-            <div class="zone-label">Objectifs</div>
+            <div class="zone-label">QUESTS</div>
+            <div class="zone-subtext">Minecraft</div>
+        </div>
+
+        <!-- Zone 5: Contact (Marvel themed - Bottom Right) -->
+        <div class="click-zone marvel-themed" style="bottom: 12%; right: 8%; width: 220px; height: 220px; border-radius: 15px;" onclick="openGameModal('contact')">
+            <div class="zone-icon">📡</div>
+            <div class="zone-label">ASSEMBLE</div>
+            <div class="zone-subtext">Marvel Rivals</div>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="about-modal" class="modal">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('about')">×</div>
-            <h2 class="modal-title">À Propos</h2>
-            <div class="modal-section">
-                <h3>Lucas BOLES</h3>
-                <p>Étudiant en BUT Génie Électrique & Informatique Industrielle (2ème année) à l'IUT1 Grenoble Alpes, parcours Automatisme & Informatique Industrielle.</p>
-            </div>
-            <div class="modal-section">
-                <h3>Profil</h3>
-                <p>Passionné par l'automatisation industrielle et l'optimisation des systèmes. Mes expériences au CEA et CNRS m'ont permis de développer rigueur et professionnalisme, tandis que mes expériences en entreprise ont renforcé ma polyvalence.</p>
-            </div>
-            <div class="modal-section">
-                <h3>Informations</h3>
-                <div class="skill-grid">
-                    <div class="skill-item">
-                        <div class="skill-name">📍 Localisation</div>
-                        <div class="skill-level">Crolles, Isère</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">🎂 Âge</div>
-                        <div class="skill-level">19 ans</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">🚗 Permis</div>
-                        <div class="skill-level">Permis B</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">🌍 Anglais</div>
-                        <div class="skill-level">C1 Certifié</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">🇪🇸 Espagnol</div>
-                        <div class="skill-level">B1</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="skills-modal" class="modal">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('skills')">×</div>
-            <h2 class="modal-title">Compétences</h2>
-            <div class="modal-section">
-                <h3>💻 Programmation</h3>
-                <div class="skill-grid">
-                    <div class="skill-item">
-                        <div class="skill-name">Python</div>
-                        <div class="skill-level">Bonne maîtrise</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">C</div>
-                        <div class="skill-level">Bonne maîtrise</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">Arduino</div>
-                        <div class="skill-level">Bonne maîtrise</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">Java</div>
-                        <div class="skill-level">En développement</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">ADA</div>
-                        <div class="skill-level">En apprentissage</div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-section">
-                <h3>⚙️ Automatisme</h3>
-                <div class="skill-grid">
-                    <div class="skill-item">
-                        <div class="skill-name">Control Expert</div>
-                        <div class="skill-level">Bonne maîtrise</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">Vijeo Designer</div>
-                        <div class="skill-level">IHM</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">Automates Schneider</div>
-                        <div class="skill-level">Pratique</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">Grafcet</div>
-                        <div class="skill-level">Maîtrisé</div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-section">
-                <h3>🛠️ Outils</h3>
-                <div class="skill-grid">
-                    <div class="skill-item">
-                        <div class="skill-name">KiCad</div>
-                        <div class="skill-level">CAO Électronique</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">Pack Office</div>
-                        <div class="skill-level">Bonne maîtrise</div>
-                    </div>
-                    <div class="skill-item">
-                        <div class="skill-name">Logiciels CAO</div>
-                        <div class="skill-level">Pratique</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="projects-modal" class="modal">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('projects')">×</div>
-            <h2 class="modal-title">Mes Projets</h2>
+    <!-- Modal: About -->
+    <div id="about-modal" class="game-modal">
+        <div class="modal-panel">
+            <div class="modal-close" onclick="closeGameModal('about')">×</div>
+            <h2 class="modal-title">▼ PROFIL ▼</h2>
             
-            <div class="project-card">
-                <h4>🚂 Système Automatisé de Transport sur Rail</h4>
-                <div class="project-date">Octobre 2025</div>
-                <p>Conception d'un système automatisé à deux chariots pour le transfert de paniers entre cuves. Analyse fonctionnelle, grafcets, gestion des alarmes et variateurs. Programmation automate Schneider.</p>
-                <div class="tag-list">
-                    <span class="tag">Control Expert</span>
-                    <span class="tag">Vijeo Designer</span>
-                    <span class="tag">Grafcet</span>
-                </div>
+            <div class="modal-content-section">
+                <h3 class="section-title">🗡️ Lucas BOLES - L'Aventurier</h3>
+                <p class="section-text">
+                    Étudiant en BUT Génie Électrique & Informatique Industrielle (2ème année) à l'IUT1 Grenoble Alpes, 
+                    parcours Automatisme & Informatique Industrielle.
+                </p>
             </div>
 
-            <div class="project-card">
-                <h4>🤖 Robot Suiveur de Ligne</h4>
-                <div class="project-date">2024-2025</div>
-                <p>Conception complète d'un robot autonome. Maîtrise de KiCad, CAO, brasure, tests et programmation embarquée.</p>
-                <div class="tag-list">
-                    <span class="tag">KiCad</span>
-                    <span class="tag">Arduino</span>
-                    <span class="tag">C/C++</span>
-                    <span class="tag">Électronique</span>
-                </div>
+            <div class="modal-content-section">
+                <h3 class="section-title">📜 Histoire du héros</h3>
+                <p class="section-text">
+                    Passionné par l'automatisation industrielle et l'optimisation des systèmes. Mes quêtes au CEA et CNRS 
+                    m'ont permis de développer rigueur et professionnalisme, tandis que mes aventures en entreprise ont 
+                    renforcé ma polyvalence et mon adaptabilité face aux défis.
+                </p>
             </div>
 
-            <div class="project-card">
-                <h4>⚛️ Stage CEA Grenoble</h4>
-                <div class="project-date">Août 2022</div>
-                <p>Participation aux services scientifiques (nucléaire, médical, bio). Travail en autonomie et sessions anglophones.</p>
-                <div class="tag-list">
-                    <span class="tag">Recherche</span>
-                    <span class="tag">Nucléaire</span>
-                    <span class="tag">Sécurité</span>
-                </div>
-            </div>
-
-            <div class="project-card">
-                <h4>🧬 Stage CNRS Grenoble</h4>
-                <div class="project-date">Avril 2021</div>
-                <p>Culture de bactéries, extraction d'ADN, initiation à la cristallographie.</p>
-                <div class="tag-list">
-                    <span class="tag">Biologie</span>
-                    <span class="tag">Laboratoire</span>
-                    <span class="tag">ADN</span>
-                </div>
-            </div>
-
-            <div class="project-card">
-                <h4>💻 Développement de Jeux Vidéo</h4>
-                <div class="project-date">Projets personnels</div>
-                <p>Création de jeux en Java, Python, C et Scratch. POO, gestion d'événements et interfaces graphiques.</p>
-                <div class="tag-list">
-                    <span class="tag">Java</span>
-                    <span class="tag">Python</span>
-                    <span class="tag">Game Dev</span>
+            <div class="modal-content-section">
+                <h3 class="section-title">⚔️ Statistiques du personnage</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">📍 Localisation</div>
+                        <div class="stat-value">Crolles, Isère</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">🎂 Niveau</div>
+                        <div class="stat-value">19 ans</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">🚗 Mobilité</div>
+                        <div class="stat-value">Permis B</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">🌍 Anglais</div>
+                        <div class="stat-value">C1 Certifié</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">🇪🇸 Espagnol</div>
+                        <div class="stat-value">B1</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">🎮 Passion</div>
+                        <div class="stat-value">Game Dev</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="goals-modal" class="modal">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('goals')">×</div>
-            <h2 class="modal-title">Mes Objectifs</h2>
+    <!-- Modal: Skills -->
+    <div id="skills-modal" class="game-modal">
+        <div class="modal-panel">
+            <div class="modal-close" onclick="closeGameModal('skills')">×</div>
+            <h2 class="modal-title">▼ ABILITIES ▼</h2>
             
-            <div class="project-card">
-                <h4>🎯 Mi-Avril 2026</h4>
-                <p>Stage en automatisation industrielle (8-12 semaines). Mettre en pratique mes compétences en automates programmables, Control Expert et systèmes automatisés.</p>
+            <div class="modal-content-section">
+                <h3 class="section-title">💻 Programmation</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Python</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">C</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Arduino</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Java</div>
+                        <div class="stat-value">★★★☆☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">ADA</div>
+                        <div class="stat-value">★★☆☆☆</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="project-card">
-                <h4>🎓 2027</h4>
-                <p>Diplôme BUT GEII avec parcours Automatisme & Informatique Industrielle. Approfondir systèmes embarqués et réseaux industriels.</p>
+            <div class="modal-content-section">
+                <h3 class="section-title">⚙️ Automatisme</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Control Expert</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Vijeo Designer</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Automates</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Grafcet</div>
+                        <div class="stat-value">★★★★★</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="project-card">
-                <h4>🚀 2027-2029</h4>
-                <p>École d'ingénieur ou master spécialisé en automatisme, robotique ou systèmes embarqués. Devenir ingénieur et contribuer à l'Industrie 4.0.</p>
-            </div>
-
-            <div class="project-card">
-                <h4>🌍 2028-2030</h4>
-                <p>Expertise en systèmes automatisés complexes. Projets internationaux avec mes compétences linguistiques.</p>
-            </div>
-
-            <div class="project-card">
-                <h4>💡 Long terme</h4>
-                <p>Innovation en automatisation industrielle, R&D, encadrement d'équipes techniques. Veille sur l'IA appliquée à l'industrie.</p>
+            <div class="modal-content-section">
+                <h3 class="section-title">🛠️ Outils & Équipement</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">KiCad</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pack Office</div>
+                        <div class="stat-value">★★★★☆</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">CAO</div>
+                        <div class="stat-value">★★★☆☆</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="contact-modal" class="modal">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('contact')">×</div>
-            <h2 class="modal-title">Contact</h2>
-            <div class="modal-section">
-                <h3>Me contacter</h3>
-                <div class="contact-links">
-                    <a href="mailto:boleslcc@gmail.com" class="contact-link">
-                        <div style="font-size: 2rem;">✉️</div>
+    <!-- Modal: Projects -->
+    <div id="projects-modal" class="game-modal">
+        <div class="modal-panel">
+            <div class="modal-close" onclick="closeGameModal('projects')">×</div>
+            <h2 class="modal-title">▼ MISSIONS ▼</h2>
+            
+            <div class="project-block">
+                <h4 class="project-title">🚂 Système Automatisé sur Rail</h4>
+                <div class="project-date">📅 Octobre 2025 - Mission Terminée</div>
+                <p class="project-desc">
+                    Conception d'un système automatisé à deux chariots pour transfert de paniers entre cuves. 
+                    Analyse fonctionnelle, grafcets, gestion alarmes et variateurs. Programmation automate Schneider.
+                </p>
+                <div class="tag-container">
+                    <span class="tech-tag">Control Expert</span>
+                    <span class="tech-tag">Vijeo Designer</span>
+                    <span class="tech-tag">Grafcet</span>
+                    <span class="tech-tag">Automates</span>
+                </div>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">🤖 Robot Suiveur de Ligne</h4>
+                <div class="project-date">📅 2024-2025 - Mission Active</div>
+                <p class="project-desc">
+                    Conception complète d'un robot autonome. Maîtrise de KiCad, CAO, brasure, tests et programmation embarquée.
+                </p>
+                <div class="tag-container">
+                    <span class="tech-tag">KiCad</span>
+                    <span class="tech-tag">Arduino</span>
+                    <span class="tech-tag">C/C++</span>
+                    <span class="tech-tag">Électronique</span>
+                </div>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">⚛️ Stage CEA Grenoble</h4>
+                <div class="project-date">📅 Août 2022 - Mission Spéciale</div>
+                <p class="project-desc">
+                    Participation aux services scientifiques (nucléaire, médical, bio). Travail autonome et sessions anglophones.
+                </p>
+                <div class="tag-container">
+                    <span class="tech-tag">Recherche</span>
+                    <span class="tech-tag">Nucléaire</span>
+                    <span class="tech-tag">Sécurité</span>
+                    <span class="tech-tag">Anglais</span>
+                </div>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">🧬 Stage CNRS Grenoble</h4>
+                <div class="project-date">📅 Avril 2021 - Première Quête</div>
+                <p class="project-desc">
+                    Culture de bactéries, extraction d'ADN, initiation à la cristallographie. Développement de la rigueur scientifique.
+                </p>
+                <div class="tag-container">
+                    <span class="tech-tag">Biologie</span>
+                    <span class="tech-tag">Laboratoire</span>
+                    <span class="tech-tag">ADN</span>
+                </div>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">💻 Développement de Jeux</h4>
+                <div class="project-date">📅 Projets personnels - Side Quests</div>
+                <p class="project-desc">
+                    Création de jeux en Java, Python, C et Scratch. POO, gestion d'événements et interfaces graphiques.
+                </p>
+                <div class="tag-container">
+                    <span class="tech-tag">Java</span>
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">C</span>
+                    <span class="tech-tag">Game Dev</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Goals -->
+    <div id="goals-modal" class="game-modal">
+        <div class="modal-panel">
+            <div class="modal-close" onclick="closeGameModal('goals')">×</div>
+            <h2 class="modal-title">▼ QUESTS ▼</h2>
+            
+            <div class="project-block">
+                <h4 class="project-title">🎯 Quête Principale: Stage Automatisation</h4>
+                <div class="project-date">📅 Mi-Avril 2026 (8-12 semaines)</div>
+                <p class="project-desc">
+                    Recherche active d'un stage en automatisation industrielle pour mettre en pratique compétences en 
+                    automates programmables, Control Expert et systèmes automatisés.
+                </p>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">🎓 Quête Académique: Diplôme BUT GEII</h4>
+                <div class="project-date">📅 2027</div>
+                <p class="project-desc">
+                    Obtenir le BUT avec parcours Automatisme & Informatique Industrielle. Approfondir systèmes embarqués 
+                    et réseaux industriels.
+                </p>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">🚀 Quête Avancée: École d'Ingénieur</h4>
+                <div class="project-date">📅 2027-2029</div>
+                <p class="project-desc">
+                    Poursuite en école d'ingénieur ou master spécialisé en automatisme, robotique ou systèmes embarqués. 
+                    Objectif: devenir ingénieur et contribuer à l'Industrie 4.0.
+                </p>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">🌍 Quête Internationale: Expertise Technique</h4>
+                <div class="project-date">📅 2028-2030</div>
+                <p class="project-desc">
+                    Développer expertise en systèmes automatisés complexes. Projets internationaux avec compétences 
+                    linguistiques (Anglais C1, Espagnol B1).
+                </p>
+            </div>
+
+            <div class="project-block">
+                <h4 class="project-title">💡 Quête Légendaire: Innovation & Leadership</h4>
+                <div class="project-date">📅 Long terme</div>
+                <p class="project-desc">
+                    Contribuer à l'innovation en automatisation industrielle, participer à la R&D, encadrer des équipes 
+                    techniques. Veille permanente sur l'IA appliquée à l'industrie.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Contact -->
+    <div id="contact-modal" class="game-modal">
+        <div class="modal-panel">
+            <div class="modal-close" onclick="closeGameModal('contact')">×</div>
+            <h2 class="modal-title">▼ ASSEMBLE ▼</h2>
+            
+            <div class="modal-content-section">
+                <h3 class="section-title">📡 Canaux de communication</h3>
+                <div class="contact-grid">
+                    <a href="mailto:boleslcc@gmail.com" class="contact-card">
+                        <div class="contact-icon">✉️</div>
                         <div>Email Personnel</div>
                         <div style="font-size: 0.8rem; margin-top: 0.5rem;">boleslcc@gmail.com</div>
                     </a>
-                    <a href="mailto:lucas.boles@etu.univ-grenoble-alpes.fr" class="contact-link">
-                        <div style="font-size: 2rem;">🎓</div>
-                        <div>Email Universitaire</div>
+                    <a href="mailto:lucas.boles@etu.univ-grenoble-alpes.fr" class="contact-card">
+                        <div class="contact-icon">🎓</div>
+                        <div>Email Université</div>
                         <div style="font-size: 0.8rem; margin-top: 0.5rem;">lucas.boles@etu...</div>
                     </a>
-                    <a href="tel:+33670150329" class="contact-link">
-                        <div style="font-size: 2rem;">📱</div>
+                    <a href="tel:+33670150329" class="contact-card">
+                        <div class="contact-icon">📱</div>
                         <div>Téléphone</div>
                         <div style="font-size: 0.8rem; margin-top: 0.5rem;">06 70 15 03 29</div>
                     </a>
-                    <a href="https://www.linkedin.com/in/lucas-boles-2b027a389/" target="_blank" class="contact-link">
-                        <div style="font-size: 2rem;">💼</div>
+                    <a href="https://www.linkedin.com/in/lucas-boles-2b027a389/" target="_blank" class="contact-card">
+                        <div class="contact-icon">💼</div>
                         <div>LinkedIn</div>
-                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">Profil Pro</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">Réseau Pro</div>
                     </a>
+                </div>
+            </div>
+
+            <div class="modal-content-section">
+                <h3 class="section-title">🗺️ Localisation de la base</h3>
+                <div class="stat-box">
+                    <div class="stat-label">📍 Position GPS</div>
+                    <div class="stat-value">Crolles (38920), Isère - France</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Generate floating particles
+        // Create particles
         function createParticles() {
-            const world = document.getElementById('game-world');
-            for (let i = 0; i < 30; i++) {
+            const world = document.getElementById('gaming-world');
+            const colors = ['#2ecc71', '#3498db', '#9b59b6', '#e74c3c', '#f39c12'];
+            
+            for (let i = 0; i < 20; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.animationDuration = (5 + Math.random() * 10) + 's';
+                particle.style.width = (Math.random() * 4 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particle.style.boxShadow = `0 0 15px ${particle.style.background}`;
                 world.appendChild(particle);
             }
         }
 
-        function openModal(id) {
+        function openGameModal(id) {
             document.getElementById(id + '-modal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        function closeModal(id) {
+        function closeGameModal(id) {
             document.getElementById(id + '-modal').classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
-        // Close modal on outside click
-        document.querySelectorAll('.modal').forEach(modal => {
+        // Close on background click
+        document.querySelectorAll('.game-modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.remove('active');
@@ -727,10 +1009,10 @@
             });
         });
 
-        // ESC key to close modal
+        // ESC key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                document.querySelectorAll('.modal').forEach(modal => {
+                document.querySelectorAll('.game-modal').forEach(modal => {
                     modal.classList.remove('active');
                 });
                 document.body.style.overflow = 'auto';
