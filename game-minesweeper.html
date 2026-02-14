@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démineur Électrique - Mini-Jeu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #fc466b;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fc466b;
+            margin-bottom: 1rem;
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3f5efb;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .difficulty {
+            margin-bottom: 1.5rem;
+        }
+
+        .difficulty button {
+            margin: 0 0.5rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid #3f5efb;
+            background: white;
+            color: #3f5efb;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty button.active,
+        .difficulty button:hover {
+            background: #3f5efb;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .grid {
+            display: inline-grid;
+            gap: 2px;
+            background: #2d3561;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin: 1rem auto;
+        }
+
+        .cell {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .cell:hover:not(.revealed):not(.flagged) {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .cell.revealed {
+            background: #ecf0f1;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: default;
+            color: #2c3e50;
+        }
+
+        .cell.flagged {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+        }
+
+        .cell.mine {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+        }
+
+        .cell.revealed.num-1 { color: #3498db; }
+        .cell.revealed.num-2 { color: #2ecc71; }
+        .cell.revealed.num-3 { color: #e74c3c; }
+        .cell.revealed.num-4 { color: #9b59b6; }
+        .cell.revealed.num-5 { color: #f39c12; }
+        .cell.revealed.num-6 { color: #1abc9c; }
+        .cell.revealed.num-7 { color: #34495e; }
+        .cell.revealed.num-8 { color: #7f8c8d; }
+
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button.control-btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .new-button {
+            background: #3f5efb;
+            color: white;
+        }
+
+        .new-button:hover {
+            background: #2d45d9;
+            transform: translateY(-3px);
+        }
+
+        .message {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fc466b;
+            min-height: 25px;
+        }
+
+        .instructions {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        @media (max-width: 600px) {
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+            
+            .game-container {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="games.html" class="back-button">← Retour aux Jeux</a>
+    
+    <div class="game-container">
+        <h1>💣 Démineur Électrique</h1>
+        
+        <div class="info">
+            <div>💣 Mines: <span id="mineCount">10</span></div>
+            <div>🚩 Drapeaux: <span id="flagCount">0</span></div>
+            <div>⏱️ Temps: <span id="timer">0</span>s</div>
+        </div>
+
+        <div class="difficulty">
+            <button class="active" onclick="setDifficulty('easy')">Facile (8×8)</button>
+            <button onclick="setDifficulty('medium')">Moyen (12×12)</button>
+            <button onclick="setDifficulty('hard')">Difficile (16×16)</button>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="message" id="message">Clic gauche : révéler | Clic droit : drapeau</div>
+
+        <div class="controls">
+            <button class="control-btn new-button" onclick="initGame()">Nouvelle Partie</button>
+        </div>
+
+        <div class="instructions">
+            <strong>🎯 Comment jouer :</strong><br>
+            <strong>Clic gauche</strong> pour révéler une case<br>
+            <strong>Clic droit</strong> pour placer/retirer un drapeau 🚩<br>
+            Les chiffres indiquent le nombre de mines adjacentes. Trouvez toutes les cases sûres sans déclencher de mine !
+        </div>
+    </div>
+
+    <script>
+        const gridElement = document.getElementById('grid');
+        const mineCountElement = document.getElementById('mineCount');
+        const flagCountElement = document.getElementById('flagCount');
+        const timerElement = document.getElementById('timer');
+        const messageElement = document.getElementById('message');
+
+        let difficulty = 'easy';
+        let gridSize = 8;
+        let mineCount = 10;
+        let grid = [];
+        let revealedCount = 0;
+        let flagCount = 0;
+        let gameOver = false;
+        let gameWon = false;
+        let timer = 0;
+        let timerInterval = null;
+
+        const difficulties = {
+            easy: { size: 8, mines: 10 },
+            medium: { size: 12, mines: 25 },
+            hard: { size: 16, mines: 50 }
+        };
+
+        function setDifficulty(diff) {
+            difficulty = diff;
+            gridSize = difficulties[diff].size;
+            mineCount = difficulties[diff].mines;
+            
+            document.querySelectorAll('.difficulty button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            initGame();
+        }
+
+        function initGame() {
+            clearInterval(timerInterval);
+            timer = 0;
+            timerElement.textContent = timer;
+            gameOver = false;
+            gameWon = false;
+            revealedCount = 0;
+            flagCount = 0;
+            flagCountElement.textContent = flagCount;
+            mineCountElement.textContent = mineCount;
+            messageElement.textContent = 'Clic gauche : révéler | Clic droit : drapeau';
+            messageElement.style.color = '#fc466b';
+            
+            grid = [];
+            for (let y = 0; y < gridSize; y++) {
+                grid[y] = [];
+                for (let x = 0; x < gridSize; x++) {
+                    grid[y][x] = {
+                        isMine: false,
+                        isRevealed: false,
+                        isFlagged: false,
+                        adjacentMines: 0
+                    };
+                }
+            }
+            
+            // Placer les mines
+            let minesPlaced = 0;
+            while (minesPlaced < mineCount) {
+                const x = Math.floor(Math.random() * gridSize);
+                const y = Math.floor(Math.random() * gridSize);
+                
+                if (!grid[y][x].isMine) {
+                    grid[y][x].isMine = true;
+                    minesPlaced++;
+                }
+            }
+            
+            // Calculer les mines adjacentes
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (!grid[y][x].isMine) {
+                        grid[y][x].adjacentMines = countAdjacentMines(x, y);
+                    }
+                }
+            }
+            
+            renderGrid();
+        }
+
+        function countAdjacentMines(x, y) {
+            let count = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
+                        if (grid[ny][nx].isMine) count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        function renderGrid() {
+            gridElement.innerHTML = '';
+            gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 35px)`;
+            
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const cell = document.createElement('button');
+                    cell.className = 'cell';
+                    const cellData = grid[y][x];
+                    
+                    if (cellData.isRevealed) {
+                        cell.classList.add('revealed');
+                        if (cellData.isMine) {
+                            cell.classList.add('mine');
+                            cell.textContent = '💥';
+                        } else if (cellData.adjacentMines > 0) {
+                            cell.textContent = cellData.adjacentMines;
+                            cell.classList.add(`num-${cellData.adjacentMines}`);
+                        }
+                    } else if (cellData.isFlagged) {
+                        cell.classList.add('flagged');
+                        cell.textContent = '🚩';
+                    }
+                    
+                    cell.addEventListener('click', () => revealCell(x, y));
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        toggleFlag(x, y);
+                    });
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function startTimer() {
+            if (!timerInterval) {
+                timerInterval = setInterval(() => {
+                    timer++;
+                    timerElement.textContent = timer;
+                }, 1000);
+            }
+        }
+
+        function revealCell(x, y) {
+            if (gameOver || gameWon) return;
+            
+            startTimer();
+            
+            const cell = grid[y][x];
+            if (cell.isRevealed || cell.isFlagged) return;
+            
+            cell.isRevealed = true;
+            revealedCount++;
+            
+            if (cell.isMine) {
+                gameOver = true;
+                clearInterval(timerInterval);
+                revealAllMines();
+                messageElement.textContent = '💥 BOOM ! Vous avez touché une mine !';
+                messageElement.style.color = '#e74c3c';
+                return;
+            }
+            
+            if (cell.adjacentMines === 0) {
+                // Révéler les cellules adjacentes
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
+                            if (!grid[ny][nx].isRevealed) {
+                                revealCell(nx, ny);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            renderGrid();
+            checkWin();
+        }
+
+        function toggleFlag(x, y) {
+            if (gameOver || gameWon) return;
+            
+            const cell = grid[y][x];
+            if (cell.isRevealed) return;
+            
+            cell.isFlagged = !cell.isFlagged;
+            flagCount += cell.isFlagged ? 1 : -1;
+            flagCountElement.textContent = flagCount;
+            
+            renderGrid();
+        }
+
+        function revealAllMines() {
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (grid[y][x].isMine) {
+                        grid[y][x].isRevealed = true;
+                    }
+                }
+            }
+            renderGrid();
+        }
+
+        function checkWin() {
+            const totalCells = gridSize * gridSize;
+            const safeCells = totalCells - mineCount;
+            
+            if (revealedCount === safeCells) {
+                gameWon = true;
+                clearInterval(timerInterval);
+                messageElement.textContent = `🎉 Victoire ! Temps: ${timer}s`;
+                messageElement.style.color = '#2ecc71';
+            }
+        }
+
+        // Initialiser le jeu
+        initGame();
+    </script>
+</body>
+</html>
