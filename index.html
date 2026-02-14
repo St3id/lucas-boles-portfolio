@@ -45,6 +45,11 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        nav.hidden {
+            transform: translateY(-100%);
         }
 
         .game-button {
@@ -1012,6 +1017,30 @@
                     link.classList.add('active');
                 }
             });
+        });
+
+        // Hide/Show navigation on scroll
+        let lastScrollTop = 0;
+        const nav = document.querySelector('nav');
+        const scrollThreshold = 100; // Commence à cacher après 100px de scroll
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Si on est en haut de la page, toujours montrer la nav
+            if (scrollTop < scrollThreshold) {
+                nav.classList.remove('hidden');
+            } 
+            // Si on scroll vers le bas
+            else if (scrollTop > lastScrollTop) {
+                nav.classList.add('hidden');
+            } 
+            // Si on scroll vers le haut
+            else {
+                nav.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
         });
     </script>
 </body>
