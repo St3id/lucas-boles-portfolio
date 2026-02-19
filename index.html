@@ -183,9 +183,11 @@
         /* Hero Section */
         #moi {
             background: 
-                radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 160, 122, 0.06) 0%, transparent 50%),
-                var(--background);
+                linear-gradient(rgba(250, 250, 248, 0.8), rgba(250, 250, 248, 0.8)),
+                url('Background_mountain.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
         .hero-content {
@@ -248,6 +250,22 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .profile-photo-container .alt-photo {
+            opacity: 0;
+        }
+
+        .profile-photo-container:hover .main-photo {
+            opacity: 0;
+        }
+
+        .profile-photo-container:hover .alt-photo {
+            opacity: 1;
         }
 
         .profile-photo-placeholder {
@@ -323,12 +341,35 @@
 
         .passion-card {
             background: white;
-            padding: 2.5rem 1.5rem;
             border-radius: 25px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .passion-image {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+        }
+
+        .passion-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .passion-card:hover .passion-image img {
+            transform: scale(1.1);
+        }
+
+        .passion-content {
+            padding: 1.5rem;
         }
 
         .passion-card:hover {
@@ -443,6 +484,15 @@
         }
 
         /* Projects Grid */
+        #projets {
+            background: 
+                linear-gradient(rgba(250, 250, 248, 0.9), rgba(250, 250, 248, 0.9)),
+                url('Background_mountain_2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -544,6 +594,15 @@
         }
 
         /* Projections Timeline */
+        #projections {
+            background: 
+                linear-gradient(rgba(250, 250, 248, 0.85), rgba(250, 250, 248, 0.85)),
+                url('Background_mountain_3.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
         .timeline {
             position: relative;
             padding: 2rem 0;
@@ -888,7 +947,8 @@
 
                 <div class="hero-visual fade-in">
                     <div class="profile-photo-container">
-                        <img src="Photo de profil en montagne.jpg" alt="Lucas BOLES">
+                        <img src="Photo de profil en montagne.jpg" alt="Lucas BOLES" class="main-photo">
+                        <img src="Photo de profil cv.jpg" alt="Lucas BOLES CV" class="alt-photo">
                     </div>
                     <div class="key-stats">
                         <div class="stat-card glass-card">
@@ -974,24 +1034,35 @@
             <h2 style="margin-top: 4rem;">Mes Passions</h2>
             <div class="passions-grid fade-in">
                 <div class="passion-card glass-card">
-                    <span class="passion-icon">🚀</span>
-                    <h4>Apprentissage Continu</h4>
-                    <p>Toujours en quête de nouveaux langages et outils (actuellement sur ADA)</p>
+                    <div class="passion-content">
+                        <span class="passion-icon">🚀</span>
+                        <h4>Apprentissage Continu</h4>
+                        <p>Toujours en quête de nouveaux langages et outils (actuellement sur ADA)</p>
+                    </div>
                 </div>
                 <div class="passion-card glass-card">
-                    <span class="passion-icon">🧗‍♂️</span>
-                    <h4>Escalade</h4>
-                    <p>Niveau 7A - Un sport qui allie force, technique et mental</p>
+                    <div class="passion-image">
+                        <img src="Escalade.jpg" alt="Escalade">
+                    </div>
+                    <div class="passion-content">
+                        <span class="passion-icon">🧗‍♂️</span>
+                        <h4>Escalade</h4>
+                        <p>Niveau 7A - Un sport qui allie force, technique et mental</p>
+                    </div>
                 </div>
                 <div class="passion-card glass-card">
-                    <span class="passion-icon">🏐</span>
-                    <h4>Volley-ball</h4>
-                    <p>Esprit d'équipe et dynamisme sur le terrain</p>
+                    <div class="passion-content">
+                        <span class="passion-icon">🏐</span>
+                        <h4>Volley-ball</h4>
+                        <p>Esprit d'équipe et dynamisme sur le terrain</p>
+                    </div>
                 </div>
                 <div class="passion-card glass-card">
-                    <span class="passion-icon">🤿</span>
-                    <h4>Plongée</h4>
-                    <p>Certifié PADI Open Water - Exploration des fonds marins</p>
+                    <div class="passion-content">
+                        <span class="passion-icon">🤿</span>
+                        <h4>Plongée</h4>
+                        <p>Certifié PADI Open Water - Exploration des fonds marins</p>
+                    </div>
                 </div>
             </div>
 
