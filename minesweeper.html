@@ -254,29 +254,304 @@
             color: var(--text);
         }
 
-        @media (max-width: 600px) {
-            .cell {
-                width: 28px;
-                height: 28px;
-                font-size: 14px;
+        .touch-controls {
+            display: none;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .touch-controls.active {
+            display: flex;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .control-btn.reveal {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .control-btn.reveal:active {
+            transform: scale(0.98);
+        }
+
+        .control-btn.flag {
+            background: linear-gradient(145deg, #ffd700, #ffc700);
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .control-btn.flag:active {
+            transform: scale(0.98);
+        }
+
+        .mode-indicator {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: center;
+            font-weight: 500;
+            margin-top: -0.5rem;
+        }
+
+        .instructions-mobile {
+            display: none;
+            background: linear-gradient(135deg, #fff8f0, #fff5eb);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .instructions-mobile.active {
+            display: block;
+        }
+
+        .instructions-mobile strong {
+            color: var(--accent);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .instructions-mobile ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions-mobile li {
+            margin: 0.5rem 0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .instructions-mobile li::before {
+            content: '👉';
+            min-width: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .back-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            body {
+                padding: 1rem;
             }
 
             .container {
-                padding: 2rem 1.5rem;
+                padding: 2rem 1rem;
+                max-width: 100%;
             }
 
             h1 {
-                font-size: 2.5rem;
+                font-size: 2rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .subtitle {
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
             }
 
             .controls {
                 flex-direction: column;
-                align-items: flex-start;
+                padding: 1rem;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
             }
 
             .info {
+                flex-direction: row;
+                gap: 1rem;
+                width: 100%;
+                justify-content: space-around;
+                font-size: 0.95rem;
+            }
+
+            .info-item {
+                display: flex;
                 flex-direction: column;
-                gap: 0.5rem;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+            .info-item span:first-child {
+                font-size: 1.5rem;
+            }
+
+            .difficulty {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .diff-btn {
+                flex: 1;
+                padding: 0.7rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .touch-controls.active {
+                flex-direction: row;
+                gap: 0.8rem;
+            }
+
+            .control-btn {
+                padding: 0.9rem 0.8rem;
+                font-size: 0.95rem;
+                border-radius: 12px;
+            }
+
+            .cell {
+                width: 32px;
+                height: 32px;
+                font-size: 13px;
+                border-radius: 3px;
+            }
+
+            .grid {
+                gap: 1px;
+                padding: 1px;
+            }
+
+            .btn-new {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            .status {
+                font-size: 0.95rem;
+                margin-top: 1rem;
+            }
+
+            .instructions {
+                margin-top: 1.5rem;
+                padding: 1rem;
+                font-size: 0.85rem;
+                line-height: 1.6;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-button {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.8rem;
+                top: 1rem;
+                left: 1rem;
+            }
+
+            body {
+                padding: 0.5rem;
+            }
+
+            .container {
+                padding: 1.5rem 1rem;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .controls {
+                padding: 1rem 0.8rem;
+                gap: 0.8rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .info {
+                gap: 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .info-item span:first-child {
+                font-size: 1.3rem;
+            }
+
+            .info-item span:last-child {
+                white-space: nowrap;
+            }
+
+            .difficulty {
+                width: 100%;
+                gap: 0.3rem;
+            }
+
+            .diff-btn {
+                padding: 0.5rem 0.7rem;
+                font-size: 0.75rem;
+                border-radius: 8px;
+                border-width: 1px;
+            }
+
+            .touch-controls.active {
+                flex-direction: column;
+                gap: 0.6rem;
+                margin-bottom: 1rem;
+            }
+
+            .control-btn {
+                padding: 0.8rem 0.6rem;
+                font-size: 0.9rem;
+                border-radius: 10px;
+            }
+
+            .cell {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+                gap: 0;
+            }
+
+            .grid {
+                gap: 1px;
+                padding: 1px;
+                border-width: 2px;
+            }
+
+            .btn-new {
+                padding: 0.9rem;
+                font-size: 0.95rem;
+                border-radius: 25px;
+                margin-bottom: 0.5rem;
+            }
+
+            .status {
+                font-size: 0.9rem;
+                margin-top: 0.8rem;
+            }
+
+            .instructions {
+                display: none;
+            }
+
+            .instructions-mobile.active {
+                margin-top: 1rem;
+                padding: 1rem 0.8rem;
             }
         }
     </style>
@@ -310,6 +585,17 @@
             </div>
         </div>
 
+        <div class="touch-controls" id="touchControls">
+            <button class="control-btn reveal" id="revealModeBtn">
+                <span>👆</span> Mode Révéler
+            </button>
+            <button class="control-btn flag" id="flagModeBtn">
+                <span>🚩</span> Mode Drapeau
+            </button>
+        </div>
+
+        <div class="mode-indicator" id="modeIndicator"></div>
+
         <div class="grid-container">
             <div class="grid" id="grid"></div>
         </div>
@@ -318,12 +604,24 @@
 
         <button class="btn-new" onclick="initGame()">Nouvelle Partie</button>
 
-        <div class="instructions">
+        <div class="instructions" id="instructionsDesktop">
             <strong>Comment jouer:</strong><br>
             • <strong>Clic gauche</strong> pour révéler une case<br>
             • <strong>Clic droit</strong> pour placer/retirer un drapeau 🚩<br>
             • Les chiffres indiquent le nombre de mines adjacentes<br>
             • Le premier clic ne peut jamais être une mine !
+        </div>
+
+        <div class="instructions-mobile" id="instructionsMobile">
+            <strong>📱 Comment jouer sur mobile:</strong>
+            <ul>
+                <li><strong>Bouton "Révéler"</strong> - Appuie pour passer en mode révélation</li>
+                <li><strong>Bouton "Drapeau"</strong> - Appuie pour passer en mode drapeau</li>
+                <li>Sélectionne un mode puis tape sur une case</li>
+                <li>Les <strong>chiffres</strong> = nombre de mines à côté</li>
+                <li>Le <strong>premier clic</strong> n'est jamais une mine!</li>
+                <li>Gagne en révélant toutes les cases sans mines!</li>
+            </ul>
         </div>
     </div>
 
@@ -333,6 +631,12 @@
         const flagCountEl = document.getElementById('flagCount');
         const timerEl = document.getElementById('timer');
         const statusEl = document.getElementById('status');
+        const touchControls = document.getElementById('touchControls');
+        const modeIndicator = document.getElementById('modeIndicator');
+        const revealModeBtn = document.getElementById('revealModeBtn');
+        const flagModeBtn = document.getElementById('flagModeBtn');
+        const instructionsMobile = document.getElementById('instructionsMobile');
+        const instructionsDesktop = document.getElementById('instructionsDesktop');
 
         let difficulty = 'easy';
         let gridSize = 9;
@@ -345,12 +649,54 @@
         let timer = 0;
         let timerInterval = null;
         let firstClick = true;
+        let isTouchDevice = () => (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+        let touchMode = 'reveal';
 
         const difficulties = {
             easy: { size: 9, mines: 10 },
             medium: { size: 16, mines: 40 },
             hard: { size: 22, mines: 99 }
         };
+
+        let touchControlsSetup = false;
+
+        function setupTouchControls() {
+            if (isTouchDevice()) {
+                touchControls.classList.add('active');
+                instructionsMobile.classList.add('active');
+                instructionsDesktop.style.display = 'none';
+                statusEl.style.display = 'none';
+
+                if (!touchControlsSetup) {
+                    revealModeBtn.addEventListener('click', () => {
+                        touchMode = 'reveal';
+                        revealModeBtn.style.opacity = '1';
+                        flagModeBtn.style.opacity = '0.6';
+                        modeIndicator.textContent = '👆 Mode Révéler actif';
+                    });
+
+                    flagModeBtn.addEventListener('click', () => {
+                        touchMode = 'flag';
+                        flagModeBtn.style.opacity = '1';
+                        revealModeBtn.style.opacity = '0.6';
+                        modeIndicator.textContent = '🚩 Mode Drapeau actif';
+                    });
+                    touchControlsSetup = true;
+                }
+
+                revealModeBtn.style.opacity = '1';
+                flagModeBtn.style.opacity = '0.6';
+                modeIndicator.textContent = '👆 Mode Révéler actif';
+            } else {
+                touchControls.classList.remove('active');
+                instructionsMobile.classList.remove('active');
+                instructionsDesktop.style.display = 'block';
+                statusEl.style.display = 'block';
+            }
+        }
+
+        setupTouchControls();
+        window.addEventListener('resize', setupTouchControls);
 
         // Sélection difficulté
         document.querySelectorAll('.diff-btn').forEach(btn => {
@@ -470,11 +816,24 @@
                         cell.textContent = '🚩';
                     }
 
-                    cell.addEventListener('click', () => revealCell(x, y));
-                    cell.addEventListener('contextmenu', (e) => {
-                        e.preventDefault();
-                        toggleFlag(x, y);
+                    cell.addEventListener('click', () => {
+                        if (isTouchDevice()) {
+                            if (touchMode === 'reveal') {
+                                revealCell(x, y);
+                            } else {
+                                toggleFlag(x, y);
+                            }
+                        } else {
+                            revealCell(x, y);
+                        }
                     });
+
+                    if (!isTouchDevice()) {
+                        cell.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            toggleFlag(x, y);
+                        });
+                    }
 
                     gridEl.appendChild(cell);
                 }
