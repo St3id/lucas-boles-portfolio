@@ -596,6 +596,7 @@
         let touchPressTimer = null;
         let touchStartX = 0;
         let touchStartY = 0;
+        let isTouchEvent = false;
 
         const difficulties = {
             easy: { size: 9, mines: 10 },
@@ -604,6 +605,7 @@
         };
 
         function handleCellTouchStart(e, x, y) {
+            isTouchEvent = true;
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
 
@@ -614,18 +616,22 @@
         }
 
         function handleCellTouchEnd(e, x, y) {
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            const distX = Math.abs(touchEndX - touchStartX);
-            const distY = Math.abs(touchEndY - touchStartY);
-
             if (touchPressTimer !== null) {
                 clearTimeout(touchPressTimer);
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const distX = Math.abs(touchEndX - touchStartX);
+                const distY = Math.abs(touchEndY - touchStartY);
+
                 if (distX < 10 && distY < 10) {
                     revealCell(x, y);
                 }
                 touchPressTimer = null;
             }
+            
+            setTimeout(() => {
+                isTouchEvent = false;
+            }, 100);
         }
 
         // Sélection difficulté
@@ -746,13 +752,19 @@
                         cell.textContent = '🚩';
                     }
 
-                    cell.addEventListener('click', () => revealCell(x, y));
+                    cell.addEventListener('click', (e) => {
+                        if (!isTouchEvent) {
+                            revealCell(x, y);
+                        }
+                    });
                     cell.addEventListener('contextmenu', (e) => {
                         e.preventDefault();
-                        toggleFlag(x, y);
+                        if (!isTouchEvent) {
+                            toggleFlag(x, y);
+                        }
                     });
-                    cell.addEventListener('touchstart', (e) => handleCellTouchStart(e, x, y), false);
-                    cell.addEventListener('touchend', (e) => handleCellTouchEnd(e, x, y), false);
+                    cell.addEventListener('touchstart', (e) => handleCellTouchStart(e, x, y), { passive: true });
+                    cell.addEventListener('touchend', (e) => handleCellTouchEnd(e, x, y), { passive: true });
 
                     gridEl.appendChild(cell);
                 }
