@@ -318,6 +318,88 @@
             width: 100%;
         }
 
+        /* About Tabs Styles */
+        .btn_nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 0;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .btn_nav li {
+            padding: 12px 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .btn_nav li:hover {
+            color: var(--accent);
+        }
+
+        .btn_nav li.selected_btn {
+            color: var(--accent);
+        }
+
+        .btn_nav li.selected_btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .box_style.about_p {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .box_style.about_p.hidden {
+            display: none;
+        }
+
+        .box_style.about_p p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .lang-list, .soft-skills-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .lang-item, .soft-skill-item {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .lang-item h3, .soft-skill-item h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .stat-card {
             background: white;
             padding: 1.5rem 1rem;
@@ -1170,25 +1252,94 @@
                 <div class="hero-text">
                     <h1>Lucas BOLES</h1>
                     <p class="hero-subtitle typing-container"><span class="typing-text" data-text="Étudiant en Génie Électrique & Informatique Industrielle"></span></p>
-                    <p class="hero-description">
-                        Passionné par l'automatisation industrielle et l'optimisation des systèmes, je développe mes compétences 
-                        techniques à travers des projets concrets et des expériences variées. Mes stages au CEA et au CNRS m'ont 
-                        permis de développer rigueur et professionnalisme, tandis que mes expériences en entreprise ont renforcé 
-                        ma polyvalence et mon sens de l'adaptation.
-                    </p>
-                    <p class="hero-description">
-                        Toujours curieux d'explorer de nouveaux horizons technologiques, je consacre actuellement du temps à l'apprentissage d'ADA, 
-                        un langage robuste utilisé dans les systèmes critiques et embarqués, domaine qui correspond parfaitement à mes ambitions 
-                        professionnelles en automatisme industriel.
-                    </p>
-                    <div class="info-item" style="margin-bottom: 2rem;">📍 <strong>Crolles, Isère (38)</strong> | 🎓 <strong>BUT GEII 2ème année</strong> | 🚗 <strong>Permis B</strong></div>
                     
-                    <div class="hero-info">
-                        <div class="info-item">📍 <strong>Crolles, Isère (38)</strong></div>
-                        <div class="info-item">🎓 <strong>BUT GEII 2ème année</strong> - IUT1 Grenoble Alpes</div>
-                        <div class="info-item">🎯 <strong>Parcours:</strong> Automatisme & Informatique Industrielle</div>
-                        <div class="info-item">🚗 <strong>Permis B</strong></div>
-                        <div class="info-item">🌍 <strong>Anglais C1</strong> (Certifié Bright Language 2025 et 885/990 TOEIC 2026)</div>
+                    <nav class="btn_nav">
+                        <ul>
+                            <li data-target="about_presentation" class="selected_btn">Présentation</li>
+                            <li data-target="about_competences">Compétences</li>
+                            <li data-target="about_languages">Langues</li>
+                            <li data-target="about_passions">Passions</li>
+                        </ul>
+                    </nav>
+
+                    <div class="box_style about_p" id="about_presentation">
+                        <p>
+                            Passionné par l'automatisation industrielle et l'optimisation des systèmes, je développe mes compétences 
+                            techniques à travers des projets concrets et des expériences variées. Mes stages au CEA et au CNRS m'ont 
+                            permis de développer rigueur et professionnalisme, tandis que mes expériences en entreprise ont renforcé 
+                            ma polyvalence et mon sens de l'adaptation.
+                        </p>
+                        <p>
+                            Toujours curieux d'explorer de nouveaux horizons technologiques, je consacre actuellement du temps à l'apprentissage d'ADA, 
+                            un langage robuste utilisé dans les systèmes critiques et embarqués, domaine qui correspond parfaitement à mes ambitions 
+                            professionnelles en automatisme industriel.
+                        </p>
+                        <div class="info-item" style="margin-top: 2rem;">📍 <strong>Crolles, Isère (38)</strong> | 🎓 <strong>BUT GEII 2ème année</strong> | 🚗 <strong>Permis B</strong></div>
+                    </div>
+
+                    <div class="box_style about_p hidden" id="about_competences">
+                        <div class="skills-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0;">
+                            <div class="skill-category glass-card" style="padding: 1rem;">
+                                <h3>💻 Programmation</h3>
+                                <div class="skill-item"><span>Python</span></div>
+                                <div class="skill-item"><span>C</span></div>
+                                <div class="skill-item"><span>Arduino</span></div>
+                                <div class="skill-item"><span>ADA</span></div>
+                            </div>
+                            <div class="skill-category glass-card" style="padding: 1rem;">
+                                <h3>⚙️ Automatisme</h3>
+                                <div class="skill-item"><span>Control Expert</span></div>
+                                <div class="skill-item"><span>Vijeo Designer</span></div>
+                                <div class="skill-item"><span>Grafcet</span></div>
+                            </div>
+                            <div class="skill-category glass-card" style="padding: 1rem;">
+                                <h3>🛠️ Outils</h3>
+                                <div class="skill-item"><span>KiCad</span></div>
+                                <div class="skill-item"><span>Pack Office</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box_style about_p hidden" id="about_languages">
+                        <div class="lang-list">
+                            <div class="lang-item">
+                                <h3>Français</h3>
+                                <p>Langue Maternelle</p>
+                            </div>
+                            <div class="lang-item">
+                                <h3>Anglais</h3>
+                                <p>Niveau C1 - Certifié Bright Language 2025 et 885/990 TOEIC 2026</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box_style about_p hidden" id="about_passions">
+                        <div class="passions-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 0;">
+                            <div class="passion-card glass-card">
+                                <div class="passion-content" style="padding: 1rem;">
+                                    <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Escalade</h4>
+                                    <p style="font-size: 0.8rem;">Niveau 7A</p>
+                                </div>
+                            </div>
+                            <div class="passion-card glass-card">
+                                <div class="passion-content" style="padding: 1rem;">
+                                    <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Volley-ball</h4>
+                                    <p style="font-size: 0.8rem;">Esprit d'équipe</p>
+                                </div>
+                            </div>
+                            <div class="passion-card glass-card">
+                                <div class="passion-content" style="padding: 1rem;">
+                                    <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Plongée</h4>
+                                    <p style="font-size: 0.8rem;">PADI Open Water</p>
+                                </div>
+                            </div>
+                            <div class="passion-card glass-card">
+                                <div class="passion-content" style="padding: 1rem;">
+                                    <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Montagne</h4>
+                                    <p style="font-size: 0.8rem;">Randonnées</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
