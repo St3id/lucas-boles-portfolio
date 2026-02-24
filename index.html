@@ -947,6 +947,17 @@
             margin-bottom: 1.5rem;
         }
 
+        .project-description a {
+            color: var(--accent);
+            font-weight: 600;
+            text-underline-offset: 2px;
+            text-decoration-thickness: 2px;
+        }
+
+        .project-description a:hover {
+            opacity: 0.85;
+        }
+
         .project-tags {
             display: flex;
             flex-wrap: wrap;
@@ -1713,6 +1724,29 @@
             line-height: 1.7;
         }
 
+        .timeline-description a {
+            color: var(--accent);
+            font-weight: 600;
+            text-underline-offset: 2px;
+            text-decoration-thickness: 2px;
+        }
+
+        .timeline-description a:hover {
+            opacity: 0.85;
+        }
+
+        .timeline-stage-image {
+            display: block;
+            width: 100%;
+            height: clamp(80px, 11vw, 180px);
+            object-fit: cover;
+            object-position: center;
+            border-radius: 12px;
+            margin: 0.9rem 0 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
         /* Links Grid */
         .links-grid {
             display: grid;
@@ -2312,6 +2346,12 @@
                 line-height: 1.3;
             }
 
+            .timeline-stage-image {
+                height: 64px;
+                margin: 0.45rem 0 0.55rem;
+                border-radius: 8px;
+            }
+
             .timeline-date {
                 font-size: 0.6rem;
                 margin-bottom: 0.2rem;
@@ -2413,15 +2453,15 @@
                     <h1>Lucas BOLES</h1>
                     <p class="hero-subtitle typing-container"><span class="typing-text" data-text="Étudiant en Génie Électrique & Informatique Industrielle"></span></p>
                     <p class="hero-description">
-                        Passionné par l'automatisation industrielle et l'optimisation des systèmes, je développe mes compétences 
-                        techniques à travers des projets concrets et des expériences variées. Mes stages au CEA et au CNRS m'ont 
-                        permis de développer rigueur et professionnalisme, tandis que mes expériences en entreprise ont renforcé 
-                        ma polyvalence et mon sens de l'adaptation.
+                        Passionné par <strong>l'automatisation industrielle</strong> et <strong>l'optimisation des systèmes</strong>, 
+                        je développe mes compétences techniques à travers des projets concrets et des expériences variées. Mes stages 
+                        au <strong>CEA</strong> et au <strong>CNRS</strong> m'ont permis de développer rigueur et professionnalisme, 
+                        tandis que mes expériences en entreprise ont renforcé ma polyvalence et mon sens de l'adaptation.
                     </p>
                     <p class="hero-description">
-                        Toujours curieux d'explorer de nouveaux horizons technologiques, je consacre actuellement du temps à l'apprentissage d'ADA, 
-                        un langage robuste utilisé dans les systèmes critiques et embarqués, domaine qui correspond parfaitement à mes ambitions 
-                        professionnelles en automatisme industriel.
+                        Toujours curieux d'explorer de nouveaux horizons technologiques, je consacre actuellement du temps à 
+                        l'apprentissage d'<strong>ADA</strong>, un langage robuste utilisé dans les <strong>systèmes critiques et embarqués</strong>, 
+                        domaine qui correspond parfaitement à mes ambitions professionnelles en automatisme industriel.
                     </p>
                     <div class="info-item" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: inline-block;">
                         <a href="https://www.google.com/maps/search/?api=1&query=Crolles+Isere+France" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;" title="Voir sur Google Maps">📍 <strong>Crolles, Isère (38)</strong></a> | 
@@ -2567,10 +2607,11 @@
                         <div class="project-date">Octobre 2025</div>
                         <h3 class="project-title">Système Automatisé de Transport sur Rail</h3>
                         <p class="project-description">
-                            Conception d'un système automatisé à deux chariots pour le transfert de paniers entre cuves 
-                            de traitement chimique. Analyse fonctionnelle, grafcets, gestion des alarmes et des variateurs. 
-                            Programmation sur automate Schneider (Control Expert) et IHM Vijeo Designer. Simulation et tests 
-                            sur banc d'essai.
+                            Conception d'un <strong>système automatisé à deux chariots</strong> pour le transfert de paniers entre cuves 
+                            de traitement chimique. <strong>Analyse fonctionnelle</strong>, grafcets, gestion des alarmes et des variateurs. 
+                            <strong>Programmation sur automate Schneider</strong> (Control Expert) et IHM Vijeo Designer. Simulation et tests 
+                            sur banc d'essai. Projet mené dans le cadre du 
+                            <a href="https://iut1.univ-grenoble-alpes.fr/" target="_blank" rel="noopener noreferrer">BUT GEII de l'IUT1 Grenoble</a>.
                         </p>
                         <div class="project-tags">
                             <span class="tag">Control Expert</span>
@@ -2590,9 +2631,10 @@
                         <div class="project-date">2024 - 2025</div>
                         <h3 class="project-title">Robot Suiveur de Ligne</h3>
                         <p class="project-description">
-                            Suivi d'un cahier des charges complet pour la conception d'un robot autonome. Maîtrise de KiCad 
-                            pour la conception des circuits, utilisation des logiciels CAO, brasure, tests, programmation 
-                            embarquée et élaboration des dossiers techniques.
+                            Suivi d'un <strong>cahier des charges complet</strong> pour la conception d'un robot autonome. Maîtrise de KiCad 
+                            pour la conception des circuits, utilisation des logiciels CAO, brasure, tests, <strong>programmation embarquée</strong> 
+                            et élaboration des dossiers techniques. Projet réalisé au 
+                            <a href="https://iut1.univ-grenoble-alpes.fr/" target="_blank" rel="noopener noreferrer">sein de l'IUT1 Grenoble</a>.
                         </p>
                         <div class="project-tags">
                             <span class="tag">KiCad</span>
@@ -2604,7 +2646,8 @@
                     </div>
                 </div>
 
-                <div class="project-card fade-in">
+                <div class="project-card fade-in"
+                     data-modal-details="Au CEA Grenoble, j'ai découvert un environnement de recherche appliquée où les projets couvrent notamment les énergies bas carbone, la santé, le numérique et la sécurité. Mon stage m'a permis d'observer des méthodes de travail exigeantes : confidentialité, traçabilité, respect des protocoles et communication technique claire. Cette expérience a renforcé ma rigueur professionnelle et ma capacité à évoluer de façon autonome dans un cadre scientifique.">
                     <div class="project-image">
                         <img loading="lazy" decoding="async" src="CEA.png" alt="CEA Grenoble">
                     </div>
@@ -2612,9 +2655,10 @@
                         <div class="project-date">Août 2022</div>
                         <h3 class="project-title">Stage CEA Grenoble</h3>
                         <p class="project-description">
-                            Participation aux divers services scientifiques (nucléaire, médical, biologique). Observation 
-                            de la sécurité et défense des informations. Travail en autonomie, participation à des sessions 
-                            de travail anglophones et attention aux détails.
+                            J'ai effectué un stage au <strong>CEA Grenoble</strong>, un centre de recherche technologique 
+                            où se croisent énergie, santé, numérique et sécurité. Cette immersion m'a appris à travailler 
+                            avec méthode dans un environnement exigeant, en respectant la confidentialité et la qualité de 
+                            l'information scientifique. <a href="https://www.cea.fr/Pages/le-cea/les-centres-cea/grenoble.aspx" target="_blank" rel="noopener noreferrer">Découvrir le CEA Grenoble</a>.
                         </p>
                         <div class="project-tags">
                             <span class="tag">Recherche scientifique</span>
@@ -2625,7 +2669,8 @@
                     </div>
                 </div>
 
-                <div class="project-card fade-in">
+                <div class="project-card fade-in"
+                     data-modal-details="Le CNRS est un organisme national de recherche pluridisciplinaire. Pendant mon stage à Grenoble, j'ai participé à des manipulations de laboratoire (culture microbienne, extraction d'ADN, premières notions de cristallographie) avec une forte exigence de précision et de reproductibilité. Cette expérience m'a appris à documenter proprement chaque étape et à adopter les standards de qualité attendus en recherche.">
                     <div class="project-image">
                         <img loading="lazy" decoding="async" src="Photo CNRS.jpg" alt="Stage CNRS - Laboratoire">
                     </div>
@@ -2633,9 +2678,10 @@
                         <div class="project-date">Avril 2021</div>
                         <h3 class="project-title">Stage CNRS Grenoble</h3>
                         <p class="project-description">
-                            Culture de bactéries et de levures, extraction d'ADN. Initiation à la cristallographie. 
-                            Développement du professionnalisme, sens des responsabilités et minutie dans les manipulations 
-                            scientifiques.
+                            Mon stage au <strong>CNRS Grenoble</strong> m'a permis de découvrir la recherche publique en 
+                            laboratoire et ses standards de rigueur expérimentale. Entre manipulations biologiques et 
+                            travail de précision, j'ai renforcé ma discipline, ma traçabilité des actions et mon sens des 
+                            responsabilités. <a href="https://www.grenoble.cnrs.fr/" target="_blank" rel="noopener noreferrer">Découvrir le CNRS Grenoble</a>.
                         </p>
                         <div class="project-tags">
                             <span class="tag">Biologie</span>
@@ -2646,7 +2692,8 @@
                     </div>
                 </div>
 
-                <div class="project-card fade-in">
+                <div class="project-card fade-in"
+                     data-modal-details="Ada est un langage historiquement conçu pour les systèmes robustes et sûrs, utilisés dans des contextes où la fiabilité du logiciel est essentielle. Mon objectif est de compléter mes bases en automatisme et en programmation industrielle avec des pratiques plus strictes de qualité logicielle : typage fort, lisibilité, maintenance long terme et réduction des erreurs dès la conception.">
                     <div class="project-image">
                         <img loading="lazy" decoding="async" src="Veille & Apprentissage Continu.png" alt="Programmation - Code ADA">
                     </div>
@@ -2654,7 +2701,10 @@
                         <div class="project-date">En cours</div>
                         <h3 class="project-title">Veille & Apprentissage Continu</h3>
                         <p class="project-description">
-                            Toujours en quête de nouveaux défis intellectuels, je consacre une partie de mon temps à l'exploration de nouveaux langages et outils. Actuellement, je me perfectionne sur le langage <strong>ADA</strong>, approfondissant mes connaissances en programmation système sécurisée et robuste pour enrichir ma polyvalence technique.
+                            Je développe en continu ma culture technique autour du langage <strong>Ada</strong>, reconnu 
+                            pour sa robustesse dans les systèmes critiques et embarqués. Cet apprentissage m'aide à 
+                            structurer un code plus fiable, plus lisible et mieux maîtrisé dans la durée. 
+                            <a href="https://ada-lang.io/" target="_blank" rel="noopener noreferrer">En savoir plus sur Ada</a>.
                         </p>
                         <div class="project-tags">
                             <span class="tag">ADA</span>
@@ -2665,7 +2715,8 @@
                     </div>
                 </div>
 
-                <div class="project-card fade-in">
+                <div class="project-card fade-in"
+                     data-modal-details="Chez SDMR, j'ai travaillé sur la chaîne de production et de conditionnement dans un contexte agroalimentaire. Les missions confiées combinaient conduite de machine, contrôles qualité, gestion des non-conformités et logistique de fin de ligne. Cette expérience m'a apporté des réflexes terrain concrets : cadence, fiabilité d'exécution, coordination d'équipe et adaptation rapide.">
                     <div class="project-image">
                         <img loading="lazy" decoding="async" src="SDMR.jpg" alt="Ligne de production SDMR">
                     </div>
@@ -2673,9 +2724,10 @@
                         <div class="project-date">Août 2024</div>
                         <h3 class="project-title">Opérateur de Production - SDMR</h3>
                         <p class="project-description">
-                            Travail sur machine, manutention, emballage, tri, contrôle qualité, gestion des non-conformités, 
-                            palettisation dans une société de distribution de produits alimentaires. Développement de la 
-                            capacité d'adaptation et du dynamisme.
+                            Mon expérience chez <strong>SDMR</strong> m'a plongé dans le rythme réel d'un environnement de 
+                            production agroalimentaire : opérations machine, contrôle qualité et gestion des non-conformités. 
+                            Elle a consolidé ma polyvalence, ma réactivité terrain et ma capacité à maintenir un niveau 
+                            d'exigence constant en équipe. <a href="https://www.societe.com/societe/sdmr-321177131.html" target="_blank" rel="noopener noreferrer">Voir la fiche entreprise</a>.
                         </p>
                         <div class="project-tags">
                             <span class="tag">Production</span>
@@ -2715,13 +2767,14 @@
             <h2>Mes Objectifs</h2>
             <div class="timeline">
                 <div class="timeline-item fade-in">
-                    <div class="timeline-content">
+                    <div class="timeline-content" data-modal-details="Ce stage se déroule chez Waga Energy à Eybens, au sein du service EIA. L'entreprise est spécialisée dans la production de biométhane à partir du gaz des sites de stockage de déchets grâce à sa technologie WAGABOX®. Ma mission s'inscrit dans cette logique industrielle : accompagner la mise en service de nouvelles interfaces PROFINET pour des capteurs de vibration Emerson, du câblage et du paramétrage jusqu'aux essais de validation, puis rédiger une notice d'utilisation claire pour capitaliser sur les projets futurs. La durée prévue est de 11 semaines et 2 jours.">
                         <div class="timeline-date">Mi-Avril 2026</div>
-                        <h3 class="timeline-title">Stage en Automatisation Industrielle</h3>
+                        <h3 class="timeline-title">Stage chez Waga Energy</h3>
+                        <img loading="lazy" decoding="async" src="Waga_Energy_Homepage-pic_1920x957.jpg" class="timeline-stage-image" alt="Visuel Waga Energy et solution WAGABOX">
                         <p class="timeline-description">
-                            Recherche active d'un stage de 8 à 12 semaines en automatisation industrielle pour mettre en 
-                            pratique mes compétences en automates programmables, Control Expert et systèmes automatisés. 
-                            Souhait de contribuer à des projets concrets d'optimisation de production.
+                            Stage confirmé chez <strong>Waga Energy</strong> à Eybens (service EIA) pour 11 semaines et 
+                            2 jours. Je contribuerai à la mise en service d'interfaces PROFINET et à la rédaction de 
+                            supports techniques.
                         </p>
                     </div>
                     <div class="timeline-dot"></div>
@@ -2731,9 +2784,10 @@
                     <div class="timeline-content">
                         <div class="timeline-date">2027</div>
                         <h3 class="timeline-title">Diplôme BUT GEII</h3>
+                        <img loading="lazy" decoding="async" src="Dipl%C3%B4me%20BUT%20GEII.png" class="timeline-stage-image" alt="Objectif diplôme BUT GEII">
                         <p class="timeline-description">
-                            Obtenir mon BUT Génie Électrique & Informatique Industrielle avec un parcours spécialisé en 
-                            Automatisme & Informatique Industrielle. Approfondir mes connaissances en systèmes embarqués, 
+                            Obtenir mon <strong>BUT Génie Électrique & Informatique Industrielle</strong> avec un parcours spécialisé en 
+                            <strong>Automatisme & Informatique Industrielle</strong>. Approfondir mes connaissances en systèmes embarqués, 
                             réseaux industriels et supervision.
                         </p>
                     </div>
@@ -2744,9 +2798,10 @@
                     <div class="timeline-content">
                         <div class="timeline-date">2027-2029</div>
                         <h3 class="timeline-title">Spécialisation ou École d'Ingénieur</h3>
+                        <img loading="lazy" decoding="async" src="Sp%C3%A9cialisation_%C3%89cole%20d%E2%80%99Ing%C3%A9nieur.png" class="timeline-stage-image" alt="Objectif spécialisation ou école d'ingénieur">
                         <p class="timeline-description">
-                            Poursuivre mes études en école d'ingénieur ou master spécialisé en automatisme, robotique ou 
-                            systèmes embarqués. Objectif : devenir ingénieur en automatisation et contribuer à l'Industrie 4.0.
+                            Poursuivre mes études en <strong>école d'ingénieur</strong> ou master spécialisé en automatisme, robotique ou 
+                            systèmes embarqués. Objectif : devenir <strong>ingénieur en automatisation</strong> et contribuer à l'Industrie 4.0.
                         </p>
                     </div>
                     <div class="timeline-dot"></div>
@@ -2756,8 +2811,9 @@
                     <div class="timeline-content">
                         <div class="timeline-date">2028-2030</div>
                         <h3 class="timeline-title">Expertise Technique Internationale</h3>
+                        <img loading="lazy" decoding="async" src="Expertise%20technique%20internationale.png" class="timeline-stage-image" alt="Objectif expertise technique internationale">
                         <p class="timeline-description">
-                            Développer une expertise en systèmes automatisés complexes et travailler sur des projets 
+                            Développer une <strong>expertise en systèmes automatisés complexes</strong> et travailler sur des projets 
                             internationaux. Utiliser mes compétences linguistiques pour collaborer 
                             avec des équipes multiculturelles.
                         </p>
@@ -2769,9 +2825,10 @@
                     <div class="timeline-content">
                         <div class="timeline-date">Long terme</div>
                         <h3 class="timeline-title">Innovation & Leadership</h3>
+                        <img loading="lazy" decoding="async" src="Innovation%20%26%20Leadership.png" class="timeline-stage-image" alt="Objectif innovation et leadership">
                         <p class="timeline-description">
-                            Contribuer à l'innovation dans l'automatisation industrielle, participer à des projets de R&D, 
-                            et éventuellement encadrer des équipes techniques. Rester curieux et en veille technologique 
+                            Contribuer à <strong>l'innovation en automatisation industrielle</strong>, participer à des projets de R&D, 
+                            et éventuellement encadrer des équipes techniques. Rester curieux et en <strong>veille technologique</strong> 
                             permanente sur l'IA appliquée à l'industrie.
                         </p>
                     </div>
@@ -3201,8 +3258,16 @@
             card.setAttribute('role', 'button');
             card.setAttribute('aria-label', window.getPortfolioText ? window.getPortfolioText('projectCardAriaLabel') : 'Ouvrir les détails du projet');
 
-            card.addEventListener('click', () => openProjectModal(card));
+            card.addEventListener('click', (event) => {
+                if (event.target.closest('a, button, input, select, textarea, label')) {
+                    return;
+                }
+                openProjectModal(card);
+            });
             card.addEventListener('keydown', (event) => {
+                if (event.target !== card) {
+                    return;
+                }
                 if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
                     openProjectModal(card);
@@ -3281,8 +3346,16 @@
             card.setAttribute('role', 'button');
             card.setAttribute('aria-label', window.getPortfolioText ? window.getPortfolioText('objectiveCardAriaLabel') : "Ouvrir les détails de l'objectif");
 
-            card.addEventListener('click', () => openObjectiveModal(card));
+            card.addEventListener('click', (event) => {
+                if (event.target.closest('a, button, input, select, textarea, label')) {
+                    return;
+                }
+                openObjectiveModal(card);
+            });
             card.addEventListener('keydown', (event) => {
+                if (event.target !== card) {
+                    return;
+                }
                 if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
                     openObjectiveModal(card);
