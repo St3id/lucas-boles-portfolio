@@ -760,24 +760,91 @@
         }
 
         .skill-item {
+            position: relative;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
-            margin-bottom: 0.8rem;
-            padding-bottom: 0.8rem;
+            gap: 0.75rem;
+            margin-bottom: 0.7rem;
+            padding-bottom: 1.1rem;
+            padding-right: 3.4rem;
             border-bottom: 1px solid var(--border);
+            --skill-value: 0%;
         }
 
         .skill-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
-            padding-bottom: 0;
+        }
+
+        .skill-item > span:first-child {
+            font-weight: 600;
+        }
+
+        .skill-item::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0.35rem;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(160, 160, 150, 0.25);
+            opacity: 0;
+            transform: translateY(3px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .skill-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0.35rem;
+            height: 6px;
+            width: var(--skill-value);
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.35);
+            transform-origin: left center;
+            transform: scaleX(0);
+            opacity: 0;
+            transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease;
+        }
+
+        .skill-item:hover::after,
+        .skill-item:focus-within::after {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .skill-item:hover::before,
+        .skill-item:focus-within::before {
+            opacity: 1;
+            transform: scaleX(1);
         }
 
         .skill-level {
+            position: absolute;
+            top: 0;
+            right: 0;
             font-size: 0.85rem;
-            color: var(--text-light);
-            font-style: italic;
+            color: var(--accent);
+            font-style: normal;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            min-width: 3rem;
+            text-align: right;
+            opacity: 0;
+            transform: translateX(6px);
+            transition: transform 0.7s ease, color 0.7s ease, opacity 0.7s ease;
+            pointer-events: none;
+        }
+
+        .skill-item:hover .skill-level,
+        .skill-item:focus-within .skill-level {
+            opacity: 1;
+            transform: translateX(0);
+            color: #d64f21;
         }
 
         /* Soft Skills Section */
@@ -2509,26 +2576,26 @@
                     <div class="skills-grid" style="margin-bottom: 0;">
                         <div class="skill-category glass-card">
                             <h3>💻 Programmation</h3>
-                            <div class="skill-item"><span>Python</span><span class="skill-level">Bonne maîtrise</span></div>
-                            <div class="skill-item"><span>C</span><span class="skill-level">Bonne maîtrise</span></div>
-                            <div class="skill-item"><span>Arduino</span><span class="skill-level">Bonne maîtrise</span></div>                            
-                            <div class="skill-item"><span>HTML</span><span class="skill-level">Pratique</span></div>
-                            <div class="skill-item"><span>Java</span><span class="skill-level">En développement</span></div>
-                            <div class="skill-item"><span>ADA</span><span class="skill-level">En apprentissage</span></div>
+                            <div class="skill-item" style="--skill-value: 90%;"><span>Python</span><span class="skill-level">90%</span></div>
+                            <div class="skill-item" style="--skill-value: 80%;"><span>C</span><span class="skill-level">80%</span></div>
+                            <div class="skill-item" style="--skill-value: 80%;"><span>Arduino</span><span class="skill-level">80%</span></div>                            
+                            <div class="skill-item" style="--skill-value: 70%;"><span>HTML</span><span class="skill-level">70%</span></div>
+                            <div class="skill-item" style="--skill-value: 60%;"><span>Java</span><span class="skill-level">60%</span></div>
+                            <div class="skill-item" style="--skill-value: 50%;"><span>ADA</span><span class="skill-level">50%</span></div>
                         </div>
                         <div class="skill-category glass-card">
                             <h3>⚙️ Automatisme</h3>
-                            <div class="skill-item"><span>Control Expert</span><span class="skill-level">Bonne maîtrise</span></div>
-                            <div class="skill-item"><span>Vijeo Designer</span><span class="skill-level">Bonne maîtrise</span></div>
-                            <div class="skill-item"><span>Automates Schneider</span><span class="skill-level">Bonne maîtrise</span></div>
-                            <div class="skill-item"><span>Automates Siemens</span><span class="skill-level">Pratique</span></div>
-                            <div class="skill-item"><span>Grafcet</span><span class="skill-level">Maîtrisé</span></div>
+                            <div class="skill-item" style="--skill-value: 90%;"><span>Control Expert</span><span class="skill-level">90%</span></div>
+                            <div class="skill-item" style="--skill-value: 80%;"><span>TIA Portal</span><span class="skill-level">80%</span></div>
+                            <div class="skill-item" style="--skill-value: 80%;"><span>Vijeo Designer</span><span class="skill-level">80%</span></div>
+                            <div class="skill-item" style="--skill-value: 90%;"><span>Automates Schneider</span><span class="skill-level">90%</span></div>
+                            <div class="skill-item" style="--skill-value: 70%;"><span>Automates Siemens</span><span class="skill-level">70%</span></div>
                         </div>
                         <div class="skill-category glass-card">
                             <h3>🛠️ Outils</h3>
-                            <div class="skill-item"><span>KiCad</span><span class="skill-level">Bonne maîtrise</span></div>
-                            <div class="skill-item"><span>Pack Office</span><span class="skill-level">Bonne maîtrise</span></div>
-                            <div class="skill-item"><span>Logiciels CAO</span><span class="skill-level">Pratique</span></div>
+                            <div class="skill-item" style="--skill-value: 80%;"><span>KiCad</span><span class="skill-level">80%</span></div>
+                            <div class="skill-item" style="--skill-value: 90%;"><span>Pack Office</span><span class="skill-level">90%</span></div>
+                            <div class="skill-item" style="--skill-value: 70%;"><span>Logiciels CAO</span><span class="skill-level">70%</span></div>
                         </div>
                     </div>
                 </div>
