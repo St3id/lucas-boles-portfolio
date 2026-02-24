@@ -3006,20 +3006,53 @@
         });
 
         // Typing Effect
-        function typeWriter(element) {
-            const text = element.getAttribute('data-text');
+        const typingRuntimeMap = new WeakMap();
+
+        function stopTypeWriter(element, clearText = false) {
+            const runtime = typingRuntimeMap.get(element);
+            if (runtime && runtime.timerId) {
+                clearTimeout(runtime.timerId);
+            }
+            typingRuntimeMap.delete(element);
+
+            if (clearText) {
+                element.textContent = '';
+            }
+        }
+
+        function typeWriter(element, speed = 50) {
+            if (!element) return;
+
+            const text = element.getAttribute('data-text') || '';
+            stopTypeWriter(element, true);
+
             let i = 0;
-            element.textContent = '';
-            
+            const runtime = {
+                token: Symbol('typing'),
+                timerId: null
+            };
+            typingRuntimeMap.set(element, runtime);
+
             function type() {
+                const activeRuntime = typingRuntimeMap.get(element);
+                if (!activeRuntime || activeRuntime.token !== runtime.token) {
+                    return;
+                }
+
                 if (i < text.length) {
                     element.textContent += text.charAt(i);
                     i++;
-                    setTimeout(type, 50);
+                    runtime.timerId = setTimeout(type, speed);
+                } else {
+                    runtime.timerId = null;
                 }
             }
+
             type();
         }
+
+        window.typeWriter = typeWriter;
+        window.stopTypeWriter = stopTypeWriter;
 
         // Initialize Typing Effect
         const typingText = document.querySelector('.typing-text');
