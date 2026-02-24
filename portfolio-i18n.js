@@ -429,7 +429,11 @@
         });
 
         const typingNode = document.querySelector(".typing-text");
-        if (typingNode && typingNode.textContent.trim().length > 0) {
+        if (typingNode) {
+            if (typeof window.stopTypeWriter === "function") {
+                window.stopTypeWriter(typingNode, true);
+            }
+
             if (settings.animateTyping && typeof window.typeWriter === "function") {
                 window.typeWriter(typingNode);
             } else {
