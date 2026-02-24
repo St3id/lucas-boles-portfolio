@@ -37,9 +37,10 @@
         },
         {
             selector: ".hero-description",
+            mode: "html",
             en: [
-                "Passionate about industrial automation and system optimization, I build my technical skills through concrete projects and varied experiences. My internships at CEA and CNRS strengthened my rigor and professionalism, while my company experience improved versatility and adaptability.",
-                "Always curious to explore new technologies, I currently dedicate time to learning ADA, a robust language used in critical and embedded systems, fully aligned with my career goals in industrial automation."
+                "Passionate about <strong>industrial automation</strong> and <strong>system optimization</strong>, I build my technical skills through concrete projects and varied experiences. My internships at <strong>CEA</strong> and <strong>CNRS</strong> strengthened my rigor and professionalism, while my company experience improved versatility and adaptability.",
+                "Always curious to explore new technologies, I currently dedicate time to learning <strong>ADA</strong>, a robust language used in <strong>critical and embedded systems</strong>, fully aligned with my career goals in industrial automation."
             ]
         },
         {
@@ -52,7 +53,7 @@
         },
         {
             selector: ".key-stats .stat-label",
-            en: ["Current Program", "Track", "Seeking position"]
+            en: ["Current Program", "Path", "Looking for position"]
         },
         {
             selector: ".tabs-buttons .tab-btn",
@@ -132,12 +133,12 @@
             selector: "#projets .project-description",
             mode: "html",
             en: [
-                "Design of a two-cart automated system for transferring baskets between chemical treatment tanks. Functional analysis, GRAFCET diagrams, alarm management, and drive control. PLC programming with Schneider Control Expert and Vijeo Designer HMI. Simulation and bench testing.",
-                "Worked from a complete specification to design an autonomous robot. Proficient use of KiCad for circuit design, CAD software, soldering, testing, embedded programming, and preparation of technical documentation.",
-                "Contributed across several scientific departments (nuclear, medical, and biological). Observed safety practices and information protection. Worked independently, took part in English-speaking sessions, and maintained strong attention to detail.",
-                "Cultivation of bacteria and yeast, DNA extraction, and introduction to crystallography. Strengthened professionalism, sense of responsibility, and precision in scientific lab work.",
-                "Always seeking new intellectual challenges, I dedicate part of my time to exploring new languages and tools. Currently, I am improving in <strong>ADA</strong> to deepen my knowledge of secure and robust system programming and strengthen my technical versatility.",
-                "Machine operation, handling, packaging, sorting, quality control, non-conformity management, and palletizing in a food distribution company. Developed adaptability and a strong work pace."
+                "Design of a <strong>two-cart automated system</strong> for transferring baskets between chemical treatment tanks. <strong>Functional analysis</strong>, GRAFCET diagrams, alarm management, and drive control. <strong>PLC programming with Schneider Control Expert</strong> and Vijeo Designer HMI. Simulation and bench testing. Project carried out within the <a href=\"https://iut1.univ-grenoble-alpes.fr/\" target=\"_blank\" rel=\"noopener noreferrer\">BUT GEII program at IUT1 Grenoble</a>.",
+                "Worked from a <strong>complete specification</strong> to design an autonomous robot. Proficient use of KiCad for circuit design, CAD software, soldering, testing, <strong>embedded programming</strong>, and preparation of technical documentation. Project completed at <a href=\"https://iut1.univ-grenoble-alpes.fr/\" target=\"_blank\" rel=\"noopener noreferrer\">IUT1 Grenoble</a>.",
+                "I completed an internship at <strong>CEA Grenoble</strong>, a major French technology research center where energy, health, digital technologies, and security intersect. It taught me to work methodically in a demanding environment while respecting confidentiality and scientific data quality. <a href=\"https://www.cea.fr/Pages/le-cea/les-centres-cea/grenoble.aspx\" target=\"_blank\" rel=\"noopener noreferrer\">Discover CEA Grenoble</a>.",
+                "My internship at <strong>CNRS Grenoble</strong> introduced me to public research lab standards and experimental rigor. Through biological manipulations and precision-oriented routines, I strengthened discipline, traceability, and responsibility in scientific work. <a href=\"https://www.grenoble.cnrs.fr/\" target=\"_blank\" rel=\"noopener noreferrer\">Discover CNRS Grenoble</a>.",
+                "I continuously develop my technical foundations with <strong>Ada</strong>, a language known for robust software in critical and embedded systems. This work helps me write clearer, safer, and more maintainable code over time. <a href=\"https://ada-lang.io/\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more about Ada</a>.",
+                "My experience at <strong>SDMR</strong> immersed me in the pace of food-industry production: machine operations, quality checks, and non-conformity handling. It strengthened my versatility, on-site responsiveness, and ability to keep consistent execution standards in a team. <a href=\"https://www.societe.com/societe/sdmr-321177131.html\" target=\"_blank\" rel=\"noopener noreferrer\">Company profile</a>."
             ]
         },
         {
@@ -184,7 +185,7 @@
         {
             selector: "#projections .timeline-title",
             en: [
-                "Internship in Industrial Automation",
+                "Internship at Waga Energy",
                 "BUT GEII Diploma",
                 "Specialization or Engineering School",
                 "International Technical Expertise",
@@ -193,12 +194,13 @@
         },
         {
             selector: "#projections .timeline-description",
+            mode: "html",
             en: [
-                "Actively looking for an 8 to 12-week internship in industrial automation to apply my skills in PLC programming, Control Expert, and automated systems. I aim to contribute to concrete production optimization projects.",
-                "Earn my BUT Electrical Engineering & Industrial Computing degree with a specialization in Automation & Industrial Computing. Deepen my knowledge of embedded systems, industrial networks, and supervision.",
-                "Continue my studies in engineering school or a specialized master's program in automation, robotics, or embedded systems. Goal: become an automation engineer and contribute to Industry 4.0.",
-                "Develop expertise in complex automated systems and work on international projects. Use my language skills to collaborate with multicultural teams.",
-                "Contribute to innovation in industrial automation, take part in R&D projects, and potentially lead technical teams. Stay curious and continuously monitor AI applications in industry."
+                "Internship secured at <strong>Waga Energy</strong> in Eybens (EIA department) for 11 weeks and 2 days. I will contribute to commissioning PROFINET interfaces and writing technical documentation.",
+                "Earn my <strong>BUT Electrical Engineering & Industrial Computing</strong> degree with a specialization in <strong>Automation & Industrial Computing</strong>. Deepen my knowledge of embedded systems, industrial networks, and supervision.",
+                "Continue my studies in an <strong>engineering school</strong> or a specialized master's program in automation, robotics, or embedded systems. Goal: become an <strong>automation engineer</strong> and contribute to Industry 4.0.",
+                "Develop <strong>expertise in complex automated systems</strong> and work on international projects. Use my language skills to collaborate with multicultural teams.",
+                "Contribute to <strong>innovation in industrial automation</strong>, take part in R&D projects, and potentially lead technical teams. Stay curious and maintain a <strong>continuous technology watch</strong> on AI applications in industry."
             ]
         },
         {
@@ -360,6 +362,34 @@
             en: ["Download the functional analysis (PDF)"]
         },
         {
+            selector: "#projets .project-card:nth-child(3)",
+            attr: "data-modal-details",
+            en: [
+                "At CEA Grenoble, I discovered an applied research environment where projects include low-carbon energy, health, digital technologies, and security. This internship exposed me to demanding methods: confidentiality, traceability, protocol compliance, and clear technical communication. It strengthened both my professional rigor and my ability to work autonomously in a scientific context."
+            ]
+        },
+        {
+            selector: "#projets .project-card:nth-child(4)",
+            attr: "data-modal-details",
+            en: [
+                "CNRS is France's leading public multidisciplinary research organization. During my internship in Grenoble, I took part in lab work (microbial culture, DNA extraction, first notions of crystallography) with strong requirements for precision and reproducibility. This experience taught me to document each step carefully and apply research-quality standards."
+            ]
+        },
+        {
+            selector: "#projets .project-card:nth-child(5)",
+            attr: "data-modal-details",
+            en: [
+                "Ada is a language historically designed for robust and safe systems where software reliability is critical. My objective is to complement my automation and industrial programming skills with stricter software quality practices: strong typing, readability, long-term maintainability, and earlier error prevention at design stage."
+            ]
+        },
+        {
+            selector: "#projets .project-card:nth-child(6)",
+            attr: "data-modal-details",
+            en: [
+                "At SDMR, I worked on production and packaging flow in a food-industry context. Assigned tasks combined machine operations, quality checks, non-conformity handling, and end-of-line logistics. This experience gave me strong field reflexes: pace management, execution reliability, team coordination, and rapid adaptation."
+            ]
+        },
+        {
             selector: "#projets .project-card",
             attr: "aria-label",
             en: "Open project details"
@@ -368,6 +398,13 @@
             selector: "#projections .timeline-content",
             attr: "aria-label",
             en: "Open objective details"
+        },
+        {
+            selector: "#projections .timeline-item:first-child .timeline-content",
+            attr: "data-modal-details",
+            en: [
+                "This internship takes place at Waga Energy in Eybens, within the EIA department. The company specializes in producing biomethane from landfill gas through its WAGABOX technology. My mission is to support the commissioning of new PROFINET interfaces for Emerson vibration sensors, from wiring and configuration to validation tests, and then write a clear user guide to support future projects. Duration: 11 weeks and 2 days."
+            ]
         }
     ];
 
