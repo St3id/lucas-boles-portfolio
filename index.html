@@ -1083,24 +1083,41 @@
             }
 
             .timeline::before {
-                left: 30px;
-            }
-
-            .timeline-item {
-                flex-direction: row !important;
-                padding-left: 60px;
-            }
-
-            .timeline-content {
-                width: 100%;
+                left: 50%;
             }
 
             .timeline-dot {
-                left: 30px;
+                left: 50%;
             }
 
             .projects-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .project-content {
+                padding: 1rem;
+            }
+
+            .project-title {
+                font-size: 1.2rem;
+            }
+
+            .timeline-item {
+                margin-bottom: 2rem;
+            }
+
+            .timeline-content {
+                width: calc(50% - 20px);
+                padding: 1rem;
+            }
+
+            .timeline-title {
+                font-size: 1.1rem;
+            }
+
+            .timeline-description {
+                font-size: 0.85rem;
             }
 
             .tabs-buttons {
@@ -1113,6 +1130,27 @@
         }
 
         @media (max-width: 480px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                flex-direction: row !important;
+                padding-left: 40px;
+            }
+
+            .timeline-content {
+                width: 100%;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+
             .passions-grid {
                 grid-template-columns: 1fr;
             }
