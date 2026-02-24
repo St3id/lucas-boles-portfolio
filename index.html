@@ -4,32 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucas BOLES - Portfolio</title>
-    <meta name="description" content="Portfolio de Lucas BOLES, etudiant en BUT GEII parcours AII, en recherche d'alternance 2026 en automatisme et informatique industrielle.">
+    <meta name="description" content="Portfolio de Lucas BOLES, étudiant en BUT GEII parcours AII, en recherche d'alternance 2026 en automatisme et informatique industrielle.">
     <meta name="keywords" content="Lucas Boles, portfolio, BUT GEII, automatisme, informatique industrielle, alternance 2026, Control Expert, Vijeo Designer, Schneider">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="./">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:title" content="Lucas BOLES - Portfolio">
-    <meta property="og:description" content="Etudiant en BUT GEII parcours AII, en recherche d'alternance 2026 en automatisme et informatique industrielle.">
+    <meta property="og:description" content="Étudiant en BUT GEII parcours AII, en recherche d'alternance 2026 en automatisme et informatique industrielle.">
     <meta property="og:url" content="./">
     <meta property="og:image" content="Photo%20de%20profil%20cv.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Lucas BOLES - Portfolio">
-    <meta name="twitter:description" content="Etudiant en BUT GEII, recherche d'alternance 2026 en automatisme et informatique industrielle.">
+    <meta name="twitter:description" content="Étudiant en BUT GEII, recherche d'alternance 2026 en automatisme et informatique industrielle.">
     <meta name="twitter:image" content="Photo%20de%20profil%20cv.jpg">
     <script type="application/ld+json">
         {
           "@context": "https://schema.org",
           "@type": "Person",
           "name": "Lucas BOLES",
-          "jobTitle": "Etudiant BUT GEII - parcours AII",
+          "jobTitle": "Étudiant BUT GEII - parcours AII",
           "email": "mailto:boleslcc@gmail.com",
           "telephone": "+33670150329",
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Crolles",
-            "addressRegion": "Isere",
+            "addressRegion": "Isère",
             "addressCountry": "FR"
           },
           "url": "./",
@@ -48,12 +48,12 @@
               "name": "Quel poste recherchez-vous en alternance ?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Je recherche une alternance orientee automatisme industriel, supervision IHM, programmation d'automates et integration de systemes."
+                "text": "Je recherche une alternance orientée automatisme industriel, supervision IHM, programmation d'automates et intégration de systèmes."
               }
             },
             {
               "@type": "Question",
-              "name": "Quelles technologies maitrisez-vous ?",
+              "name": "Quelles technologies maîtrisez-vous ?",
               "acceptedAnswer": {
                 "@type": "Answer",
                 "text": "J'utilise notamment Control Expert, Vijeo Designer, Grafcet, Python, C et Arduino, avec une progression continue sur ADA."
@@ -61,10 +61,10 @@
             },
             {
               "@type": "Question",
-              "name": "Etes-vous mobile ?",
+              "name": "Êtes-vous mobile ?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Oui. Base a Crolles en Isere, je suis mobile selon le projet et l'opportunite."
+                "text": "Oui. Basé à Crolles en Isère, je suis mobile selon le projet et l'opportunité."
               }
             }
           ]
@@ -155,24 +155,66 @@
             transform: translateY(-100%);
         }
 
-        .game-button {
+        .nav-actions {
             position: absolute;
-            right: 4rem;
+            right: 0;
             top: 50%;
             transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .cv-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 999px;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            background: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
+            transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+
+        .cv-nav-link::after {
+            display: none;
+        }
+
+        .cv-nav-link:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .cv-icon {
+            font-size: 0.95rem;
+            line-height: 1;
+        }
+
+        .game-button {
+            position: relative;
             font-size: 2rem;
             background: transparent;
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
             text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .game-button::after {
+            display: none;
+        }
+
         .game-button:hover {
-            transform: translateY(-50%) scale(1.2);
+            transform: scale(1.15);
         }
 
         @keyframes slideDown {
@@ -751,6 +793,34 @@
             transform: scaleX(1);
         }
 
+        .project-card::after {
+            content: '';
+            position: absolute;
+            top: 0.85rem;
+            right: 0.85rem;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95) url('Icone_Click.jpg') center / 70% no-repeat;
+            border: 1px solid var(--border);
+            box-shadow: 0 5px 16px rgba(0, 0, 0, 0.16);
+            pointer-events: none;
+            z-index: 2;
+            animation: clickPulse 1.8s ease-in-out infinite;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .project-card:hover::after,
+        .project-card:focus-visible::after {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        @keyframes clickPulse {
+            0%, 100% { transform: scale(1); opacity: 0.92; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+
         .project-image {
             width: 100%;
             height: 250px;
@@ -1103,11 +1173,34 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
+        }
+
+        .timeline-content::after {
+            content: '';
+            position: absolute;
+            top: 0.65rem;
+            right: 0.65rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95) url('Icone_Click.jpg') center / 70% no-repeat;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+            pointer-events: none;
+            animation: clickPulse 1.8s ease-in-out infinite;
+            transition: transform 0.25s ease, opacity 0.25s ease;
         }
 
         .timeline-content:hover {
             transform: scale(1.03);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .timeline-content:hover::after,
+        .timeline-content:focus-visible::after {
+            transform: scale(1.1);
+            opacity: 1;
         }
 
         .timeline-content:focus-visible {
@@ -1164,12 +1257,35 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             border: 2px solid transparent;
+            position: relative;
+        }
+
+        a.link-card::after {
+            content: '';
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95) url('Icone_Click.jpg') center / 70% no-repeat;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+            pointer-events: none;
+            animation: clickPulse 1.8s ease-in-out infinite;
+            transition: transform 0.25s ease, opacity 0.25s ease;
         }
 
         .link-card:hover {
             transform: translateY(-5px);
             border-color: var(--accent);
             box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        a.link-card:hover::after,
+        a.link-card:focus-visible::after {
+            transform: scale(1.1);
+            opacity: 1;
         }
 
         .link-icon {
@@ -1439,15 +1555,26 @@
                 text-align: center;
             }
 
-            .game-button {
-                right: 0;
+            .nav-actions {
                 position: relative;
+                right: auto;
                 top: auto;
                 transform: none;
+                gap: 0.55rem;
+            }
+
+            .cv-nav-link {
+                padding: 0.42rem 0.7rem;
+                font-size: 0.68rem;
+                letter-spacing: 0.04em;
+            }
+
+            .game-button {
+                font-size: 1.6rem;
             }
 
             .game-button:hover {
-                transform: scale(1.1);
+                transform: scale(1.08);
             }
 
             section {
@@ -1536,6 +1663,13 @@
                 font-size: 0.72rem;
             }
 
+            .project-card::after {
+                width: 26px;
+                height: 26px;
+                top: 0.45rem;
+                right: 0.45rem;
+            }
+
             .project-modal-description,
             .project-modal-extra {
                 font-size: 0.85rem;
@@ -1594,6 +1728,20 @@
             .timeline-content {
                 width: calc(50% - 15px);
                 padding: 0.5rem;
+            }
+
+            .timeline-content::after {
+                width: 22px;
+                height: 22px;
+                top: 0.3rem;
+                right: 0.3rem;
+            }
+
+            a.link-card::after {
+                width: 20px;
+                height: 20px;
+                top: 0.35rem;
+                right: 0.35rem;
             }
 
             .timeline-dot {
@@ -1677,7 +1825,13 @@
                 <li><a href="#faq">FAQ</a></li>
                 <li><a href="#liens">Contact</a></li>
             </ul>
-            <a href="minesweeper.html" class="game-button" title="Jouer au Démineur">🎮</a>
+            <div class="nav-actions">
+                <a href="BOLES_Lucas_cv_03022026.pdf" download class="cv-nav-link" title="Télécharger mon CV">
+                    <span class="cv-icon" aria-hidden="true">&#11015;</span>
+                    <span>CV</span>
+                </a>
+                <a href="minesweeper.html" class="game-button" title="Jouer au Démineur">🎮</a>
+            </div>
         </div>
     </nav>
 
@@ -2065,13 +2219,13 @@
                 <details class="faq-item fade-in" open>
                     <summary class="faq-question">Quel poste recherchez-vous en alternance ?</summary>
                     <p class="faq-answer">
-                        Je recherche une alternance orientee automatisme industriel : programmation d'automates,
-                        supervision IHM, mise en service et amelioration de process.
+                        Je recherche une alternance orientée automatisme industriel : programmation d'automates,
+                        supervision IHM, mise en service et amélioration de process.
                     </p>
                 </details>
 
                 <details class="faq-item fade-in">
-                    <summary class="faq-question">Quelles technologies maitrisez-vous deja ?</summary>
+                    <summary class="faq-question">Quelles technologies maîtrisez-vous déjà ?</summary>
                     <p class="faq-answer">
                         J'utilise Control Expert, Vijeo Designer, Grafcet, Python, C et Arduino.
                         Je poursuis aussi un apprentissage actif du langage ADA.
@@ -2081,15 +2235,15 @@
                 <details class="faq-item fade-in">
                     <summary class="faq-question">Sur quels types de projets souhaitez-vous travailler ?</summary>
                     <p class="faq-answer">
-                        Priorite aux projets industriels concrets : automatisation de lignes, pilotage d'equipements,
-                        fiabilisation, securite fonctionnelle et optimisation de production.
+                        Priorité aux projets industriels concrets : automatisation de lignes, pilotage d'équipements,
+                        fiabilisation, sécurité fonctionnelle et optimisation de production.
                     </p>
                 </details>
 
                 <details class="faq-item fade-in">
-                    <summary class="faq-question">Etes-vous mobile en France ?</summary>
+                    <summary class="faq-question">Êtes-vous mobile en France ?</summary>
                     <p class="faq-answer">
-                        Oui. Je suis base a Crolles (Isere) et je peux etudier une mobilite selon l'opportunite,
+                        Oui. Je suis basé à Crolles (Isère) et je peux étudier une mobilité selon l'opportunité,
                         le projet et le rythme d'alternance.
                     </p>
                 </details>
@@ -2098,7 +2252,7 @@
                     <summary class="faq-question">Comment vous contacter rapidement ?</summary>
                     <p class="faq-answer">
                         Le plus simple est via la section contact de ce site : email personnel, email universitaire,
-                        telephone et LinkedIn.
+                        téléphone et LinkedIn.
                     </p>
                 </details>
             </div>
@@ -2362,7 +2516,7 @@
         document.querySelectorAll('#projets .project-card').forEach(card => {
             card.setAttribute('tabindex', '0');
             card.setAttribute('role', 'button');
-            card.setAttribute('aria-label', 'Ouvrir les details du projet');
+            card.setAttribute('aria-label', 'Ouvrir les détails du projet');
 
             card.addEventListener('click', () => openProjectModal(card));
             card.addEventListener('keydown', (event) => {
@@ -2442,7 +2596,7 @@
         document.querySelectorAll('#projections .timeline-content').forEach(card => {
             card.setAttribute('tabindex', '0');
             card.setAttribute('role', 'button');
-            card.setAttribute('aria-label', 'Ouvrir les details de l objectif');
+            card.setAttribute('aria-label', "Ouvrir les détails de l'objectif");
 
             card.addEventListener('click', () => openObjectiveModal(card));
             card.addEventListener('keydown', (event) => {
