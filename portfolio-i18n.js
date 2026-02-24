@@ -39,7 +39,7 @@
             selector: ".hero-description",
             mode: "html",
             en: [
-                "Passionate about <strong>industrial automation</strong> and <strong>system optimization</strong>, I build my technical skills through concrete projects and varied experiences. My internships at <strong>CEA</strong> and <strong>CNRS</strong> especially, strengthened my rigor and professionalism, while my company experience improved versatility and adaptability.",
+                "Passionate about <strong>industrial automation</strong> and <strong>system optimization</strong>, I build my technical skills through concrete projects and varied experiences. My internships at <strong>CEA</strong> and <strong>CNRS</strong> strengthened my rigor and professionalism, while my company experience improved versatility and adaptability.",
                 "Always curious to explore new technologies, I currently dedicate time to learning <strong>ADA</strong>, a robust language used in <strong>critical and embedded systems</strong>, fully aligned with my career goals in industrial automation."
             ]
         },
@@ -66,18 +66,20 @@
         {
             selector: "#compete-content .skill-level",
             en: [
-                "Proficient",
-                "Proficient",
-                "Proficient",
-                "In progress",
-                "Learning",
-                "Proficient",
-                "HMI",
-                "Hands-on",
-                "Mastered",
-                "Electronic CAD",
-                "Proficient",
-                "Hands-on"
+                "90%",
+                "80%",
+                "80%",
+                "70%",
+                "60%",
+                "50%",
+                "90%",
+                "80%",
+                "90%",
+                "70%",
+                "90%",
+                "80%",
+                "90%",
+                "70%"
             ]
         },
         {
