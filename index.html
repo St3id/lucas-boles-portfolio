@@ -560,6 +560,50 @@
             font-style: italic;
         }
 
+        /* Soft Skills Section */
+        .soft-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .soft-category {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .soft-category h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .soft-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .soft-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .soft-level {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+
         /* Projects Grid */
         #projets {
             background: 
@@ -1049,7 +1093,7 @@
 
             .passions-grid {
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
+                gap: 2.5rem;
             }
 
             .passion-image {
@@ -1267,6 +1311,7 @@
                 <div class="tabs-buttons">
                     <button class="tab-btn active" onclick="openTab(event, 'compete-content')">Compétences</button>
                     <button class="tab-btn" onclick="openTab(event, 'passions-content')">Passions</button>
+                    <button class="tab-btn" onclick="openTab(event, 'softskills-content')">Soft Skills</button>
                 </div>
 
                 <div id="compete-content" class="tab-content active">
@@ -1331,6 +1376,19 @@
                                 <h4>Amour de la montagne</h4>
                                 <p>Randonnées, paysages et air pur - ma source d'évasion et de sérénité</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="softskills-content" class="tab-content">
+                    <div class="soft-grid" style="margin-bottom: 0;">
+                        <div class="soft-category glass-card">
+                            <h3>🤝 Qualités Personnelles</h3>
+                            <div class="soft-item"><span>Rigueur & Professionnalisme</span><span class="soft-level">Acquis au CEA/CNRS</span></div>
+                            <div class="soft-item"><span>Polyvalence & Adaptation</span><span class="soft-level">Expériences variées</span></div>
+                            <div class="soft-item"><span>Curiosité Technique</span><span class="soft-level">Apprentissage continu</span></div>
+                            <div class="soft-item"><span>Esprit d'équipe</span><span class="soft-level">Sport collectif</span></div>
+                            <div class="soft-item"><span>Persévérance</span><span class="soft-level">Mental & Sport</span></div>
                         </div>
                     </div>
                 </div>
