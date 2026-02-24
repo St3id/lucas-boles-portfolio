@@ -260,24 +260,24 @@
         },
         {
             selector: ".game-launch-kicker",
-            en: ["Gaming"]
+            en: ["Transferable Skills"]
         },
         {
             selector: "#game-launch-title",
-            en: ["Competition, teamwork, self-improvement"]
+            en: ["Gaming, teamwork, and professional mindset"]
         },
         {
             selector: "#game-launch .game-launch-line",
             en: [
-                "Video games have shaped my competitive mindset and my drive to always push further.",
-                "I have always enjoyed all kinds of video games, but I am especially drawn to team-vs-team games.",
-                "Favorite titles:",
-                "I could not build a portfolio without showing this side of me, so here is a small Minesweeper game to pass the time."
+                "Competitive games taught me to analyze situations quickly, stay calm, and make decisions under pressure.",
+                "Team-vs-team formats strengthened my communication, role coordination, and ability to contribute to a shared objective.",
+                "Games that shaped this mindset:",
+                "I wanted this dimension in my portfolio: this small Minesweeper is a playful break, with the same mindset of progress and efficiency."
             ]
         },
         {
             selector: ".game-launch-foot",
-            en: ["Read at your own pace, then confirm when you want to start Minesweeper."]
+            en: ["Read at your own pace, then confirm when you want to launch Minesweeper."]
         },
         {
             selector: "#game-launch-confirm",
