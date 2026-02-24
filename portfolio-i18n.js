@@ -39,7 +39,7 @@
             selector: ".hero-description",
             mode: "html",
             en: [
-                "Passionate about <strong>industrial automation</strong> and <strong>system optimization</strong>, I build my technical skills through concrete projects and varied experiences. My internships at <strong>CEA</strong> and <strong>CNRS</strong> strengthened my rigor and professionalism, while my company experience improved versatility and adaptability.",
+                "Passionate about <strong>industrial automation</strong> and <strong>system optimization</strong>, I build my technical skills through concrete projects and varied experiences. My internships at <strong>CEA</strong> and <strong>CNRS</strong> especially, strengthened my rigor and professionalism, while my company experience improved versatility and adaptability.",
                 "Always curious to explore new technologies, I currently dedicate time to learning <strong>ADA</strong>, a robust language used in <strong>critical and embedded systems</strong>, fully aligned with my career goals in industrial automation."
             ]
         },
