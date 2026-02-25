@@ -79,6 +79,7 @@
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         .subtitle {
@@ -819,9 +820,11 @@
         const MOUSE_DRAG_THRESHOLD = 4;
         const SUPPRESS_CLICK_DELAY = 200;
         const EASTER_EGG_TRIGGER_CLICKS = 20;
+        const HEADING_CLICK_SUPPRESS_DELAY = 500;
         let easterEggHeadingClickCount = 0;
         let minePreviewArmedForNextGame = false;
         let minePreviewActive = false;
+        let suppressHeadingClickUntil = 0;
 
         function startGridDrag(touch) {
             if (!gridWrapperEl) return;
@@ -1039,11 +1042,22 @@
             }
         }
 
-        function handleHeadingEasterEggClick() {
+        function activateHeadingEasterEggTap() {
             easterEggHeadingClickCount++;
             if (easterEggHeadingClickCount < EASTER_EGG_TRIGGER_CLICKS) return;
             minePreviewArmedForNextGame = true;
             easterEggHeadingClickCount = 0;
+        }
+
+        function handleHeadingEasterEggClick() {
+            if (Date.now() < suppressHeadingClickUntil) return;
+            activateHeadingEasterEggTap();
+        }
+
+        function handleHeadingEasterEggTouchEnd(e) {
+            e.preventDefault();
+            suppressHeadingClickUntil = Date.now() + HEADING_CLICK_SUPPRESS_DELAY;
+            activateHeadingEasterEggTap();
         }
 
         const difficulties = {
@@ -1470,6 +1484,7 @@
 
         if (gameHeadingEl) {
             gameHeadingEl.addEventListener('click', handleHeadingEasterEggClick);
+            gameHeadingEl.addEventListener('touchend', handleHeadingEasterEggTouchEnd, { passive: false });
         }
 
         gridEl.addEventListener('mousedown', handleGridMouseDown);
