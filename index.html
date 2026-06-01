@@ -2822,7 +2822,7 @@
                 <p id="project-modal-extra" class="project-modal-extra" hidden></p>
                 <div id="project-modal-gallery" class="project-modal-gallery" hidden></div>
                 <div id="project-modal-actions" class="project-modal-actions" hidden>
-                    <a id="project-modal-download" class="project-modal-download" href="#" download>
+                    <a id="project-modal-download" class="project-modal-download" href="" download>
                         Télécharger le document (PDF)
                     </a>
                 </div>
@@ -3059,7 +3059,7 @@
         }
 
         // Smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        document.querySelectorAll('a[href^="#"]:not([download])').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
