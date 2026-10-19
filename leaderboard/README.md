@@ -48,6 +48,8 @@ Après une modification du cœur du jeu, relancer `build.py` puis recoller `work
   même pseudo.
 - **Les abus** : 30 parties, 10 envois et 60 lectures par minute et par visiteur, compté sur une
   empreinte de l'adresse IP effacée après une heure.
+- **Un seul record par pseudo** : une ligne par pseudo, niveau et catégorie, remplacée uniquement
+  par un temps meilleur. Un temps moins bon ne stocke rien. La base reste donc minuscule.
 - **La catégorie Sans drapeau** : une partie gagnée sans aucun drapeau posé y figure en plus du
   classement général.
 - **Les parties avec le code secret** ne sont jamais envoyées par le jeu.
@@ -56,12 +58,30 @@ Limite connue : un robot qui lirait la grille dans le navigateur pourrait jouer 
 C'est inévitable pour un jeu qui tourne entièrement dans le navigateur ; les contrôles ci-dessus
 écartent les faux envois et les temps impossibles.
 
+## Sécurité
+
+- **Injection SQL** : impossible, toutes les requêtes sont fixes et les valeurs reçues passent par
+  des paramètres liés (`.bind`), jamais collées dans le texte SQL.
+- **Injection HTML (XSS)** : les pseudos sont limités à l'alphabet latin, aux chiffres et à `_ . -`,
+  et affichés par `textContent` dans le jeu, jamais interprétés.
+- **Usurpation de pseudo** : jeton aléatoire de 192 bits par pseudo, le serveur n'en garde que
+  l'empreinte SHA-256. Les lettres d'autres alphabets qui imitent un pseudo (« Lucаs » avec un а
+  cyrillique) et les caractères invisibles sont refusés.
+- **Requêtes trafiquées** : niveau vérifié sans passer par les propriétés héritées
+  (`constructor`, `__proto__`), corps JSON limité à 200 Ko et refusé avant lecture s'il annonce plus,
+  actions vérifiées une par une (type, case, temps entier et croissant, 5000 au plus).
+- **Réponses** : `nosniff`, CSP `default-src 'none'`, aucun détail d'erreur interne renvoyé.
+- **Adresse IP** : jamais enregistrée. Seule une empreinte salée sert à compter les requêtes par
+  minute, effacée après une heure.
+
+Les tests de `test-serveur.html` rejouent ces attaques à chaque modification.
+
 ## Retirer un pseudo (demande d'un joueur)
 
 Dans la console D1 de la base `demineur`, en remplaçant `pseudo` par le pseudo en minuscules sans accents :
 
 ```sql
-DELETE FROM scores WHERE player_key = 'pseudo';
+DELETE FROM bests WHERE player_key = 'pseudo';
 DELETE FROM players WHERE key = 'pseudo';
 ```
 

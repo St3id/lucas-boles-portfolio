@@ -2,7 +2,8 @@
  *
  * Routes :
  *   POST /start   { level }                        -> { id, seed }
- *   POST /scores  { id, pseudo, token?, actions }  -> { rank, noflag, timeMs, token? }
+ *   POST /scores  { id, pseudo, token?, actions }  -> { timeMs, noflag, all, nf, token? }
+ *                 all / nf : { improved, best, rank } (nf seulement pour une partie sans drapeau)
  *   GET  /scores?level=easy&cat=all|noflag         -> { scores: [{ pseudo, timeMs }] }
  *
  * Anti-triche : le serveur choisit la graine de chaque partie, rejoue la liste
@@ -18,6 +19,11 @@
 // --- CORE START
 var MSCore = (function () {
   var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 } };
+
+  // vrai niveau seulement : LEVELS["constructor"] ou LEVELS["__proto__"] existent aussi en JavaScript
+  function isLevel(level) {
+    return typeof level === "string" && Object.prototype.hasOwnProperty.call(LEVELS, level);
+  }
 
   // générateur pseudo-aléatoire déterministe (mulberry32) : même graine, même grille
   function rng(seed) {
@@ -65,7 +71,7 @@ var MSCore = (function () {
      chiffre). La première action est la révélation qui lance le chrono (t = 0).
      Renvoie { ok, timeMs, noflag, count } ou { ok: false, why }. */
   function replay(level, seed, actions) {
-    if (!LEVELS[level] || !Array.isArray(actions) || !actions.length || actions.length > 5000) return { ok: false, why: "format" };
+    if (!isLevel(level) || !Array.isArray(actions) || !actions.length || actions.length > 5000) return { ok: false, why: "format" };
     var size = LEVELS[level].size, total = size * size;
     var valid = function (x) {
       return x && (x.a === "r" || x.a === "f" || x.a === "c") && Number.isInteger(x.i) && x.i >= 0 && x.i < total &&
@@ -115,7 +121,7 @@ var MSCore = (function () {
     return { ok: true, timeMs: last, noflag: flagsUsed === 0, count: actions.length };
   }
 
-  return { LEVELS: LEVELS, rng: rng, neighbours: neighbours, makeBoard: makeBoard, replay: replay };
+  return { LEVELS: LEVELS, isLevel: isLevel, rng: rng, neighbours: neighbours, makeBoard: makeBoard, replay: replay };
 })();
 // --- CORE END
 
@@ -129,9 +135,12 @@ const BOARD_SIZE = 20;
 const MAX_BODY = 200000;
 
 /* --- Pseudos -------------------------------------------------------------------- */
-const PSEUDO_RE = /^[\p{L}\p{N}_.-]{3,16}$/u;
+// alphabet latin (accents compris) et chiffres 0-9 seulement : pas de lettres
+// d'autres alphabets qui imitent un pseudo existant (« Lucаs » avec un а cyrillique),
+// pas de caractères invisibles ni de chiffres exotiques
+const PSEUDO_RE = /^[\p{Script=Latin}0-9_.-]{3,16}$/u;
 const RESERVED = ["admin", "administrateur", "moderateur", "moderator", "modo", "root", "system", "systeme",
-  "lucasboles", "boles", "st3id", "anonyme", "anonymous", "null", "undefined"];
+  "lucasboles", "boles", "st3id", "anonyme", "anonymous", "null", "undefined", "constructor", "prototype"];
 // mots refusés, français et anglais ; comparés après normalisation (voir pseudoKey)
 const BANNED = [
   // français
@@ -228,22 +237,30 @@ export function d1Repo(db) {
       return db.prepare("INSERT INTO players (key, display, token_hash, created_at) VALUES (?1, ?2, ?3, ?4)")
         .bind(key, display, tokenHash, now).run();
     },
-    insertScore(gameId, playerKey, level, timeMs, noflag, now) {
-      return db.prepare("INSERT INTO scores (game_id, player_key, level, time_ms, noflag, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)")
-        .bind(gameId, playerKey, level, timeMs, noflag ? 1 : 0, now).run();
+    // un seul record par pseudo, niveau et catégorie : la ligne n'est remplacée
+    // que par un temps meilleur
+    getBest(playerKey, level, noflag) {
+      return db.prepare("SELECT time_ms FROM bests WHERE player_key = ?1 AND level = ?2 AND noflag = ?3")
+        .bind(playerKey, level, noflag ? 1 : 0).first();
+    },
+    saveBest(playerKey, level, noflag, timeMs, gameId, now) {
+      return db.prepare(
+        "INSERT INTO bests (player_key, level, noflag, time_ms, game_id, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6) " +
+        "ON CONFLICT (player_key, level, noflag) DO UPDATE SET time_ms = excluded.time_ms, game_id = excluded.game_id, " +
+        "updated_at = excluded.updated_at WHERE excluded.time_ms < bests.time_ms"
+      ).bind(playerKey, level, noflag ? 1 : 0, timeMs, gameId, now).run();
     },
     async rank(level, noflag, timeMs) {
-      // joueurs dont le meilleur temps est strictement meilleur, plus un
-      const row = await db.prepare(
-        "SELECT COUNT(*) AS better FROM (SELECT player_key, MIN(time_ms) AS best FROM scores " +
-        "WHERE level = ?1 AND (?2 = 0 OR noflag = 1) GROUP BY player_key) WHERE best < ?3"
-      ).bind(level, noflag ? 1 : 0, timeMs).first();
+      // records strictement meilleurs, plus un
+      const row = await db.prepare("SELECT COUNT(*) AS better FROM bests WHERE level = ?1 AND noflag = ?2 AND time_ms < ?3")
+        .bind(level, noflag ? 1 : 0, timeMs).first();
       return row.better + 1;
     },
     async board(level, noflag, limit) {
+      // à égalité, le premier à avoir réalisé le temps passe devant
       const res = await db.prepare(
-        "SELECT p.display AS pseudo, MIN(s.time_ms) AS timeMs FROM scores s JOIN players p ON p.key = s.player_key " +
-        "WHERE s.level = ?1 AND (?2 = 0 OR s.noflag = 1) GROUP BY s.player_key ORDER BY timeMs ASC LIMIT ?3"
+        "SELECT p.display AS pseudo, b.time_ms AS timeMs FROM bests b JOIN players p ON p.key = b.player_key " +
+        "WHERE b.level = ?1 AND b.noflag = ?2 ORDER BY b.time_ms ASC, b.updated_at ASC LIMIT ?3"
       ).bind(level, noflag ? 1 : 0, limit).all();
       return res.results;
     },
@@ -266,7 +283,16 @@ export async function handle(request, env, repo, now = Date.now()) {
     "Vary": "Origin"
   };
   const json = (body, status = 200) => new Response(JSON.stringify(body), {
-    status, headers: { ...cors, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
+    status,
+    headers: {
+      ...cors,
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      // la réponse n'est que des données : jamais interprétée comme une page
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+      "Referrer-Policy": "no-referrer"
+    }
   });
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
@@ -280,7 +306,7 @@ export async function handle(request, env, repo, now = Date.now()) {
     if (url.pathname === "/start" && request.method === "POST") {
       if (await limited("start")) return json({ error: "rate" }, 429);
       const body = await readJson(request);
-      if (!body || !MSCore.LEVELS[body.level]) return json({ error: "format" }, 400);
+      if (!body || !MSCore.isLevel(body.level)) return json({ error: "format" }, 400);
       const id = crypto.randomUUID();
       const seed = crypto.getRandomValues(new Uint32Array(1))[0];
       await repo.insertGame(id, body.level, seed, now);
@@ -291,7 +317,7 @@ export async function handle(request, env, repo, now = Date.now()) {
     if (url.pathname === "/scores" && request.method === "GET") {
       if (await limited("read")) return json({ error: "rate" }, 429);
       const level = url.searchParams.get("level");
-      if (!MSCore.LEVELS[level]) return json({ error: "format" }, 400);
+      if (!MSCore.isLevel(level)) return json({ error: "format" }, 400);
       const scores = await repo.board(level, url.searchParams.get("cat") === "noflag", BOARD_SIZE);
       return json({ scores });
     }
@@ -299,7 +325,7 @@ export async function handle(request, env, repo, now = Date.now()) {
     if (url.pathname === "/scores" && request.method === "POST") {
       if (await limited("submit")) return json({ error: "rate" }, 429);
       const body = await readJson(request);
-      if (!body || typeof body.id !== "string") return json({ error: "format" }, 400);
+      if (!body || typeof body.id !== "string" || body.id.length > 64) return json({ error: "format" }, 400);
 
       const pseudoError = checkPseudo(body.pseudo);
       if (pseudoError) return json({ error: pseudoError }, 400);
@@ -328,10 +354,18 @@ export async function handle(request, env, repo, now = Date.now()) {
       }
 
       if (!(await repo.useGame(game.id))) return json({ error: "expired" }, 400);
-      await repo.insertScore(game.id, key, game.level, result.timeMs, result.noflag, now);
-      const rank = await repo.rank(game.level, false, result.timeMs);
-      const rankNoflag = result.noflag ? await repo.rank(game.level, true, result.timeMs) : null;
-      return json({ rank, rankNoflag, noflag: result.noflag, timeMs: result.timeMs, token });
+
+      // record du joueur : remplacé seulement si ce temps est meilleur
+      const keep = async (noflag) => {
+        const before = await repo.getBest(key, game.level, noflag);
+        const improved = !before || result.timeMs < before.time_ms;
+        if (improved) await repo.saveBest(key, game.level, noflag, result.timeMs, game.id, now);
+        const best = improved ? result.timeMs : before.time_ms;
+        return { improved, best, rank: await repo.rank(game.level, noflag, best) };
+      };
+      const all = await keep(false);
+      const nf = result.noflag ? await keep(true) : null;
+      return json({ timeMs: result.timeMs, noflag: result.noflag, all, nf, token });
     }
 
     return json({ error: "not-found" }, 404);
@@ -340,10 +374,17 @@ export async function handle(request, env, repo, now = Date.now()) {
   }
 }
 
+// corps JSON d'un objet simple, refusé avant lecture s'il annonce une taille excessive
 async function readJson(request) {
+  if (Number(request.headers.get("Content-Length") || 0) > MAX_BODY) return null;
   const text = await request.text();
   if (text.length > MAX_BODY) return null;
-  try { return JSON.parse(text); } catch (e) { return null; }
+  try {
+    const body = JSON.parse(text);
+    return body && typeof body === "object" && !Array.isArray(body) ? body : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 export default {

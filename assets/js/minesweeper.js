@@ -53,12 +53,14 @@
       youAre: "Vos temps sont inscrits au nom de {p}.", youAreNot: "Gagnez une partie pour choisir votre pseudo.",
       pseudoLabel: "Pseudo pour le classement", send: "Inscrire",
       sending: "Inscription au nom de {p}...",
-      rankOk: "Inscrit au nom de {p} : {rank} sur ce niveau.", rankNoflag: " {rank} en Sans drapeau.",
+      rankNew: "{p} : nouveau record au classement, {rank} sur ce niveau.",
+      rankKept: "{p} : votre record de {best} reste {rank} sur ce niveau.",
+      rankNoflag: " En Sans drapeau : {rank}.",
       ordinal: function (n) { return n === 1 ? "1er" : n + "e"; },
       unrankedPeek: "Partie avec le code secret : hors classement.",
       unrankedLate: "Partie hors classement : le serveur n'a pas répondu à temps au début de la partie.",
       err: {
-        "pseudo-invalid": "Pseudo de 3 à 16 caractères : lettres, chiffres, _ . -",
+        "pseudo-invalid": "Pseudo de 3 à 16 caractères : lettres (accents compris), chiffres, _ . -",
         "pseudo-refused": "Ce pseudo n'est pas accepté, en choisir un autre.",
         "pseudo-taken": "Ce pseudo est déjà pris, en choisir un autre.",
         "expired": "Partie trop ancienne pour être classée.",
@@ -109,12 +111,14 @@
       youAre: "Your times are recorded as {p}.", youAreNot: "Win a game to choose your name.",
       pseudoLabel: "Name for the leaderboard", send: "Submit",
       sending: "Submitting as {p}...",
-      rankOk: "Recorded as {p}: {rank} on this level.", rankNoflag: " {rank} in No flags.",
+      rankNew: "{p}: new leaderboard best, {rank} on this level.",
+      rankKept: "{p}: your best of {best} stays {rank} on this level.",
+      rankNoflag: " No flags: {rank}.",
       ordinal: function (n) { var s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); },
       unrankedPeek: "Game played with the secret code: not ranked.",
       unrankedLate: "Not ranked: the server did not answer in time when the game started.",
       err: {
-        "pseudo-invalid": "Name of 3 to 16 characters: letters, digits, _ . -",
+        "pseudo-invalid": "Name of 3 to 16 characters: Latin letters (accents allowed), digits, _ . -",
         "pseudo-refused": "This name is not allowed, please pick another one.",
         "pseudo-taken": "This name is already taken, please pick another one.",
         "expired": "This game is too old to be ranked.",
@@ -129,7 +133,8 @@
   }[LANG];
 
   var MOVE_TOLERANCE = 10;
-  var PSEUDO_RE = /^[\p{L}\p{N}_.-]{3,16}$/u;
+  // même règle que le serveur : alphabet latin (accents compris), chiffres 0-9, _ . -
+  var PSEUDO_RE = /^[\p{Script=Latin}0-9_.-]{3,16}$/u;
 
   var $ = function (id) { return document.getElementById(id); };
   var boardEl = $("ms-board"), minesEl = $("ms-mines"), timeEl = $("ms-time"), bestEl = $("ms-best"), statusEl = $("ms-status");
@@ -511,8 +516,10 @@
         save("ms-identity-v1", identity);
       }
       rankForm.hidden = true;
-      var msg = TEXT.rankOk.replace("{p}", pseudo).replace("{rank}", TEXT.ordinal(d.rank));
-      if (d.noflag && d.rankNoflag) msg += TEXT.rankNoflag.replace("{rank}", TEXT.ordinal(d.rankNoflag));
+      // une seule ligne par pseudo : elle n'est remplacée que par un meilleur temps
+      var msg = (d.all.improved ? TEXT.rankNew : TEXT.rankKept).replace("{p}", pseudo)
+        .replace("{rank}", TEXT.ordinal(d.all.rank)).replace("{best}", fmt(d.all.best, true));
+      if (d.nf) msg += TEXT.rankNoflag.replace("{rank}", TEXT.ordinal(d.nf.rank));
       setRankMsg(msg, "ok");
     }).catch(function () {
       g.submitted = false;

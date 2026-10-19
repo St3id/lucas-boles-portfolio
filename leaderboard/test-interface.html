@@ -54,7 +54,7 @@ f.onload = async function () {
   input.value = "Lucas38";
   d.getElementById("ms-rank-form").requestSubmit();
   await wait(400);
-  ok(/Inscrit au nom de Lucas38 : 1er/.test(d.getElementById("ms-rank-msg").textContent), "inscrit : " + d.getElementById("ms-rank-msg").textContent);
+  ok(/Lucas38 : nouveau record au classement, 1er/.test(d.getElementById("ms-rank-msg").textContent), "inscrit : " + d.getElementById("ms-rank-msg").textContent);
   var id = JSON.parse(w.localStorage.getItem("ms-identity-v1"));
   ok(id && id.pseudo === "Lucas38" && id.token, "pseudo et jeton mémorisés dans le navigateur");
 
@@ -62,7 +62,7 @@ f.onload = async function () {
   d.getElementById("ms-end-new").click();
   await winGame(w, d, 120);
   ok(d.getElementById("ms-rank-form").hidden, "2e victoire : pas de formulaire");
-  ok(/Inscrit au nom de Lucas38/.test(d.getElementById("ms-rank-msg").textContent), "2e victoire inscrite automatiquement : " + d.getElementById("ms-rank-msg").textContent);
+  ok(/Lucas38 : (nouveau record|votre record)/.test(d.getElementById("ms-rank-msg").textContent), "2e victoire inscrite automatiquement : " + d.getElementById("ms-rank-msg").textContent);
 
   // classement affiché
   d.getElementById("ms-end-close").click();

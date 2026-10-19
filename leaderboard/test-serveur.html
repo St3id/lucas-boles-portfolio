@@ -44,7 +44,7 @@ async function play(level, pseudo, token, gap = 150, opts = {}) {
 
 // partie valide, premier pseudo : jeton renvoyé
 let g = await play("easy", "Lucas38");
-ok(g.r.status === 200 && g.r.rank === 1 && typeof g.r.token === "string", "partie valide, rang 1, jeton : " + JSON.stringify(g.r).slice(0, 80));
+ok(g.r.status === 200 && g.r.all.rank === 1 && g.r.all.improved && typeof g.r.token === "string", "partie valide, rang 1, jeton : " + JSON.stringify(g.r).slice(0, 80));
 const token = g.r.token;
 ok(g.r.timeMs === g.actions[g.actions.length - 1].t, "temps = dernière action (" + g.r.timeMs + " ms)");
 
@@ -54,7 +54,7 @@ ok(g.r.error === "pseudo-taken", "même pseudo en minuscules sans jeton : " + g.
 g = await play("easy", "Lucas38", "faux-jeton");
 ok(g.r.error === "pseudo-taken", "même pseudo, mauvais jeton : " + g.r.error);
 g = await play("easy", "Lucas38", token, 100);
-ok(g.r.status === 200 && !g.r.token, "même pseudo avec son jeton : accepté, rang " + g.r.rank);
+ok(g.r.status === 200 && !g.r.token, "même pseudo avec son jeton : accepté, rang " + g.r.all.rank);
 
 // triche
 g = await play("easy", "Tricheur", null, 150, { actions: (seed) => { const b = MSCore.makeBoard("easy", seed, 0); return [{ a: "r", i: 0, t: 0 }, { a: "r", i: b.mine.indexOf(true), t: 500 }]; } });
@@ -80,7 +80,7 @@ ok(g.r.error === "replay", "partie non terminée : " + g.r.error);
 g = await play("easy", "Drapeau", null, 300, { flag: true });
 ok(g.r.status === 200 && g.r.noflag === false, "partie avec drapeau : classée, noflag=false");
 g = await play("easy", "SansFlag", null, 400);
-ok(g.r.status === 200 && g.r.noflag === true && g.r.rankNoflag >= 1, "partie sans drapeau : rang Sans drapeau " + g.r.rankNoflag);
+ok(g.r.status === 200 && g.r.noflag === true && g.r.nf && g.r.nf.rank >= 1, "partie sans drapeau : rang Sans drapeau " + (g.r.nf && g.r.nf.rank));
 
 const all = await call("/scores?level=easy&cat=all");
 const nf = await call("/scores?level=easy&cat=noflag");
@@ -97,6 +97,59 @@ clock += 61_000;
 // niveau difficile, temps plancher de 25 s
 g = await play("hard", "Rapide", null, 40);
 ok(g.r.error === "too-fast" || g.r.status === 200, "difficile : " + (g.r.error || "ok") + " en " + g.actions[g.actions.length - 1].t + " ms");
+
+
+// --- un seul record par pseudo : remplacé seulement par un meilleur temps ---
+repo = memRepo(); clock += 3_600_000;
+g = await play("medium", "Kodama", null, 400);
+const kTok = g.r.token, firstBest = g.r.all.best;
+g = await play("medium", "Kodama", kTok, 600);            // plus lent
+ok(g.r.status === 200 && !g.r.all.improved && g.r.all.best === firstBest, "temps plus lent : record conservé (" + firstBest + " ms)");
+g = await play("medium", "Kodama", kTok, 200);            // plus rapide
+ok(g.r.all.improved && g.r.all.best < firstBest, "temps plus rapide : record remplacé (" + g.r.all.best + " ms)");
+let board = await call("/scores?level=medium&cat=all");
+ok(board.scores.length === 1 && board.scores[0].timeMs === g.r.all.best, "classement : une seule ligne pour Kodama, au nouveau temps");
+ok((await repo.count()) <= 2, "base : " + (await repo.count()) + " ligne(s) seulement (général + sans drapeau) après 3 parties");
+
+// --- sécurité : pseudos piégés ---
+["'; DROP TABLE players;--", "Robert'); DROP", "<img src=x>", "a​dmin", "Lucаs", "²²²", "x‮yz", "../../etc", "%27OR1=1"]
+  .forEach((p) => ok(checkPseudo(p) === "pseudo-invalid", "pseudo piégé refusé : " + JSON.stringify(p)));
+["Élodie", "Zoë_38", "jean-luc", "o.k.Lucas"].forEach((p) => ok(checkPseudo(p) === null, "pseudo accepté (accents, _ . -) : " + p));
+
+// --- sécurité : requêtes trafiquées ---
+clock += 61_000;
+let r = await call("/start", "POST", { level: "constructor" });
+ok(r.error === "format", "niveau « constructor » refusé : " + r.error);
+r = await call("/start", "POST", { level: "__proto__" });
+ok(r.error === "format", "niveau « __proto__ » refusé : " + r.error);
+r = await call("/scores?level=toString");
+ok(r.error === "format", "lecture niveau « toString » refusée : " + r.error);
+r = await call("/start", "POST", ["level", "easy"]);
+ok(r.error === "format", "corps en tableau refusé : " + r.error);
+{
+  const big = new Request("https://api/scores", { method: "POST", headers: { "Content-Type": "application/json", "Content-Length": "999999999" }, body: "{}" });
+  const res = await handle(big, env, repo, clock);
+  ok((await res.json()).error === "format", "corps annoncé énorme refusé avant lecture");
+  ok(res.headers.get("X-Content-Type-Options") === "nosniff" && /default-src 'none'/.test(res.headers.get("Content-Security-Policy")), "en-têtes de sécurité présents");
+}
+const s0 = await call("/start", "POST", { level: "easy" });
+for (const [label, actions] of [
+  ["actions absentes", undefined], ["actions en texte", "r,0,0"], ["case négative", [{ a: "r", i: -1, t: 0 }]],
+  ["case à virgule", [{ a: "r", i: 1.5, t: 0 }]], ["temps en texte", [{ a: "r", i: 0, t: "0" }]],
+  ["action inconnue", [{ a: "x", i: 0, t: 0 }]], ["temps qui recule", [{ a: "r", i: 0, t: 0 }, { a: "f", i: 5, t: 500 }, { a: "f", i: 5, t: 100 }]],
+  ["trop d'actions", Array.from({ length: 6000 }, (_, k) => ({ a: "f", i: 1, t: k }))]
+]) {
+  r = await call("/scores", "POST", { id: s0.id, pseudo: "Testeur", actions });
+  ok(r.error === "replay", "actions piégées (" + label + ") : " + r.error);
+}
+r = await call("/scores", "POST", { id: "x".repeat(500), pseudo: "Testeur", actions: [] });
+ok(r.error === "format", "identifiant de partie trop long : " + r.error);
+r = await call("/scores", "POST", { id: "' OR 1=1 --", pseudo: "Testeur", actions: [{ a: "r", i: 0, t: 0 }] });
+ok(r.error === "expired", "identifiant de partie en injection SQL : " + r.error + " (paramètre lié, aucune partie trouvée)");
+clock += 61_000; // nouvelle minute : la limite de 10 envois est atteinte
+r = await call("/scores", "POST", { id: s0.id, pseudo: "Testeur", token: { $ne: null }, actions: [{ a: "r", i: 0, t: 0 }] });
+ok(r.error === "replay", "jeton en objet : ignoré sans erreur serveur : " + r.error);
+
 
 document.getElementById("out").textContent = log.join("\n");
 </script>

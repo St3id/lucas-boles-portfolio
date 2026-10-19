@@ -6,6 +6,11 @@
 var MSCore = (function () {
   var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 } };
 
+  // vrai niveau seulement : LEVELS["constructor"] ou LEVELS["__proto__"] existent aussi en JavaScript
+  function isLevel(level) {
+    return typeof level === "string" && Object.prototype.hasOwnProperty.call(LEVELS, level);
+  }
+
   // générateur pseudo-aléatoire déterministe (mulberry32) : même graine, même grille
   function rng(seed) {
     var a = seed >>> 0;
@@ -52,7 +57,7 @@ var MSCore = (function () {
      chiffre). La première action est la révélation qui lance le chrono (t = 0).
      Renvoie { ok, timeMs, noflag, count } ou { ok: false, why }. */
   function replay(level, seed, actions) {
-    if (!LEVELS[level] || !Array.isArray(actions) || !actions.length || actions.length > 5000) return { ok: false, why: "format" };
+    if (!isLevel(level) || !Array.isArray(actions) || !actions.length || actions.length > 5000) return { ok: false, why: "format" };
     var size = LEVELS[level].size, total = size * size;
     var valid = function (x) {
       return x && (x.a === "r" || x.a === "f" || x.a === "c") && Number.isInteger(x.i) && x.i >= 0 && x.i < total &&
@@ -102,6 +107,6 @@ var MSCore = (function () {
     return { ok: true, timeMs: last, noflag: flagsUsed === 0, count: actions.length };
   }
 
-  return { LEVELS: LEVELS, rng: rng, neighbours: neighbours, makeBoard: makeBoard, replay: replay };
+  return { LEVELS: LEVELS, isLevel: isLevel, rng: rng, neighbours: neighbours, makeBoard: makeBoard, replay: replay };
 })();
 // --- CORE END
