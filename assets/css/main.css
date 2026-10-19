@@ -66,6 +66,8 @@ body {
   font-size: var(--step-body);
   line-height: 1.55;
   font-stretch: 100%;
+  /* un mot trop long pour sa colonne (texte très agrandi) passe à la ligne au lieu de déborder */
+  overflow-wrap: break-word;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -155,8 +157,10 @@ ol[role="list"] {
   padding-block: var(--section) 0;
 }
 
+/* les tailles de titres sont bornées par la largeur de l'écran : avec le texte agrandi
+   du téléphone (réglage d'accessibilité), un mot ne sort plus de l'écran */
 .section-title {
-  font-size: var(--step-h2);
+  font-size: min(var(--step-h2), 10.5vw);
   font-weight: 800;
   font-stretch: 125%;
   line-height: 0.95;
@@ -199,14 +203,19 @@ ol[role="list"] {
 }
 
 h3 {
-  font-size: var(--step-h3);
+  font-size: min(var(--step-h3), 8.5vw);
   font-weight: 750;
   font-stretch: 112%;
   line-height: 1.05;
   letter-spacing: -0.02em;
 }
 
+figure {
+  min-width: 0;
+}
+
 figure figcaption {
+  overflow-wrap: anywhere;
   margin-top: 10px;
   color: var(--ink-soft);
   font-size: var(--step-small);
@@ -300,8 +309,9 @@ figure figcaption {
 
 .site-header .wrap {
   display: flex;
+  flex-wrap: wrap;   /* texte très agrandi : l'en-tête passe sur deux lignes au lieu de sortir de l'écran */
   align-items: center;
-  gap: 24px;
+  gap: 8px 24px;
   min-height: 76px;
 }
 
@@ -406,7 +416,7 @@ figure figcaption {
 }
 
 .hero-name {
-  font-size: var(--step-display);
+  font-size: min(var(--step-display), 23vw);
   font-weight: 850;
   font-stretch: 125%;
   line-height: 0.84;
@@ -1094,7 +1104,8 @@ figure figcaption {
 
 .contact-mail {
   grid-column: 1 / -1;
-  font-size: clamp(1.6rem, 5.2vw, 4.5rem);
+  font-size: min(clamp(1.6rem, 5.2vw, 4.5rem), 8vw);
+  overflow-wrap: anywhere;
   font-weight: 800;
   font-stretch: 112%;
   letter-spacing: -0.03em;
@@ -1128,6 +1139,7 @@ figure figcaption {
 
 .contact-list {
   grid-column: 1 / -1;
+  overflow-wrap: anywhere;   /* adresse étudiante très longue, texte agrandi */
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--gap);
@@ -1304,6 +1316,6 @@ figure figcaption {
 /* très petits écrans (320 px) : « Compétences » doit tenir sur une ligne */
 @media (max-width: 360px) {
   .section-title {
-    font-size: 2rem;
+    font-size: min(2rem, 10.5vw);
   }
 }
