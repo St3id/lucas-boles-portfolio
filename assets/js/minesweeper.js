@@ -589,9 +589,61 @@
       if (req === podiumReq) box.hidden = true;
     });
   }
-  // trois marches toujours présentes : une place vide donne envie de la prendre
-  var FLAG_SVG = '<svg class="ms-step-flag" viewBox="0 0 24 24" aria-hidden="true">' +
-    '<path class="pole" d="M7 3v19"/><path class="cloth" d="M8 4h11l-3.5 4.5L19 13H8z"/></svg>';
+  // trois marches toujours présentes : une place vide donne envie de la prendre.
+  // Chaque place porte le laurier du démineur, dessiné case par case par tools/make_podium_art.py.
+  var STEP_ROWS = [8, 6, 4], CELL = 14;
+  var CONFETTI = ["1", "2", "3", "4", "5", "6", "7", "8", "1", "2", "3", "", "", "", ""];   // chiffres du jeu, et des cases
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var podiumIO = null, podiumTimer = 0;
+  function laurel() {
+    var svg = $("ms-laurel-tpl").content.firstElementChild.cloneNode(true);
+    // chaque branche pousse feuille après feuille, du nœud vers la pointe
+    svg.querySelectorAll(".lr-seg").forEach(function (g) { g.style.setProperty("--k", g.getAttribute("data-k")); });
+    return svg;
+  }
+  // la marche est un morceau de grille ; ses cases s'ouvrent en cascade depuis le haut
+  function fillCells(block) {
+    var grid = block.firstChild, rows = STEP_ROWS[+block.getAttribute("data-rank")];
+    var cols = Math.max(1, Math.ceil(block.clientWidth / CELL)), mid = (cols - 1) / 2;
+    if (grid.childElementCount === cols * rows) return;
+    grid.textContent = "";
+    grid.style.setProperty("--cols", cols);
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var cell = document.createElement("i");
+        cell.style.setProperty("--d", Math.round(Math.abs(c - mid)) + r);
+        grid.appendChild(cell);
+      }
+    }
+  }
+  // pour le premier : une gerbe de chiffres du démineur et de cases
+  function confetti() {
+    var wrap = document.createElement("span");
+    wrap.className = "ms-confetti";
+    wrap.setAttribute("aria-hidden", "true");
+    CONFETTI.forEach(function (ch, n) {
+      var p = document.createElement("i"), a = Math.PI * (1.08 + 0.84 * n / (CONFETTI.length - 1)) + (Math.random() - 0.5) * 0.25;
+      var dist = 56 + Math.random() * 64;
+      p.className = ch ? "n" + ch : "is-cell";
+      p.textContent = ch;
+      p.style.setProperty("--x", Math.round(Math.cos(a) * dist * 1.25) + "px");
+      p.style.setProperty("--y", Math.round(Math.sin(a) * dist) + "px");
+      p.style.setProperty("--r", Math.round((Math.random() - 0.5) * 300) + "deg");
+      p.style.setProperty("--n", n % 5);
+      wrap.appendChild(p);
+    });
+    return wrap;
+  }
+  function startPodium(box) {
+    box.classList.remove("is-wait");
+    void box.offsetWidth;
+    box.classList.add("is-in");
+    podiumTimer = setTimeout(function () {
+      box.classList.add("is-done");
+      var c = box.querySelector(".ms-confetti");
+      if (c) c.remove();
+    }, 4200);
+  }
   function renderPodium(scores) {
     var list = $("ms-podium-list"), box = $("ms-podium");
     list.textContent = "";
@@ -599,28 +651,46 @@
     for (var k = 0; k < 3; k++) {
       var s = scores[k], li = document.createElement("li");
       li.className = "ms-step" + (s ? "" : " is-empty");
-      var who = document.createElement("span"), t = document.createElement("span"), block = document.createElement("span"), rank = document.createElement("span");
+      var crown = document.createElement("span"), who = document.createElement("span"), t = document.createElement("span"),
+        block = document.createElement("span"), cells = document.createElement("span"), rank = document.createElement("span");
+      crown.className = "ms-step-crown";
+      crown.appendChild(laurel());
+      if (s && k === 0) crown.appendChild(confetti());
       who.className = "ms-step-who";
       who.textContent = s ? s.pseudo : TEXT.podiumFree;
       if (s) who.title = s.pseudo;
       t.className = "ms-step-time";
       t.textContent = s ? fmt(s.timeMs, true) : "--:--.-";
       block.className = "ms-step-block";
+      block.setAttribute("data-rank", k);
+      cells.className = "ms-step-cells";
       rank.className = "ms-step-rank";
       rank.textContent = String(k + 1);
       rank.setAttribute("aria-hidden", "true");
-      block.appendChild(rank);
-      li.append(who, t);
-      li.insertAdjacentHTML("beforeend", FLAG_SVG);   // dessin fixe, aucune donnée du serveur dedans
-      li.appendChild(block);
+      block.append(cells, rank);
+      li.append(crown, who, t, block);
       li.setAttribute("aria-label", TEXT.ordinal(k + 1) + " : " + (s ? s.pseudo + ", " + fmt(s.timeMs, true) : TEXT.podiumFree));
       if (s && identity && sameName(s.pseudo, identity.pseudo)) li.classList.add("is-me");
       list.appendChild(li);
     }
-    // relance l'entrée des marches et des drapeaux
-    box.classList.remove("is-in");
-    void box.offsetWidth;
-    box.classList.add("is-in");
+    list.querySelectorAll(".ms-step-block").forEach(fillCells);
+    // la cérémonie : le 3e, puis le 2e, puis le 1er ; elle attend que le podium soit à l'écran
+    clearTimeout(podiumTimer);
+    box.classList.remove("is-in", "is-done");
+    if (reduceMotion.matches) { box.classList.add("is-done"); return; }
+    box.classList.add("is-wait");
+    var r = box.getBoundingClientRect();
+    if (!("IntersectionObserver" in window) || (r.top < innerHeight * 0.8 && r.bottom > 0)) { startPodium(box); return; }
+    if (!podiumIO) {
+      podiumIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting && e.target.classList.contains("is-wait")) startPodium(e.target); });
+      }, { threshold: 0.3 });
+      podiumIO.observe(box);
+    }
+  }
+  // la largeur des marches change avec la fenêtre : on recompte les cases
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(function () { $("ms-podium-list").querySelectorAll(".ms-step-block").forEach(fillCells); }).observe($("ms-podium-list"));
   }
 
   function setTabs(attr, value) {
