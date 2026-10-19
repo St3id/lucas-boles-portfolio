@@ -43,3 +43,9 @@ CREATE TABLE IF NOT EXISTS hits (
   count INTEGER NOT NULL,
   PRIMARY KEY (key, bucket, minute)
 );
+
+-- mots bannis à la main (modération) : refusés dans tout nouveau pseudo, variantes comprises.
+-- Ajouter : INSERT OR IGNORE INTO bans (word) VALUES ('mot');
+CREATE TABLE IF NOT EXISTS bans (
+  word TEXT PRIMARY KEY
+);

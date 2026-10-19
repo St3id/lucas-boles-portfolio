@@ -2,7 +2,7 @@
    Sert uniquement aux tests en local (mode développeur du démineur sur localhost) :
    le vrai code du serveur tourne dans le navigateur, sans Cloudflare. */
 export function memRepo() {
-  const games = new Map(), players = new Map(), bests = new Map(), hits = new Map();
+  const games = new Map(), players = new Map(), bests = new Map(), hits = new Map(), banned = new Set();
   const id = (key, level, noflag) => key + "|" + level + "|" + (noflag ? 1 : 0);
   const rows = (level, noflag) => [...bests.values()].filter((b) => b.level === level && b.noflag === (noflag ? 1 : 0));
   return {
@@ -20,7 +20,7 @@ export function memRepo() {
       return true;
     },
     async getPlayer(key) { return players.get(key) || null; },
-    async insertPlayer(key, display, tokenHash) { players.set(key, { key, display, token_hash: tokenHash }); },
+    async insertPlayer(key, display, tokenHash, now) { players.set(key, { key, display, token_hash: tokenHash, created_at: now }); },
     async getBest(key, level, noflag) { return bests.get(id(key, level, noflag)) || null; },
     async saveBest(key, level, noflag, timeMs, gameId, now) {
       const cur = bests.get(id(key, level, noflag));
@@ -33,6 +33,9 @@ export function memRepo() {
         .slice(0, limit)
         .map((b) => ({ pseudo: players.get(b.player_key).display, timeMs: b.time_ms }));
     },
+    async bans() { return [...banned]; },
+    // pour les tests : bannir un mot (la console D1 fait INSERT INTO bans)
+    async addBan(word) { banned.add(word); },
     // pour les tests : nombre de lignes stockées
     async count() { return bests.size; },
     async cleanup() {}

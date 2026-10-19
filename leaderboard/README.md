@@ -39,6 +39,37 @@ Après une modification du cœur du jeu, relancer `build.py` puis recoller `work
 9. **Brancher le jeu** : mettre cette adresse (sans `/` final) dans `LEADERBOARD_API`, en haut de
    `assets/js/minesweeper.js`, lancer `python tools/build.py` et publier.
 
+## E-mail quand le top 3 change (modération)
+
+Quand un temps fait changer le top 3 d'un niveau (une arrivée, ou un changement d'ordre), le serveur
+envoie un e-mail : nouveau top 3, ancien top 3, qui sort, la partie (temps, ancien record, clics,
+drapeaux, date d'inscription du pseudo) et les commandes SQL pour retirer ou bannir le pseudo.
+Un joueur qui améliore son temps sans changer l'ordre ne déclenche rien.
+
+L'envoi passe par Resend (gratuit jusqu'à 100 e-mails par jour). Sans nom de domaine, Resend
+n'envoie qu'à l'adresse du compte : créer le compte avec l'adresse qui doit recevoir les e-mails.
+
+1. Créer un compte sur https://resend.com avec `boleslcc@gmail.com`, puis *API Keys* > *Create API Key*,
+   permission *Sending access*. Copier la clé (elle commence par `re_`, elle ne s'affiche qu'une fois).
+2. Dans le Worker : *Settings* > *Variables and Secrets* > *Add* :
+   - `RESEND_API_KEY`, type *Secret*, valeur : la clé
+   - `NOTIFY_EMAIL`, type *Text*, valeur : `boleslcc@gmail.com`
+3. Dans la console D1, créer la table des mots bannis :
+   `CREATE TABLE IF NOT EXISTS bans (word TEXT PRIMARY KEY);`
+4. Recoller `worker.js` dans le Worker (*Edit code*), puis *Deploy*.
+
+Sans `RESEND_API_KEY` ou `NOTIFY_EMAIL`, le classement marche normalement et aucun e-mail ne part.
+Une panne de Resend ne bloque jamais un envoi de temps. Les erreurs d'envoi apparaissent dans les
+journaux du Worker (*Observability* ou *Logs*).
+
+## Bannir un mot
+
+Dans la console D1 : `INSERT OR IGNORE INTO bans (word) VALUES ('mot');`
+
+Le mot est refusé dans tout nouveau pseudo, en clair (« kodama » bloque « Kodama38 ») comme avec des
+variantes (`K0d4ma`, lettres doublées, accents), et le pseudo existant qui le contient ne peut plus
+envoyer de temps. Pour l'enlever : `DELETE FROM bans WHERE word = 'mot';`. Pas besoin de republier le code.
+
 ## Ce que vérifie le serveur
 
 - **La partie** : il choisit la graine de la grille, puis rejoue la liste des clics reçue. Une partie
@@ -79,7 +110,7 @@ C'est inévitable pour un jeu qui tourne entièrement dans le navigateur ; les c
 
 Les tests de `test-serveur.html` rejouent ces attaques à chaque modification.
 
-## Retirer un pseudo (demande d'un joueur)
+## Retirer un pseudo (demande d'un joueur, ou pseudo signalé par l'e-mail)
 
 Dans la console D1 de la base `demineur`, en remplaçant `pseudo` par le pseudo en minuscules sans accents :
 

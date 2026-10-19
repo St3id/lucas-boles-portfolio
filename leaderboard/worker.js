@@ -11,6 +11,11 @@
  * annoncé avec sa propre horloge. Un robot qui lit la grille reste possible :
  * c'est la limite d'un jeu qui tourne dans le navigateur.
  *
+ * Modération : quand le top 3 d'un niveau change, un e-mail détaillé part vers
+ * NOTIFY_EMAIL (service Resend, clé RESEND_API_KEY), avec les commandes SQL pour
+ * retirer ou bannir le pseudo. Les mots de la table « bans » sont refusés dans
+ * tout nouveau pseudo, sans republier ce code.
+ *
  * Fichier autonome, à coller tel quel dans l'éditeur Cloudflare.
  * Le bloc CORE est recopié depuis assets/js/ms-core.js par tools/build.py :
  * ne pas le modifier ici.
@@ -133,6 +138,8 @@ const FLOOR_MS = { easy: 1000, medium: 6000, hard: 25000 };  // temps plancher p
 const RATE = { start: 30, submit: 10, read: 60 };             // requêtes par minute et par visiteur
 const BOARD_SIZE = 20;
 const MAX_BODY = 200000;
+const SITE_URL = "https://st3id.github.io/lucas-boles-portfolio/minesweeper.html";
+const LEVEL_NAME = { easy: "Facile", medium: "Moyen", hard: "Difficile" };
 
 /* --- Pseudos -------------------------------------------------------------------- */
 // alphabet latin (accents compris) et chiffres 0-9 seulement : pas de lettres
@@ -199,6 +206,17 @@ export function checkPseudo(pseudo) {
   return null;
 }
 
+// mots ajoutés à la main dans la table « bans » (console D1) : refusés dans tout pseudo,
+// en clair (« kodama » bloque « Kodama38 ») comme sous les variantes l33t ou doublées
+export function isBanned(pseudo, words) {
+  const plain = identityKey(pseudo), letters = pseudoKey(pseudo, true, true);
+  return words.some((raw) => {
+    if (typeof raw !== "string" || !raw.trim()) return false;
+    const w = identityKey(raw.trim()), wl = pseudoKey(raw.trim(), true, true);
+    return plain.includes(w) || (wl.length >= 3 && letters.includes(wl));
+  });
+}
+
 /* --- Outils ------------------------------------------------------------------------ */
 async function sha256(text) {
   const data = new TextEncoder().encode(text);
@@ -231,7 +249,7 @@ export function d1Repo(db) {
       return res.meta.changes === 1;
     },
     getPlayer(key) {
-      return db.prepare("SELECT key, display, token_hash FROM players WHERE key = ?1").bind(key).first();
+      return db.prepare("SELECT key, display, token_hash, created_at FROM players WHERE key = ?1").bind(key).first();
     },
     insertPlayer(key, display, tokenHash, now) {
       return db.prepare("INSERT INTO players (key, display, token_hash, created_at) VALUES (?1, ?2, ?3, ?4)")
@@ -264,6 +282,15 @@ export function d1Repo(db) {
       ).bind(level, noflag ? 1 : 0, limit).all();
       return res.results;
     },
+    // mots bannis à la main ; table absente (pas encore créée) : aucun
+    async bans() {
+      try {
+        const res = await db.prepare("SELECT word FROM bans").all();
+        return res.results.map((r) => r.word);
+      } catch (e) {
+        return [];
+      }
+    },
     async cleanup(now) {
       await db.prepare("DELETE FROM games WHERE created_at < ?1").bind(now - GAME_TTL_MS).run();
       await db.prepare("DELETE FROM hits WHERE minute < ?1").bind(Math.floor(now / 60000) - 60).run();
@@ -272,7 +299,7 @@ export function d1Repo(db) {
 }
 
 /* --- Traitement des requêtes ---------------------------------------------------- */
-export async function handle(request, env, repo, now = Date.now()) {
+export async function handle(request, env, repo, now = Date.now(), ctx = null) {
   const allowed = (env.ALLOWED_ORIGINS || "https://st3id.github.io").split(",").map((s) => s.trim());
   const origin = request.headers.get("Origin") || "";
   const cors = {
@@ -329,6 +356,7 @@ export async function handle(request, env, repo, now = Date.now()) {
 
       const pseudoError = checkPseudo(body.pseudo);
       if (pseudoError) return json({ error: pseudoError }, 400);
+      if (isBanned(body.pseudo, await repo.bans())) return json({ error: "pseudo-refused" }, 400);
 
       const game = await repo.getGame(body.id);
       if (!game || game.used || now - game.created_at > GAME_TTL_MS) return json({ error: "expired" }, 400);
@@ -355,16 +383,32 @@ export async function handle(request, env, repo, now = Date.now()) {
 
       if (!(await repo.useGame(game.id))) return json({ error: "expired" }, 400);
 
-      // record du joueur : remplacé seulement si ce temps est meilleur
+      // record du joueur : remplacé seulement si ce temps est meilleur.
+      // Si le top 3 change (arrivée, changement d'ordre), on le note pour l'e-mail.
+      const changes = [];
       const keep = async (noflag) => {
         const before = await repo.getBest(key, game.level, noflag);
         const improved = !before || result.timeMs < before.time_ms;
+        const top = improved ? await repo.board(game.level, noflag, 3) : null;
         if (improved) await repo.saveBest(key, game.level, noflag, result.timeMs, game.id, now);
         const best = improved ? result.timeMs : before.time_ms;
-        return { improved, best, rank: await repo.rank(game.level, noflag, best) };
+        const rank = await repo.rank(game.level, noflag, best);
+        if (improved && rank <= 3) {
+          const after = await repo.board(game.level, noflag, 3);
+          if (after.map((x) => x.pseudo).join("|") !== top.map((x) => x.pseudo).join("|")) {
+            changes.push({ noflag, rank, before: top, after, previous: before ? before.time_ms : null,
+              players: (await repo.rank(game.level, noflag, Number.MAX_SAFE_INTEGER)) - 1 });
+          }
+        }
+        return { improved, best, rank };
       };
       const all = await keep(false);
       const nf = result.noflag ? await keep(true) : null;
+      if (changes.length) {
+        const mail = topMail({ level: game.level, pseudo: body.pseudo, key, changes, timeMs: result.timeMs,
+          count: result.count, noflag: result.noflag, since: player ? player.created_at : null, now });
+        await later(ctx, sendMail(env, mail));
+      }
       return json({ timeMs: result.timeMs, noflag: result.noflag, all, nf, token });
     }
 
@@ -372,6 +416,85 @@ export async function handle(request, env, repo, now = Date.now()) {
   } catch (err) {
     return json({ error: "server" }, 500);
   }
+}
+
+/* --- E-mail de modération ------------------------------------------------------ */
+function fmtTime(ms) {
+  const tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
+  return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
+}
+const ord = (n) => (n === 1 ? "1er" : n + "e");
+const sqlText = (v) => "'" + String(v).replace(/'/g, "''") + "'";
+const parisDate = (ms) => new Date(ms).toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
+
+// texte de l'e-mail : nouveau top 3, ancien top 3, qui a remplacé qui, la partie,
+// et les commandes prêtes à coller dans la console D1
+export function topMail(info) {
+  const level = LEVEL_NAME[info.level], first = info.changes[0];
+  const cat = (c) => (c.noflag ? "Sans drapeau" : "Tous");
+  const where = first.rank === 1 ? "prend la 1re place" : "entre à la " + ord(first.rank) + " place";
+  const lines = [info.pseudo + " " + where + " en " + level + " (" + cat(first) + ") avec " + fmtTime(info.timeMs) + ".", ""];
+  for (const c of info.changes) {
+    lines.push("Nouveau top 3, " + level + ", " + cat(c) + " :");
+    c.after.forEach((x, i) => {
+      const was = c.before.findIndex((y) => y.pseudo === x.pseudo);
+      const note = was < 0 ? "nouveau dans le top 3" : was > i ? "monte, était " + ord(was + 1)
+        : was < i ? "descend, était " + ord(was + 1) : "";
+      lines.push("  " + ord(i + 1) + "  " + x.pseudo + "  " + fmtTime(x.timeMs) + (note ? "  (" + note + ")" : ""));
+    });
+    c.before.forEach((y, i) => {
+      if (!c.after.some((x) => x.pseudo === y.pseudo)) {
+        lines.push("  Sort du top 3 : " + y.pseudo + " (était " + ord(i + 1) + ", " + fmtTime(y.timeMs) + ")");
+      }
+    });
+    lines.push("Avant :");
+    if (!c.before.length) lines.push("  personne");
+    c.before.forEach((y, i) => lines.push("  " + ord(i + 1) + "  " + y.pseudo + "  " + fmtTime(y.timeMs)));
+    lines.push("  " + c.players + " joueur" + (c.players > 1 ? "s classés" : " classé") + " dans cette catégorie.", "");
+  }
+  const secs = info.timeMs / 1000;
+  lines.push("La partie :",
+    "  Pseudo : " + info.pseudo + " (clé « " + info.key + " »), " +
+      (info.since ? "inscrit depuis le " + parisDate(info.since) : "nouveau pseudo, créé avec cette partie"),
+    "  Temps : " + fmtTime(info.timeMs) + (first.previous ? ", ancien record " + fmtTime(first.previous) : ", premier temps sur ce niveau"),
+    "  Clics : " + info.count + (secs > 0 ? ", " + (info.count / secs).toFixed(1).replace(".", ",") + " par seconde" : "") +
+      (info.noflag ? ", sans aucun drapeau" : ", avec des drapeaux"),
+    "  Date : " + parisDate(info.now) + " (heure de Paris)", "");
+  lines.push("Modération, dans la console D1 de la base « demineur » :",
+    "  Retirer ce pseudo et ses temps :",
+    "    DELETE FROM bests WHERE player_key = " + sqlText(info.key) + ";",
+    "    DELETE FROM players WHERE key = " + sqlText(info.key) + ";",
+    "  Le bannir (refusé dans tout nouveau pseudo, variantes comprises) :",
+    "    INSERT OR IGNORE INTO bans (word) VALUES (" + sqlText(info.key) + ");", "",
+    "Classement : " + SITE_URL);
+  return {
+    subject: "Démineur : " + info.pseudo + " " + where + " en " + level + " (" + fmtTime(info.timeMs) + ")",
+    text: lines.join("\n")
+  };
+}
+
+// envoi par Resend (https://resend.com) ; sans clé ni adresse, rien n'est envoyé.
+// Une panne d'envoi ne touche jamais le classement.
+async function sendMail(env, mail) {
+  try {
+    if (env.sendMail) return await env.sendMail(mail);   // tests
+    if (!env.RESEND_API_KEY || !env.NOTIFY_EMAIL) return;
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: env.MAIL_FROM || "Démineur <onboarding@resend.dev>", to: [env.NOTIFY_EMAIL],
+        subject: mail.subject, text: mail.text })
+    });
+    if (!res.ok) console.log("e-mail non envoyé : " + res.status + " " + (await res.text()).slice(0, 200));
+  } catch (e) {
+    console.log("e-mail non envoyé : " + e.message);
+  }
+}
+
+// travail après la réponse (Cloudflare) ; sans contexte (tests), on attend la fin
+function later(ctx, promise) {
+  if (ctx && ctx.waitUntil) { ctx.waitUntil(promise); return null; }
+  return promise;
 }
 
 // corps JSON d'un objet simple, refusé avant lecture s'il annonce une taille excessive
@@ -388,8 +511,8 @@ async function readJson(request) {
 }
 
 export default {
-  fetch(request, env) {
-    return handle(request, env, d1Repo(env.DB));
+  fetch(request, env, ctx) {
+    return handle(request, env, d1Repo(env.DB), Date.now(), ctx);
   },
   // nettoyage quotidien (déclencheur « Cron » à ajouter dans Cloudflare)
   scheduled(event, env) {

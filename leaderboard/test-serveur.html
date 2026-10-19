@@ -150,6 +150,55 @@ clock += 61_000; // nouvelle minute : la limite de 10 envois est atteinte
 r = await call("/scores", "POST", { id: s0.id, pseudo: "Testeur", token: { $ne: null }, actions: [{ a: "r", i: 0, t: 0 }] });
 ok(r.error === "replay", "jeton en objet : ignoré sans erreur serveur : " + r.error);
 
+// --- e-mail quand le top 3 change ---
+// partie gagnée en exactement « ms » millisecondes (clics répartis régulièrement)
+const timed = (level, ms, flag) => (seed) => {
+  const acts = perfect(level, seed, 100, flag), n = acts.length - 1;
+  return acts.map((x, k) => ({ a: x.a, i: x.i, t: Math.round(k * ms / n) }));
+};
+repo = memRepo(); clock += 3_600_000;
+const mails = [];
+env.sendMail = (m) => { mails.push(m); };
+g = await play("easy", "Alpha", null, 0, { actions: timed("easy", 5000) });
+const aTok = g.r.token;
+ok(mails.length === 1 && /^Démineur : Alpha prend la 1re place en Facile \(00:05\.0\)$/.test(mails[0].subject), "e-mail au premier temps du niveau : " + (mails[0] && mails[0].subject));
+ok(/nouveau pseudo, créé avec cette partie/.test(mails[0].text) && /Avant :\n  personne/.test(mails[0].text), "e-mail : nouveau pseudo, top 3 vide avant");
+ok(/DELETE FROM bests WHERE player_key = 'alpha';/.test(mails[0].text) && /DELETE FROM players WHERE key = 'alpha';/.test(mails[0].text) &&
+  /INSERT OR IGNORE INTO bans \(word\) VALUES \('alpha'\);/.test(mails[0].text), "e-mail : commandes SQL de retrait et de bannissement");
+ok(/Nouveau top 3, Facile, Sans drapeau/.test(mails[0].text), "e-mail : les deux catégories dans le même e-mail (Tous et Sans drapeau)");
+g = await play("easy", "Bravo", null, 0, { actions: timed("easy", 6000) });
+const bTok = g.r.token;
+await play("easy", "Charlie", null, 0, { actions: timed("easy", 7000) });
+ok(mails.length === 3 && /Charlie entre à la 3e place/.test(mails[2].subject), "e-mail à chaque arrivée dans le top 3 : " + mails.length + " e-mails");
+g = await play("easy", "Delta", null, 0, { actions: timed("easy", 9000) });
+ok(mails.length === 3, "4e place : pas d'e-mail");
+g = await play("easy", "Delta", g.r.token, 0, { actions: timed("easy", 5500) });
+let m = mails[mails.length - 1];
+ok(mails.length === 4 && /Delta entre à la 2e place en Facile \(00:05\.5\)/.test(m.subject), "Delta passe 2e : " + m.subject);
+ok(/Sort du top 3 : Charlie \(était 3e, 00:07\.0\)/.test(m.text) && /3e  Bravo  00:06\.0  \(descend, était 2e\)/.test(m.text) &&
+  /2e  Delta  00:05\.5  \(nouveau dans le top 3\)/.test(m.text), "e-mail : qui remplace qui");
+ok(/ancien record 00:09\.0/.test(m.text) && /inscrit depuis le/.test(m.text) && /4 joueurs classés/.test(m.text), "e-mail : ancien record, date d'inscription, nombre de joueurs");
+await play("easy", "Alpha", aTok, 0, { actions: timed("easy", 4500) });
+ok(mails.length === 4, "le 1er améliore son temps sans changer l'ordre : pas d'e-mail");
+await play("easy", "Charlie", null, 0, { actions: timed("easy", 4000) });
+ok(mails.length === 4, "pseudo déjà pris (Charlie sans jeton) : refusé, pas d'e-mail");
+env.sendMail = () => { throw new Error("panne du service d'e-mail"); };
+g = await play("easy", "Echo", null, 0, { actions: timed("easy", 4200) });
+ok(g.r.status === 200 && g.r.all.rank === 1, "panne d'envoi : le temps est quand même classé (rang " + g.r.all.rank + ")");
+delete env.sendMail;
+
+// --- mots bannis à la main (table bans) ---
+await repo.addBan("kodama");
+g = await play("easy", "Kodama38", null, 300);
+ok(g.r.error === "pseudo-refused", "mot banni dans un pseudo : " + g.r.error);
+g = await play("easy", "K0d4ma", null, 300);
+ok(g.r.error === "pseudo-refused", "mot banni en l33t : " + g.r.error);
+await repo.addBan("Bravo");
+g = await play("easy", "Bravo", bTok, 300);
+ok(g.r.error === "pseudo-refused", "pseudo existant banni, même avec son jeton : " + g.r.error);
+g = await play("easy", "Bravissimo", null, 300);
+ok(g.r.status === 200, "pseudo proche mais différent (Bravissimo) : accepté");
+
 
 document.getElementById("out").textContent = log.join("\n");
 </script>
