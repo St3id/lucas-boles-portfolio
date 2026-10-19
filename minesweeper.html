@@ -12,8 +12,8 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=16e05981">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=e8cabd61">
-  <script src="assets/js/minesweeper.js?v=f2bbd315" defer></script>
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=0479de8e">
+  <script src="assets/js/minesweeper.js?v=2ef56d6e" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -52,11 +52,64 @@
 
     <p class="ms-status" id="ms-status" aria-live="polite"></p>
 
-    <section class="ms-help" aria-labelledby="ms-help-title">
-      <h2 id="ms-help-title" data-i18n="howTo">Comment jouer</h2>
-      <ul id="ms-help-list"></ul>
-    </section>
+    <div class="ms-more">
+      <button type="button" class="ms-more-btn" data-open="ms-rules">
+        <span class="ms-more-title" data-i18n="rules">Règles</span>
+        <span class="ms-more-sub" data-i18n="rulesSub">Comment jouer, ce que veulent dire les chiffres</span>
+      </button>
+      <button type="button" class="ms-more-btn" data-open="ms-settings">
+        <span class="ms-more-title" data-i18n="controls">Commandes</span>
+        <span class="ms-more-sub" data-i18n="controlsSub">Drapeau, durée de l'appui long, raccourcis</span>
+      </button>
+    </div>
   </main>
+
+  <dialog class="ms-sheet" id="ms-rules" aria-labelledby="ms-rules-title">
+    <div class="ms-sheet-head">
+      <h2 id="ms-rules-title" data-i18n="rules">Règles</h2>
+      <button type="button" class="ms-sheet-close" data-close aria-label="Fermer" data-i18n-aria="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <ul class="ms-rules-list" id="ms-help-list"></ul>
+  </dialog>
+
+  <dialog class="ms-sheet" id="ms-settings" aria-labelledby="ms-settings-title">
+    <div class="ms-sheet-head">
+      <h2 id="ms-settings-title" data-i18n="controls">Commandes</h2>
+      <button type="button" class="ms-sheet-close" data-close aria-label="Fermer" data-i18n-aria="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+
+    <div class="ms-setting">
+      <label class="ms-switch"><input type="checkbox" role="switch" id="set-hold"><span data-i18n="setHold">Appui long pour poser un drapeau</span></label>
+    </div>
+
+    <div class="ms-setting ms-hold-setting" id="ms-hold-block">
+      <label for="set-hold-ms"><span data-i18n="setHoldMs">Durée de l'appui long</span> <output id="set-hold-out" for="set-hold-ms">500 ms</output></label>
+      <input type="range" id="set-hold-ms" min="150" max="1200" step="50" value="500">
+      <div class="ms-hold-test">
+        <button type="button" class="ms-cell ms-test-cell" id="ms-test-cell" aria-describedby="ms-test-text"></button>
+        <p id="ms-test-text" data-i18n="testIdle">Rester appuyé sur la case pour essayer.</p>
+      </div>
+    </div>
+
+    <div class="ms-setting">
+      <label class="ms-switch"><input type="checkbox" role="switch" id="set-chord"><span data-i18n="setChord">Clic sur un chiffre : ouvrir ses voisins</span></label>
+    </div>
+
+    <div class="ms-setting">
+      <label class="ms-switch"><input type="checkbox" role="switch" id="set-invert"><span data-i18n="setInvert">Inverser les clics (clic : drapeau, clic droit : révéler)</span></label>
+    </div>
+
+    <div class="ms-setting" id="ms-vibrate-block">
+      <label class="ms-switch"><input type="checkbox" role="switch" id="set-vibrate"><span data-i18n="setVibrate">Vibration quand un drapeau est posé</span></label>
+    </div>
+
+    <div class="ms-setting ms-key-setting">
+      <span data-i18n="setKey">Touche drapeau au clavier</span>
+      <button type="button" class="ms-keybind" id="set-key">F</button>
+    </div>
+
+    <button type="button" class="ms-reset" id="set-reset" data-i18n="reset">Réinitialiser les réglages</button>
+  </dialog>
 
   <div class="ms-end" id="ms-end" hidden>
     <div class="ms-end-card" role="dialog" aria-modal="true" aria-labelledby="ms-end-title">

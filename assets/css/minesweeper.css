@@ -174,23 +174,6 @@
   color: #b42318;
 }
 
-.ms-help {
-  margin-top: clamp(40px, 5vw, 72px);
-  max-width: 62ch;
-}
-
-.ms-help h2 {
-  margin-top: 0;
-}
-
-.ms-help ul {
-  padding-left: 1.2em;
-}
-
-.ms-help li + li {
-  margin-top: 6px;
-}
-
 /* Fin de partie */
 .ms-end {
   position: fixed;
@@ -395,5 +378,288 @@
 @media (prefers-reduced-motion: reduce) {
   .ms-code-card.is-wrong {
     animation: none;
+  }
+}
+
+
+/* --- Appui long : une barre se remplit sous la case --------------------- */
+.ms-cell {
+  position: relative;
+  overflow: hidden;
+}
+
+.ms-cell.is-holding::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: ms-hold var(--hold, 500ms) linear forwards;
+}
+
+@keyframes ms-hold {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* --- Tuiles Règles / Commandes ---------------------------------------- */
+.ms-more {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  margin-top: clamp(40px, 5vw, 72px);
+}
+
+.ms-more-btn {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  padding: clamp(20px, 3vw, 32px);
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s var(--ease-out);
+}
+
+.ms-more-btn:hover {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.ms-more-btn:active {
+  transform: scale(0.98);
+}
+
+.ms-more-title {
+  font-size: var(--step-h3);
+  font-weight: 750;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+}
+
+.ms-more-sub {
+  font-size: var(--step-small);
+  opacity: 0.8;
+}
+
+@media (max-width: 520px) {
+  .ms-more {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Fenêtres (élément dialog natif) ------------------------------------ */
+.ms-sheet {
+  /* main.css remet toutes les marges à 0 : on rend au dialog son centrage */
+  margin: auto;
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  padding: clamp(24px, 4vw, 40px);
+  border: 0;
+  background: var(--ground);
+  color: var(--ink);
+  box-shadow: 0 24px 64px rgb(17 24 20 / 0.35);
+}
+
+.ms-sheet::backdrop {
+  background: rgb(17 24 20 / 0.55);
+}
+
+.ms-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ms-sheet-head h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+}
+
+.ms-sheet-close {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.ms-sheet-close:hover {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.ms-sheet-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.ms-rules-list {
+  padding-left: 1.2em;
+}
+
+.ms-rules-list li + li {
+  margin-top: 8px;
+}
+
+.ms-setting {
+  padding: 16px 0;
+}
+
+.ms-setting + .ms-setting {
+  border-top: 2px solid var(--surface);
+}
+
+/* interrupteur : une case à cocher habillée */
+.ms-switch {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  font-weight: 550;
+}
+
+.ms-switch input {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 48px;
+  height: 28px;
+  margin: 0;
+  border-radius: 999px;
+  background: #c9ccc4;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ms-switch input::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.2s var(--ease-out);
+}
+
+.ms-switch input:checked {
+  background: var(--accent);
+}
+
+.ms-switch input:checked::after {
+  transform: translateX(20px);
+}
+
+.ms-hold-setting label {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 550;
+}
+
+.ms-hold-setting output {
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+.ms-hold-setting input[type="range"] {
+  width: 100%;
+  margin: 12px 0 4px;
+  accent-color: var(--accent);
+}
+
+.ms-hold-setting.is-off {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.ms-hold-test {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.ms-test-cell {
+  --cell: 48px;
+  flex: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.ms-hold-test p {
+  font-size: var(--step-small);
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.ms-key-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-weight: 550;
+}
+
+.ms-keybind {
+  min-width: 64px;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ms-keybind.is-listening {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.ms-reset {
+  margin-top: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--step-small);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+}
+
+.ms-reset:hover {
+  color: var(--accent);
+}
+
+/* mouvement réduit : main.css coupe les animations, mais la barre sert de
+   repère de durée. Elle apparaît d'un coup à la fin, sans glisser. */
+@media (prefers-reduced-motion: reduce) {
+  .ms-cell.is-holding::after {
+    animation-duration: var(--hold, 500ms) !important;
+    animation-timing-function: steps(1, end);
   }
 }

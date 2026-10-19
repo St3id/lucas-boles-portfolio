@@ -1,7 +1,7 @@
 /* Démineur du portfolio.
-   Souris : clic pour révéler, clic droit pour un drapeau, clic sur un chiffre pour
-   ouvrir les voisins quand ses drapeaux sont posés. Tactile : tap pour révéler,
-   appui long ou « Mode drapeau » pour un drapeau. Clavier : flèches, Entrée, F. */
+   Clic : révéler. Clic droit ou appui long : drapeau. Clic sur un chiffre : ouvrir
+   ses voisins quand ses drapeaux sont posés. Clavier : flèches, Entrée, touche drapeau.
+   Les réglages (fenêtre « Commandes ») sont gardés dans le navigateur du joueur. */
 (function () {
   "use strict";
 
@@ -14,12 +14,28 @@
       title: "Démineur", lead: "Trouver toutes les cases sûres sans toucher une mine.",
       levels: "Difficulté", easy: "Facile", medium: "Moyen", hard: "Difficile",
       minesLeft: "Mines restantes", time: "Temps", flagMode: "Mode drapeau", newGame: "Nouvelle partie",
-      board: "Grille du démineur", close: "Fermer", howTo: "Comment jouer",
-      hintMouse: "Clic : révéler. Clic droit : drapeau.",
+      board: "Grille du démineur", close: "Fermer",
+      rules: "Règles", rulesSub: "Comment jouer, ce que veulent dire les chiffres",
+      controls: "Commandes", controlsSub: "Drapeau, durée de l'appui long, raccourcis",
+      hintMouse: "Clic : révéler. Clic droit ou appui long : drapeau.",
       hintTouch: "Tap : révéler. Appui long ou Mode drapeau : drapeau.",
-      helpMouse: ["Clic pour révéler une case, clic droit pour poser ou retirer un drapeau.", "Clic sur un chiffre déjà révélé : ouvre ses voisins si le bon nombre de drapeaux est posé autour."],
-      helpTouch: ["Tap pour révéler une case, appui long pour poser ou retirer un drapeau.", "Le bouton Mode drapeau transforme chaque tap en drapeau, pratique sur petit écran.", "Tap sur un chiffre déjà révélé : ouvre ses voisins si le bon nombre de drapeaux est posé autour."],
-      helpCommon: ["Un chiffre indique combien de mines touchent la case.", "Le premier clic ne tombe jamais sur une mine.", "Au clavier : flèches pour se déplacer, Entrée pour révéler, F pour un drapeau.", "La partie est gagnée quand toutes les cases sûres sont révélées."],
+      hintInvert: "Clics inversés : clic pour un drapeau, clic droit pour révéler.",
+      rulesList: [
+        "Le but : révéler toutes les cases qui ne cachent pas de mine.",
+        "Un chiffre indique combien de mines touchent la case, en comptant les diagonales.",
+        "Un drapeau marque une mine supposée : clic droit, appui long ou Mode drapeau.",
+        "Clic sur un chiffre déjà révélé : si autant de drapeaux que le chiffre l'entourent, ses autres voisins s'ouvrent.",
+        "Le premier clic ne tombe jamais sur une mine, ni sur une case voisine d'une mine.",
+        "Au clavier : flèches pour se déplacer, Entrée pour révéler, la touche drapeau (F par défaut) pour marquer.",
+        "Les commandes se règlent dans la fenêtre Commandes."
+      ],
+      setHold: "Appui long pour poser un drapeau", setHoldMs: "Durée de l'appui long",
+      setChord: "Clic sur un chiffre : ouvrir ses voisins",
+      setInvert: "Inverser les clics (clic : drapeau, clic droit : révéler)",
+      setVibrate: "Vibration quand un drapeau est posé", setKey: "Touche drapeau au clavier",
+      keyListen: "Appuyer sur une touche", reset: "Réinitialiser les réglages",
+      testIdle: "Rester appuyé sur la case pour essayer.", testHold: "Tenu {ms} ms",
+      testShort: "Relâché à {ms} ms : clic normal.", testFlag: "Drapeau posé à {ms} ms.",
       win: "Gagné", lose: "Perdu", winText: "Grille dégagée en {t}.", loseText: "Une mine, après {t}.",
       cell: "Ligne {r}, colonne {c}", flagged: "drapeau", hidden: "cachée", mine: "mine", empty: "vide",
       up: "Haut", down: "Bas", left: "Gauche", right: "Droite"
@@ -29,12 +45,28 @@
       title: "Minesweeper", lead: "Find every safe cell without hitting a mine.",
       levels: "Difficulty", easy: "Easy", medium: "Medium", hard: "Hard",
       minesLeft: "Mines left", time: "Time", flagMode: "Flag mode", newGame: "New game",
-      board: "Minesweeper board", close: "Close", howTo: "How to play",
-      hintMouse: "Click: reveal. Right click: flag.",
+      board: "Minesweeper board", close: "Close",
+      rules: "Rules", rulesSub: "How to play, what the numbers mean",
+      controls: "Controls", controlsSub: "Flags, long-press timing, shortcuts",
+      hintMouse: "Click: reveal. Right click or long press: flag.",
       hintTouch: "Tap: reveal. Long press or Flag mode: flag.",
-      helpMouse: ["Click to reveal a cell, right click to place or remove a flag.", "Click a revealed number to open its neighbours once the right number of flags is around it."],
-      helpTouch: ["Tap to reveal a cell, long press to place or remove a flag.", "Flag mode turns every tap into a flag, handy on a small screen.", "Tap a revealed number to open its neighbours once the right number of flags is around it."],
-      helpCommon: ["A number tells how many mines touch that cell.", "The first click is never a mine.", "Keyboard: arrows to move, Enter to reveal, F to flag.", "You win once every safe cell is revealed."],
+      hintInvert: "Swapped clicks: click to flag, right click to reveal.",
+      rulesList: [
+        "The goal: reveal every cell that does not hide a mine.",
+        "A number tells how many mines touch the cell, diagonals included.",
+        "A flag marks a suspected mine: right click, long press or Flag mode.",
+        "Click a revealed number: if it is surrounded by as many flags as its value, its other neighbours open.",
+        "The first click never lands on a mine, nor next to one.",
+        "Keyboard: arrows to move, Enter to reveal, the flag key (F by default) to mark.",
+        "Controls can be changed in the Controls window."
+      ],
+      setHold: "Long press to place a flag", setHoldMs: "Long-press duration",
+      setChord: "Click a number: open its neighbours",
+      setInvert: "Swap clicks (click: flag, right click: reveal)",
+      setVibrate: "Vibrate when a flag is placed", setKey: "Keyboard flag key",
+      keyListen: "Press a key", reset: "Reset settings",
+      testIdle: "Press and hold the cell to try it.", testHold: "Held {ms} ms",
+      testShort: "Released at {ms} ms: normal click.", testFlag: "Flag placed at {ms} ms.",
       win: "You win", lose: "Game over", winText: "Board cleared in {t}.", loseText: "Hit a mine after {t}.",
       cell: "Row {r}, column {c}", flagged: "flag", hidden: "hidden", mine: "mine", empty: "empty",
       up: "Up", down: "Down", left: "Left", right: "Right"
@@ -42,12 +74,22 @@
   }[LANG];
 
   var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 } };
-  var LONG_PRESS_MS = 450, MOVE_TOLERANCE = 10;
+  var MOVE_TOLERANCE = 10;
 
   var $ = function (id) { return document.getElementById(id); };
   var boardEl = $("ms-board"), minesEl = $("ms-mines"), timeEl = $("ms-time"), statusEl = $("ms-status");
   var flagModeBtn = $("ms-flag-mode"), endEl = $("ms-end");
   var coarse = window.matchMedia("(pointer: coarse)").matches;
+  var canVibrate = "vibrate" in navigator && coarse;
+
+  /* --- Réglages, gardés dans le navigateur (aucun envoi) ------------------- */
+  var STORE = "ms-settings-v1";
+  var DEFAULTS = { hold: true, holdMs: 500, chord: true, invert: false, vibrate: true, flagKey: "f" };
+  var settings = Object.assign({}, DEFAULTS);
+  try { Object.assign(settings, JSON.parse(localStorage.getItem(STORE)) || {}); } catch (e) { /* stockage indisponible */ }
+  function saveSettings() {
+    try { localStorage.setItem(STORE, JSON.stringify(settings)); } catch (e) { /* stockage indisponible */ }
+  }
 
   /* --- Textes et liens selon la langue ----------------------------------- */
   document.documentElement.lang = LANG;
@@ -58,13 +100,17 @@
   var switcher = document.querySelector("[data-lang-switch]");
   switcher.textContent = LANG === "en" ? "FR" : "EN";
   switcher.href = LANG === "en" ? "?lang=fr" : "?lang=en";
-  var helpList = $("ms-help-list");
-  (coarse ? TEXT.helpTouch : TEXT.helpMouse).concat(TEXT.helpCommon).forEach(function (line) {
+  TEXT.rulesList.forEach(function (line) {
     var li = document.createElement("li");
     li.textContent = line;
-    helpList.appendChild(li);
+    $("ms-help-list").appendChild(li);
   });
   if (!coarse) flagModeBtn.hidden = true;
+
+  function hint() {
+    if (settings.invert) return TEXT.hintInvert;
+    return coarse ? TEXT.hintTouch : TEXT.hintMouse;
+  }
 
   /* --- État de la partie --------------------------------------------------- */
   var level = "easy", size, mineTotal, cells, opened, flags, started, over, timer, seconds;
@@ -98,7 +144,7 @@
     peek = peekNext;
     peekNext = false;
     timeEl.textContent = fmt(0);
-    statusEl.textContent = coarse ? TEXT.hintTouch : TEXT.hintMouse;
+    statusEl.textContent = hint();
     statusEl.className = "ms-status";
     closeEnd();
 
@@ -178,6 +224,7 @@
 
   // clic sur un chiffre : si autant de drapeaux que le chiffre, on ouvre le reste
   function chord(i) {
+    if (!settings.chord) return;
     var around = neighbours(i);
     var flagged = around.filter(function (nb) { return cells[nb].flag; }).length;
     if (flagged !== cells[i].n) return;
@@ -191,13 +238,22 @@
     flags += cell.flag ? 1 : -1;
     paint(i);
     updateMines();
+    if (cell.flag && canVibrate && settings.vibrate) navigator.vibrate(15);
   }
 
-  function act(i) {
+  // action principale (clic, tap, Entrée) et action secondaire (clic droit, appui long)
+  function flagsFirst() { return flagMode !== settings.invert; }
+  function primary(i) {
     if (over) { showEnd(); return; }
     var cell = cells[i];
     if (cell.open) { if (cell.n) chord(i); return; }
-    if (flagMode) toggleFlag(i); else reveal(i);
+    if (flagsFirst()) toggleFlag(i); else reveal(i);
+  }
+  function secondary(i) {
+    if (over) return;
+    var cell = cells[i];
+    if (cell.open) { if (cell.n) chord(i); return; }
+    if (flagsFirst()) reveal(i); else toggleFlag(i);
   }
 
   function finish() {
@@ -248,11 +304,27 @@
   endEl.addEventListener("click", function (e) { if (e.target === endEl) closeEnd(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && codeEl.hidden) closeEnd(); });
 
+  /* --- Appui long ------------------------------------------------------------
+     Partagé par la grille et la case d'essai des réglages : une barre se remplit
+     sous la case pendant settings.holdMs, puis onHold() est appelé. */
+  function startHold(el, onHold) {
+    el.style.setProperty("--hold", settings.holdMs + "ms");
+    el.classList.add("is-holding");
+    return setTimeout(function () {
+      el.classList.remove("is-holding");
+      onHold();
+    }, settings.holdMs);
+  }
+  function stopHold(el, t) {
+    clearTimeout(t);
+    if (el) el.classList.remove("is-holding");
+  }
+
   /* --- Souris et tactile (Pointer Events) ------------------------------------ */
   var press = null, lastPointer = "mouse";
   function cellIndex(target) {
     var el = target.closest && target.closest(".ms-cell");
-    return el ? Number(el.dataset.i) : -1;
+    return el && boardEl.contains(el) ? Number(el.dataset.i) : -1;
   }
 
   boardEl.addEventListener("pointerdown", function (e) {
@@ -260,42 +332,43 @@
     var i = cellIndex(e.target);
     if (i < 0 || e.button !== 0) return;
     press = { i: i, x: e.clientX, y: e.clientY, long: false, timer: null };
-    if (e.pointerType !== "mouse") {
-      press.timer = setTimeout(function () {
+    // appui long sur une case fermée, à la souris comme au doigt : action secondaire
+    if (settings.hold && !over && !cells[i].open) {
+      press.timer = startHold(cells[i].el, function () {
+        if (!press) return;
         press.long = true;
-        toggleFlag(press.i);
-        if (navigator.vibrate) navigator.vibrate(15);
-      }, LONG_PRESS_MS);
+        secondary(press.i);
+      });
     }
   });
   boardEl.addEventListener("pointermove", function (e) {
     if (!press) return;
     if (Math.abs(e.clientX - press.x) > MOVE_TOLERANCE || Math.abs(e.clientY - press.y) > MOVE_TOLERANCE) {
-      clearTimeout(press.timer);
+      stopHold(cells[press.i].el, press.timer);
       press.moved = true;
     }
   });
   boardEl.addEventListener("pointerup", function (e) {
     if (!press) return;
-    clearTimeout(press.timer);
     var p = press;
     press = null;
+    stopHold(cells[p.i] && cells[p.i].el, p.timer);
     if (p.long || p.moved || cellIndex(e.target) !== p.i) return;
-    act(p.i);
+    primary(p.i);
   });
   boardEl.addEventListener("pointercancel", function () {
-    if (press) clearTimeout(press.timer);
+    if (press) stopHold(cells[press.i] && cells[press.i].el, press.timer);
     press = null;
   });
   boardEl.addEventListener("contextmenu", function (e) {
     e.preventDefault();
     var i = cellIndex(e.target);
-    if (i >= 0 && lastPointer === "mouse") toggleFlag(i);
+    if (i >= 0 && lastPointer === "mouse") secondary(i);
   });
   // clavier : Entrée et Espace déclenchent un « click » sans pointeur (detail = 0)
   boardEl.addEventListener("click", function (e) {
     var i = cellIndex(e.target);
-    if (i >= 0 && e.detail === 0) act(i);
+    if (i >= 0 && e.detail === 0) primary(i);
   });
   boardEl.addEventListener("keydown", function (e) {
     var i = cellIndex(e.target);
@@ -310,12 +383,13 @@
       cells[i].el.tabIndex = -1;
       cells[next].el.tabIndex = 0;
       cells[next].el.focus();
-    } else if (e.key === "f" || e.key === "F") {
+    } else if (e.key.toLowerCase() === settings.flagKey) {
+      e.preventDefault();
       toggleFlag(i);
     }
   });
 
-  /* --- Commandes ---------------------------------------------------------------- */
+  /* --- Commandes de la page ---------------------------------------------------- */
   document.querySelectorAll(".ms-level").forEach(function (btn) {
     btn.addEventListener("click", function () {
       level = btn.dataset.level;
@@ -329,6 +403,110 @@
   });
   $("ms-new").addEventListener("click", newGame);
   window.addEventListener("resize", fitCells);
+
+  /* --- Fenêtres Règles et Commandes (élément dialog natif) -------------------- */
+  document.querySelectorAll("[data-open]").forEach(function (btn) {
+    btn.addEventListener("click", function () { $(btn.dataset.open).showModal(); });
+  });
+  document.querySelectorAll(".ms-sheet").forEach(function (dlg) {
+    dlg.querySelector("[data-close]").addEventListener("click", function () { dlg.close(); });
+    // clic sur le fond assombri (en dehors de la fenêtre) : on ferme
+    dlg.addEventListener("click", function (e) {
+      var r = dlg.getBoundingClientRect();
+      if (e.target === dlg && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) dlg.close();
+    });
+  });
+
+  var holdBox = $("set-hold"), holdMs = $("set-hold-ms"), holdOut = $("set-hold-out"), holdBlock = $("ms-hold-block");
+  var chordBox = $("set-chord"), invertBox = $("set-invert"), vibrateBox = $("set-vibrate"), keyBtn = $("set-key");
+  if (!canVibrate) $("ms-vibrate-block").hidden = true;
+
+  function showSettings() {
+    holdBox.checked = settings.hold;
+    holdMs.value = settings.holdMs;
+    holdOut.textContent = settings.holdMs + " ms";
+    holdBlock.classList.toggle("is-off", !settings.hold);
+    chordBox.checked = settings.chord;
+    invertBox.checked = settings.invert;
+    vibrateBox.checked = settings.vibrate;
+    keyBtn.textContent = settings.flagKey.toUpperCase();
+    if (!over) statusEl.textContent = hint();
+  }
+  function setSetting(name, value) {
+    settings[name] = value;
+    saveSettings();
+    showSettings();
+  }
+  holdBox.addEventListener("change", function () { setSetting("hold", holdBox.checked); });
+  holdMs.addEventListener("input", function () { setSetting("holdMs", Number(holdMs.value)); });
+  chordBox.addEventListener("change", function () { setSetting("chord", chordBox.checked); });
+  invertBox.addEventListener("change", function () { setSetting("invert", invertBox.checked); });
+  vibrateBox.addEventListener("change", function () { setSetting("vibrate", vibrateBox.checked); });
+  $("set-reset").addEventListener("click", function () {
+    settings = Object.assign({}, DEFAULTS);
+    saveSettings();
+    showSettings();
+  });
+
+  // touche drapeau : on écoute la prochaine touche « simple » (lettre ou chiffre)
+  var listening = false;
+  keyBtn.addEventListener("click", function () {
+    listening = true;
+    keyBtn.classList.add("is-listening");
+    keyBtn.textContent = TEXT.keyListen;
+  });
+  keyBtn.addEventListener("blur", function () {
+    if (!listening) return;
+    listening = false;
+    keyBtn.classList.remove("is-listening");
+    showSettings();
+  });
+  keyBtn.addEventListener("keydown", function (e) {
+    if (!listening) return;
+    if (e.key === "Escape" || e.key === "Tab") return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (/^[a-z0-9]$/i.test(e.key)) {
+      listening = false;
+      keyBtn.classList.remove("is-listening");
+      setSetting("flagKey", e.key.toLowerCase());
+    }
+  });
+
+  // case d'essai : affiche le temps tenu et si le drapeau serait posé
+  var testCell = $("ms-test-cell"), testText = $("ms-test-text"), test = null;
+  function testTick() {
+    if (!test) return;
+    testText.textContent = TEXT.testHold.replace("{ms}", Math.round(performance.now() - test.t0));
+    test.raf = requestAnimationFrame(testTick);
+  }
+  testCell.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) return;
+    testCell.textContent = "";
+    test = { t0: performance.now(), done: false };
+    test.timer = startHold(testCell, function () {
+      if (!test) return;
+      test.done = true;
+      testCell.textContent = "⚑";
+      testText.textContent = TEXT.testFlag.replace("{ms}", settings.holdMs);
+      cancelAnimationFrame(test.raf);
+      if (canVibrate && settings.vibrate) navigator.vibrate(15);
+    });
+    testTick();
+  });
+  function endTest() {
+    if (!test) return;
+    stopHold(testCell, test.timer);
+    cancelAnimationFrame(test.raf);
+    if (!test.done) testText.textContent = TEXT.testShort.replace("{ms}", Math.round(performance.now() - test.t0));
+    test = null;
+  }
+  testCell.addEventListener("pointerup", endTest);
+  testCell.addEventListener("pointerleave", endTest);
+  testCell.addEventListener("pointercancel", endTest);
+  testCell.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+  showSettings();
 
   /* --- Easter egg : 30 clics rapides sur le titre, puis le code Konami ------
      haut haut bas bas gauche droite gauche droite B A. Réussi, il lance une
