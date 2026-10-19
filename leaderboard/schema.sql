@@ -1,4 +1,6 @@
--- Base D1 du classement du démineur. À exécuter une fois dans la console D1.
+-- Base D1 du classement du démineur, version commentée.
+-- Dans la console D1, coller schema-console.sql (sans commentaires) : la console met
+-- tout sur une ligne et le premier « -- » transformerait le reste en commentaire.
 
 -- une partie commencée : la graine choisie par le serveur
 CREATE TABLE IF NOT EXISTS games (

@@ -8,7 +8,7 @@
 
   // Adresse du serveur du classement (Cloudflare Worker). Vide : pas de classement,
   // le jeu et les records locaux fonctionnent quand même.
-  var LEADERBOARD_API = "";
+  var LEADERBOARD_API = "https://demineur-classement.lucasboles.workers.dev";
 
   var params = new URLSearchParams(location.search);
   var LANG = params.get("lang") === "en" || (!params.get("lang") && /\/en\/?$/.test(new URL(document.referrer || location.href).pathname)) ? "en" : "fr";

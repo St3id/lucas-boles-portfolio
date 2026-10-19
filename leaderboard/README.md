@@ -6,7 +6,8 @@ Tout se fait dans le navigateur, sur le tableau de bord Cloudflare : aucun outil
 | Fichier | Rôle |
 |---|---|
 | `worker.js` | le serveur, à coller tel quel dans Cloudflare |
-| `schema.sql` | les tables, à exécuter une fois dans la console D1 |
+| `schema.sql` | les tables, commentées (la référence) |
+| `schema-console.sql` | les mêmes tables sans commentaires, à coller dans la console D1 |
 | `mem-repo.js` | base en mémoire pour les tests en local |
 | `test-serveur.html`, `test-interface.html` | tests à ouvrir en local |
 
@@ -22,7 +23,9 @@ Après une modification du cœur du jeu, relancer `build.py` puis recoller `work
    sous-domaine `workers.dev` (par exemple `lucasboles`). L'adresse du serveur devient
    `https://demineur-classement.lucasboles.workers.dev`.
 3. **Créer la base** : menu *Storage & Databases* > *D1 SQL Database* > *Create*. Nom : `demineur`.
-   Ouvrir la base, onglet *Console*, coller tout le contenu de `schema.sql`, puis *Execute*.
+   Ouvrir la base, onglet *Console*, coller tout le contenu de `schema-console.sql`, puis *Execute*.
+   (Pas `schema.sql` : la console met tout sur une ligne, et le premier commentaire `--` avalerait
+   toutes les requêtes.)
 4. **Relier la base au Worker** : ouvrir le Worker > *Settings* > *Bindings* > *Add* > *D1 database*.
    Variable name : `DB` (en majuscules), base : `demineur`, puis *Deploy*.
 5. **Réglages du Worker** : *Settings* > *Variables and Secrets* > *Add* :
