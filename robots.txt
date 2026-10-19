@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://st3id.github.io/lucas-boles-portfolio/sitemap.xml

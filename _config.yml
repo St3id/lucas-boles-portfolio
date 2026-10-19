@@ -1,0 +1,6 @@
+# GitHub Pages copie le site tel quel ; ces fichiers restent dans le dépôt mais ne sont pas publiés.
+exclude:
+  - CLAUDE.md
+  - README.md
+  - tools/
+  - assets/img/manifest.json
