@@ -21,7 +21,8 @@
       helpTouch: ["Tap pour révéler une case, appui long pour poser ou retirer un drapeau.", "Le bouton Mode drapeau transforme chaque tap en drapeau, pratique sur petit écran.", "Tap sur un chiffre déjà révélé : ouvre ses voisins si le bon nombre de drapeaux est posé autour."],
       helpCommon: ["Un chiffre indique combien de mines touchent la case.", "Le premier clic ne tombe jamais sur une mine.", "Au clavier : flèches pour se déplacer, Entrée pour révéler, F pour un drapeau.", "La partie est gagnée quand toutes les cases sûres sont révélées."],
       win: "Gagné", lose: "Perdu", winText: "Grille dégagée en {t}.", loseText: "Une mine, après {t}.",
-      cell: "Ligne {r}, colonne {c}", flagged: "drapeau", hidden: "cachée", mine: "mine", empty: "vide"
+      cell: "Ligne {r}, colonne {c}", flagged: "drapeau", hidden: "cachée", mine: "mine", empty: "vide",
+      up: "Haut", down: "Bas", left: "Gauche", right: "Droite"
     },
     en: {
       pageTitle: "Minesweeper - Lucas Boles", skip: "Skip to the game", back: "Back to the portfolio",
@@ -35,7 +36,8 @@
       helpTouch: ["Tap to reveal a cell, long press to place or remove a flag.", "Flag mode turns every tap into a flag, handy on a small screen.", "Tap a revealed number to open its neighbours once the right number of flags is around it."],
       helpCommon: ["A number tells how many mines touch that cell.", "The first click is never a mine.", "Keyboard: arrows to move, Enter to reveal, F to flag.", "You win once every safe cell is revealed."],
       win: "You win", lose: "Game over", winText: "Board cleared in {t}.", loseText: "Hit a mine after {t}.",
-      cell: "Row {r}, column {c}", flagged: "flag", hidden: "hidden", mine: "mine", empty: "empty"
+      cell: "Row {r}, column {c}", flagged: "flag", hidden: "hidden", mine: "mine", empty: "empty",
+      up: "Up", down: "Down", left: "Left", right: "Right"
     }
   }[LANG];
 
@@ -244,7 +246,7 @@
   $("ms-end-new").addEventListener("click", newGame);
   $("ms-end-close").addEventListener("click", closeEnd);
   endEl.addEventListener("click", function (e) { if (e.target === endEl) closeEnd(); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeEnd(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && codeEl.hidden) closeEnd(); });
 
   /* --- Souris et tactile (Pointer Events) ------------------------------------ */
   var press = null, lastPointer = "mouse";
@@ -328,13 +330,76 @@
   $("ms-new").addEventListener("click", newGame);
   window.addEventListener("resize", fitCells);
 
-  // easter egg conservé : 70 clics rapides sur le titre montrent les mines de la partie suivante
-  var eggCount = 0, eggLast = 0;
+  /* --- Easter egg : 30 clics rapides sur le titre, puis le code Konami ------
+     haut haut bas bas gauche droite gauche droite B A. Réussi, il lance une
+     partie où les mines restent visibles. */
+  var CODE = ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"];
+  var KEYS = {
+    ArrowUp: "up", z: "up", Z: "up", ArrowDown: "down", s: "down", S: "down",
+    ArrowLeft: "left", q: "left", Q: "left", ArrowRight: "right", d: "right", D: "right",
+    a: "a", A: "a", b: "b", B: "b"
+  };
+  var codeEl = $("ms-code"), codeCard = codeEl.querySelector(".ms-code-card");
+  var codePos = 0, codeFocus = null, eggCount = 0, eggLast = 0;
+
+  function openCode() {
+    codePos = 0;
+    codeCard.classList.remove("is-ok", "is-wrong");
+    codeFocus = document.activeElement;
+    codeEl.hidden = false;
+    $("ms-code-close").focus();
+  }
+  function closeCode() {
+    codeEl.hidden = true;
+    if (codeFocus && codeFocus.focus) codeFocus.focus();
+  }
+  function flash(key) {
+    var btn = codeEl.querySelector('[data-key="' + key + '"]');
+    btn.classList.add("is-down");
+    setTimeout(function () { btn.classList.remove("is-down"); }, 140);
+  }
+  function codeInput(key) {
+    if (codeCard.classList.contains("is-ok")) return;
+    flash(key);
+    if (key === CODE[codePos]) {
+      codePos++;
+      if (codePos === CODE.length) {
+        codeCard.classList.add("is-ok");
+        setTimeout(function () {
+          closeCode();
+          peekNext = true;
+          newGame();
+        }, 650);
+      }
+      return;
+    }
+    // erreur : on repart du début (un « haut » compte déjà comme premier appui)
+    codePos = key === CODE[0] ? 1 : 0;
+    codeCard.classList.remove("is-wrong");
+    void codeCard.offsetWidth;
+    codeCard.classList.add("is-wrong");
+  }
+
+  codeEl.querySelectorAll("[data-key]").forEach(function (btn) {
+    btn.addEventListener("click", function () { codeInput(btn.dataset.key); });
+  });
+  $("ms-code-close").addEventListener("click", closeCode);
+  codeEl.addEventListener("click", function (e) { if (e.target === codeEl) closeCode(); });
+  document.addEventListener("keydown", function (e) {
+    if (codeEl.hidden) return;
+    if (e.key === "Escape") { closeCode(); return; }
+    var key = KEYS[e.key];
+    if (!key) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!e.repeat) codeInput(key);
+  }, true);
+
   document.querySelector(".ms-title").addEventListener("click", function () {
     var now = Date.now();
     eggCount = now - eggLast < 2000 ? eggCount + 1 : 1;
     eggLast = now;
-    if (eggCount >= 70) { eggCount = 0; peekNext = true; }
+    if (eggCount >= 30) { eggCount = 0; openCode(); }
   });
 
   newGame();

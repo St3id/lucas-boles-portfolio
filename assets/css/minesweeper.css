@@ -251,3 +251,149 @@
     margin-right: auto;
   }
 }
+
+/* Fenêtre du code secret : une croix et deux boutons, façon manette */
+.ms-code {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(6 16 12 / 0.75);
+}
+
+.ms-code[hidden] {
+  display: none;
+}
+
+.ms-code-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(28px, 7vw, 64px);
+  padding: clamp(40px, 6vw, 56px) clamp(24px, 6vw, 56px);
+  background: var(--field);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
+}
+
+.ms-code-card.is-wrong {
+  animation: ms-shake 0.35s ease;
+}
+
+.ms-code-card.is-ok .ms-key {
+  background: var(--accent-on-field);
+  color: var(--field);
+}
+
+@keyframes ms-shake {
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.ms-code-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--on-field-soft);
+  cursor: pointer;
+}
+
+.ms-code-close svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.ms-code-close:hover {
+  color: var(--on-field);
+}
+
+.ms-pad {
+  display: grid;
+  grid-template-columns: repeat(3, var(--key));
+  grid-template-rows: repeat(3, var(--key));
+  --key: clamp(58px, 16vw, 72px);
+}
+
+.ms-key-up { grid-column: 2; grid-row: 1; }
+.ms-key-left { grid-column: 1; grid-row: 2; }
+.ms-pad-center { grid-column: 2; grid-row: 2; background: #26302b; }
+.ms-key-right { grid-column: 3; grid-row: 2; }
+.ms-key-down { grid-column: 2; grid-row: 3; }
+
+.ms-key {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: #26302b;
+  color: var(--on-field);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.ms-key svg {
+  width: 62%;
+  height: 62%;
+  fill: currentColor;
+}
+
+.ms-key:hover {
+  background: #33403a;
+}
+
+.ms-key.is-down {
+  background: var(--accent-on-field);
+  color: var(--field);
+  transform: scale(0.94);
+}
+
+.ms-ab {
+  display: flex;
+  gap: 16px;
+  /* A un peu plus haut que B, comme sur la manette */
+  align-items: flex-end;
+}
+
+.ms-key-round {
+  width: clamp(56px, 14vw, 72px);
+  height: clamp(56px, 14vw, 72px);
+  border-radius: 50%;
+  background: #b42318;
+  color: #ffffff;
+}
+
+.ms-key-round:hover {
+  background: #c9372b;
+}
+
+.ms-ab .ms-key-round:last-child {
+  margin-bottom: 24px;
+}
+
+@media (max-width: 420px) {
+  .ms-code-card {
+    flex-direction: column;
+    gap: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-code-card.is-wrong {
+    animation: none;
+  }
+}

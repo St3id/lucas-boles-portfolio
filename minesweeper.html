@@ -12,8 +12,8 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=16e05981">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=ad5d05dd">
-  <script src="assets/js/minesweeper.js?v=222cf1da" defer></script>
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=e8cabd61">
+  <script src="assets/js/minesweeper.js?v=d6c8bfb5" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -65,6 +65,25 @@
       <div class="ms-end-actions">
         <button type="button" class="button" id="ms-end-new" data-i18n="newGame">Nouvelle partie</button>
         <button type="button" class="ms-end-close" id="ms-end-close" data-i18n="close">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ms-code" id="ms-code" hidden>
+    <div class="ms-code-card" role="dialog" aria-modal="true" aria-label="Code">
+      <button type="button" class="ms-code-close" id="ms-code-close" aria-label="Fermer" data-i18n-aria="close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="ms-pad">
+        <button type="button" class="ms-key ms-key-up" data-key="up" aria-label="Haut" data-i18n-aria="up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6l7 9H5z"/></svg></button>
+        <button type="button" class="ms-key ms-key-left" data-key="left" aria-label="Gauche" data-i18n-aria="left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12l9-7v14z"/></svg></button>
+        <span class="ms-pad-center" aria-hidden="true"></span>
+        <button type="button" class="ms-key ms-key-right" data-key="right" aria-label="Droite" data-i18n-aria="right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 12l-9 7V5z"/></svg></button>
+        <button type="button" class="ms-key ms-key-down" data-key="down" aria-label="Bas" data-i18n-aria="down"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18l-7-9h14z"/></svg></button>
+      </div>
+      <div class="ms-ab">
+        <button type="button" class="ms-key ms-key-round" data-key="b" aria-label="B">B</button>
+        <button type="button" class="ms-key ms-key-round" data-key="a" aria-label="A">A</button>
       </div>
     </div>
   </div>
