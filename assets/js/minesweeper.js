@@ -340,12 +340,15 @@
     a: "a", A: "a", b: "b", B: "b"
   };
   var codeEl = $("ms-code"), codeCard = codeEl.querySelector(".ms-code-card");
-  var codePos = 0, codeFocus = null, eggCount = 0, eggLast = 0;
+  var codePos = 0, codeFocus = null, eggCount = 0, eggLast = 0, codeOpenedAt = 0;
+  // un clic de trop sur le titre ne doit pas refermer la fenêtre tout de suite
+  var OUTSIDE_CLICK_GRACE_MS = 2500;
 
   function openCode() {
     codePos = 0;
     codeCard.classList.remove("is-ok", "is-wrong");
     codeFocus = document.activeElement;
+    codeOpenedAt = Date.now();
     codeEl.hidden = false;
     $("ms-code-close").focus();
   }
@@ -384,7 +387,9 @@
     btn.addEventListener("click", function () { codeInput(btn.dataset.key); });
   });
   $("ms-code-close").addEventListener("click", closeCode);
-  codeEl.addEventListener("click", function (e) { if (e.target === codeEl) closeCode(); });
+  codeEl.addEventListener("click", function (e) {
+    if (e.target === codeEl && Date.now() - codeOpenedAt > OUTSIDE_CLICK_GRACE_MS) closeCode();
+  });
   document.addEventListener("keydown", function (e) {
     if (codeEl.hidden) return;
     if (e.key === "Escape") { closeCode(); return; }
