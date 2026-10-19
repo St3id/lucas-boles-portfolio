@@ -536,34 +536,125 @@
     });
   }
 
-  // Titres de section
-  gsap.utils.toArray(".section-title").forEach(function (title) {
-    gsap.from(title, {
-      y: 48, opacity: 0, duration: 1.1, ease: ease,
-      scrollTrigger: { trigger: title, start: "top 90%", once: true }
+  // Titres de section : chaque ligne monte depuis un masque, comme le nom en haut de page.
+  // Le titre n'est découpé qu'à son arrivée (la largeur est alors connue), puis il
+  // retrouve son texte d'origine et se recompose librement si la fenêtre change.
+  function splitTitle(title) {
+    var text = title.textContent.trim().replace(/\s+/g, " ");
+    title.textContent = "";
+    var words = text.split(" ").map(function (w) {
+      var span = document.createElement("span");
+      span.style.display = "inline-block";
+      span.textContent = w;
+      title.append(span, " ");
+      return span;
+    });
+    var lines = [];
+    words.forEach(function (w) {
+      var last = lines[lines.length - 1];
+      if (last && Math.abs(last.top - w.offsetTop) < 4) last.words.push(w.textContent);
+      else lines.push({ top: w.offsetTop, words: [w.textContent] });
+    });
+    title.textContent = "";
+    return lines.map(function (line) {
+      var mask = document.createElement("span"), inner = document.createElement("span");
+      mask.className = "line";
+      inner.textContent = line.words.join(" ");
+      mask.appendChild(inner);
+      title.append(mask, " ");
+      return inner;
+    });
+  }
+  function restoreTitle(title) {
+    if (title.msDone) return;
+    title.msDone = true;
+    gsap.killTweensOf(title.querySelectorAll(".line > span"));
+    title.textContent = title.msText;
+    gsap.set(title, { opacity: 1 });
+  }
+  var titles = gsap.utils.toArray(".section-title");
+  titles.forEach(function (title) {
+    title.msText = title.textContent;
+    gsap.set(title, { opacity: 0 });
+    window.ScrollTrigger.create({
+      trigger: title, start: "top 88%", once: true,
+      onEnter: function () {
+        if (title.msDone) return;
+        var lines = splitTitle(title);
+        gsap.set(title, { opacity: 1 });
+        gsap.from(lines, {
+          yPercent: 115, duration: 1.05, ease: ease, stagger: 0.1,
+          onComplete: function () { restoreTitle(title); }
+        });
+      }
     });
   });
 
-  // Entrées par section, dans l'ordre de lecture
-  var parts = gsap.utils.toArray(
-    ".project-head, .prose > *, .points li, .tool-list, .radar-links, .rail-demo, figure, .robot-main, .robot-side, " +
-    ".path-col h3, .path-list li, .skills > div, .contact .lead, .contact-mail, .contact-actions, .contact-list li"
-  ).filter(function (n) { return !n.closest(".hero"); });
-  gsap.set(parts, { y: 28, opacity: 0 });
-  window.ScrollTrigger.batch(parts, {
-    start: "top 92%",
-    once: true,
+  // Photos : elles s'ouvrent comme un volet, de bas en haut, en se recadrant légèrement.
+  // Les grandes images qui bougent déjà avec le défilement et le radar animé n'en ont pas.
+  var shutters = gsap.utils.toArray(".media").filter(function (m) {
+    return m.querySelector("img") && !m.closest(".hero-photo, .now-figure, .outside-hero, .radar-live");
+  });
+  gsap.set(shutters, { clipPath: "inset(100% 0% 0% 0%)" });
+  gsap.set(shutters.map(function (m) { return m.querySelector("img"); }), { scale: 1.12, transition: "none" });
+  function openShutter(m, delay) {
+    // début et fin donnés tous les deux : le navigateur réécrit « inset(100% 0% 0% 0%) »
+    // en trois valeurs, que GSAP n'interpolerait pas proprement vers quatre
+    gsap.fromTo(m, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, delay: delay, ease: "power3.inOut", clearProps: "clipPath" });
+    gsap.to(m.querySelector("img"), { scale: 1, duration: 1.5, delay: delay, ease: "power2.out", clearProps: "transform,transition" });
+  }
+  // un saut dans la page (menu, lien) fait entrer d'un coup tout ce qui a été dépassé :
+  // seul ce qui est à l'écran s'anime, le reste est simplement affiché
+  function onScreen(n) {
+    var r = n.getBoundingClientRect();
+    return r.bottom > 0 && r.top < window.innerHeight;
+  }
+  window.ScrollTrigger.batch(shutters, {
+    start: "top 90%", once: true,
     onEnter: function (batch) {
-      gsap.to(batch, { y: 0, opacity: 1, duration: 0.9, ease: ease, stagger: 0.07, overwrite: true, clearProps: "transform" });
+      var k = 0;
+      batch.forEach(function (m) {
+        if (onScreen(m)) { openShutter(m, k++ * 0.12); return; }
+        gsap.set(m, { clearProps: "clipPath" });
+        gsap.set(m.querySelector("img"), { clearProps: "transform,transition" });
+      });
     }
   });
 
-  // Photos : légère mise au point à l'entrée
-  gsap.utils.toArray(".media img").forEach(function (img) {
-    if (img.closest(".hero-photo, .now-figure, .outside-hero")) return;
-    gsap.from(img, {
-      scale: 1.14, duration: 1.4, ease: ease, clearProps: "transform",
-      scrollTrigger: { trigger: img.parentNode, start: "top 92%", once: true }
+  // Entrées par section, selon le contenu : les blocs montent, les paragraphes
+  // apparaissent sans bouger, les lignes du parcours arrivent l'une après l'autre
+  // et les étiquettes d'outils une à une.
+  function notHero(n) { return !n.closest(".hero"); }
+  function holdsShutter(n) { return shutters.some(function (m) { return n === m || n.contains(m); }); }
+  var groups = [
+    { nodes: ".project-head, .path-col h3, .rail-demo, .radar-links, .contact-mail, .contact-actions, figure, .robot-main, .robot-side",
+      from: { y: 28, opacity: 0 }, duration: 0.9, stagger: 0.08, skipShutters: true },
+    { nodes: ".prose > *, .points li, .skills > div, .contact .lead, .contact-list li",
+      from: { opacity: 0 }, duration: 0.9, stagger: 0.07 },
+    { nodes: ".path-list li", from: { y: 16, opacity: 0 }, duration: 0.7, stagger: 0.06 },
+    { nodes: ".tool-list li", from: { y: 8, opacity: 0 }, duration: 0.5, stagger: 0.04 }
+  ];
+  var parts = [];
+  groups.forEach(function (g) {
+    var nodes = gsap.utils.toArray(g.nodes).filter(notHero);
+    if (g.skipShutters) {
+      // une photo en volet ne glisse pas en plus : seule sa légende apparaît
+      nodes = nodes.filter(function (n) { return !holdsShutter(n); });
+      shutters.forEach(function (m) {
+        var cap = m.closest("figure") && m.closest("figure").querySelector("figcaption");
+        if (cap && nodes.indexOf(cap) < 0) nodes.push(cap);
+      });
+    }
+    if (!nodes.length) return;
+    parts = parts.concat(nodes);
+    gsap.set(nodes, g.from);
+    window.ScrollTrigger.batch(nodes, {
+      start: "top 92%", once: true,
+      onEnter: function (batch) {
+        var shown = batch.filter(onScreen), passed = batch.filter(function (n) { return !onScreen(n); });
+        if (passed.length) gsap.set(passed, { opacity: 1, clearProps: "transform" });
+        if (shown.length) gsap.to(shown, { y: 0, opacity: 1, duration: g.duration, ease: ease, stagger: g.stagger, overwrite: true, clearProps: "transform" });
+      }
     });
   });
 
@@ -581,10 +672,21 @@
   // navigateur lent), tout ce qui est déjà à l'écran ou au-dessus est rendu visible.
   window.setTimeout(function () {
     var hero = gsap.utils.toArray(".hero-name .line > span, .hero-body > *, .hero-photo img");
-    gsap.utils.toArray(".section-title").concat(parts, hero).forEach(function (n) {
+    parts.concat(hero).forEach(function (n) {
       if (n.getBoundingClientRect().top < window.innerHeight && parseFloat(getComputedStyle(n).opacity) < 1) {
         gsap.killTweensOf(n);
-        gsap.set(n,{ opacity: 1, y: 0, yPercent: 0, clearProps: "transform" });
+        gsap.set(n, { opacity: 1, y: 0, yPercent: 0, clearProps: "transform" });
+      }
+    });
+    titles.forEach(function (t) {
+      if (t.getBoundingClientRect().top < window.innerHeight) restoreTitle(t);
+    });
+    shutters.forEach(function (m) {
+      if (m.getBoundingClientRect().top < window.innerHeight && m.style.clipPath) {
+        var img = m.querySelector("img");
+        gsap.killTweensOf([m, img]);
+        gsap.set(m, { clearProps: "clipPath" });
+        gsap.set(img, { clearProps: "transform,transition" });
       }
     });
   }, 2500);

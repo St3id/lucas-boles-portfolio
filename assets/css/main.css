@@ -87,8 +87,10 @@ a {
   text-underline-offset: 0.2em;
 }
 
-a:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  a:hover {
+    color: var(--accent);
+  }
 }
 
 :focus-visible {
@@ -163,6 +165,20 @@ ol[role="list"] {
   max-width: 14ch;
 }
 
+/* pendant leur entrée, les titres sont découpés en lignes (main.js) : chaque ligne
+   monte derrière son propre masque, un peu plus haut que la ligne pour garder
+   les accents et les jambages */
+.section-title .line {
+  display: block;
+  overflow: clip;
+  padding-block: 0.08em 0.14em;
+  margin-block: -0.08em -0.14em;
+}
+
+.section-title .line > span {
+  display: inline-block;
+}
+
 .lead {
   font-size: var(--step-lead);
   line-height: 1.35;
@@ -208,9 +224,11 @@ figure figcaption {
   transition: transform 0.9s var(--ease-out);
 }
 
-a.media:hover img,
-.media-hover:hover img {
-  transform: scale(1.03);
+@media (hover: hover) {
+  a.media:hover img,
+  .media-hover:hover img {
+    transform: scale(1.03);
+  }
 }
 
 /* --- Buttons and links ------------------------------------------------------ */
@@ -231,9 +249,11 @@ a.media:hover img,
   transition: background-color 0.25s ease, transform 0.2s var(--ease-out);
 }
 
-.button:hover {
-  background: #095a41;
-  color: var(--accent-ink);
+@media (hover: hover) {
+  .button:hover {
+    background: #095a41;
+    color: var(--accent-ink);
+  }
 }
 
 .button:active {
@@ -244,8 +264,10 @@ a.media:hover img,
   transition: transform 0.35s var(--ease-out);
 }
 
-.button:hover .arrow {
-  transform: translateX(4px);
+@media (hover: hover) {
+  .button:hover .arrow {
+    transform: translateX(4px);
+  }
 }
 
 .text-link {
@@ -256,8 +278,10 @@ a.media:hover img,
   transition: color 0.2s ease, text-underline-offset 0.25s var(--ease-out);
 }
 
-.text-link:hover {
-  text-underline-offset: 0.4em;
+@media (hover: hover) {
+  .text-link:hover {
+    text-underline-offset: 0.4em;
+  }
 }
 
 /* --- Header ------------------------------------------------------------------- */
@@ -305,9 +329,14 @@ a.media:hover img,
   padding-block: 4px;
 }
 
-.nav-links a:hover,
 .nav-links a[aria-current="true"] {
   background-size: 100% 2px;
+}
+
+@media (hover: hover) {
+  .nav-links a:hover {
+    background-size: 100% 2px;
+  }
 }
 
 .lang-link {
@@ -552,8 +581,10 @@ a.media:hover img,
   color: var(--on-field-soft);
 }
 
-.project-radar a:hover {
-  color: var(--accent-on-field);
+@media (hover: hover) {
+  .project-radar a:hover {
+    color: var(--accent-on-field);
+  }
 }
 
 .radar-text {
@@ -685,9 +716,11 @@ a.media:hover img,
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s var(--ease-out);
 }
 
-.rail-buttons button:hover {
-  background: var(--ink);
-  color: var(--ground);
+@media (hover: hover) {
+  .rail-buttons button:hover {
+    background: var(--ink);
+    color: var(--ground);
+  }
 }
 
 .rail-buttons button:active {
@@ -1044,8 +1077,10 @@ a.media:hover img,
   padding-block: clamp(80px, 11vw, 180px) clamp(56px, 7vw, 96px);
 }
 
-.contact a:hover {
-  color: var(--accent-on-field);
+@media (hover: hover) {
+  .contact a:hover {
+    color: var(--accent-on-field);
+  }
 }
 
 .contact .lead {
@@ -1084,9 +1119,11 @@ a.media:hover img,
   color: var(--field);
 }
 
-.contact .button:hover {
-  background: #a3e2c6;
-  color: var(--field);
+@media (hover: hover) {
+  .contact .button:hover {
+    background: #a3e2c6;
+    color: var(--field);
+  }
 }
 
 .contact-list {
@@ -1137,8 +1174,10 @@ a.media:hover img,
   overflow: hidden;
 }
 
-.site-footer a:hover {
-  color: var(--accent-on-field);
+@media (hover: hover) {
+  .site-footer a:hover {
+    color: var(--accent-on-field);
+  }
 }
 
 /* « Lucas Boles » mesure 7,17 fois la taille de police : on la déduit de la largeur utile */
