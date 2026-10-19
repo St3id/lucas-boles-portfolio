@@ -45,6 +45,14 @@ Le script produit `assets/img/<nom>-480.webp`, `-960.webp`, `-1600.webp`, l'imag
 
 **Activer les statistiques** : créer un compte gratuit sur https://www.goatcounter.com, puis mettre le code choisi dans `GOATCOUNTER_CODE` en haut de `assets/js/main.js`. Sans cookie, donc sans bannière.
 
+**Après toute modification de `main.css` ou `main.js`** :
+
+```
+python tools/version_assets.py
+```
+
+Le script ajoute une empreinte (`?v=...`) aux liens vers ces fichiers dans toutes les pages. Sans elle, un navigateur peut garder l'ancienne feuille de style en cache et casser l'affichage de la nouvelle page. À lancer en dernier, après `build_en.py`.
+
 **Mettre à jour le sitemap** : changer les dates `lastmod` de `sitemap.xml` après une modification importante.
 
 ## Tester en local

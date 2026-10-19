@@ -284,7 +284,16 @@
 
     resize();
     draw();
-    window.addEventListener("resize", function () { resize(); draw(); });
+    // la toile suit sa taille réelle à l'écran, et l'échelle d'affichage quand
+    // la fenêtre passe d'un écran à l'autre (100 %, 125 %, 150 %...)
+    function refit() { resize(); draw(); }
+    if ("ResizeObserver" in window) new ResizeObserver(refit).observe(canvas);
+    window.addEventListener("resize", refit);
+    (function watchScale() {
+      var mq = window.matchMedia("(resolution: " + window.devicePixelRatio + "dppx)");
+      var onChange = function () { mq.removeEventListener("change", onChange); refit(); watchScale(); };
+      if (mq.addEventListener) mq.addEventListener("change", onChange);
+    })();
     // sans animation demandée : une seule image, fixe
     if (reducedMotion) return;
     // la simulation ne tourne que lorsqu'elle est à l'écran
