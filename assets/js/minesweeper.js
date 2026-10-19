@@ -53,6 +53,11 @@
       podiumEmpty: "Personne pour l'instant : le premier temps s'affichera ici.", podiumFree: "Place libre",
       lbLoading: "Chargement...", lbEmpty: "Personne pour l'instant. À vous de jouer !", lbError: "Classement indisponible pour le moment.",
       youAre: "Vos temps sont inscrits au nom de {p}.", youAreNot: "Gagnez une partie pour choisir votre pseudo.",
+      meLine: "Votre pseudo : ", saveLink: "Sauvegarder mon pseudo",
+      saveCopied: "Lien copié. Gardez-le pour vous : l'ouvrir plus tard, ici ou sur un autre appareil, redonne votre pseudo.",
+      saveManual: "Copier ce lien et le garder pour vous : ",
+      restored: "Pseudo {p} retrouvé dans ce navigateur.", restoreBad: "Lien de sauvegarde incomplet : le copier en entier.",
+      tokenLost: "Ce navigateur n'a plus la clé de {p}. Ouvrir votre lien de sauvegarde, ou choisir un autre pseudo.",
       pseudoLabel: "Pseudo pour le classement", send: "Inscrire",
       sending: "Inscription au nom de {p}...",
       rankNew: "{p} : nouveau record au classement, {rank} sur ce niveau.",
@@ -113,6 +118,11 @@
       podiumEmpty: "No one yet: the first time will show up here.", podiumFree: "Open spot",
       lbLoading: "Loading...", lbEmpty: "Nobody yet. Your turn!", lbError: "Leaderboard unavailable right now.",
       youAre: "Your times are recorded as {p}.", youAreNot: "Win a game to choose your name.",
+      meLine: "Your name: ", saveLink: "Save my name",
+      saveCopied: "Link copied. Keep it to yourself: opening it later, here or on another device, brings your name back.",
+      saveManual: "Copy this link and keep it to yourself: ",
+      restored: "Name {p} restored in this browser.", restoreBad: "Incomplete save link: copy it in full.",
+      tokenLost: "This browser no longer has the key for {p}. Open your save link, or pick another name.",
       pseudoLabel: "Name for the leaderboard", send: "Submit",
       sending: "Submitting as {p}...",
       rankNew: "{p}: new leaderboard best, {rank} on this level.",
@@ -166,6 +176,30 @@
   var settings = Object.assign({}, DEFAULTS, load("ms-settings-v1", {}));
   var records = load("ms-records-v1", {});            // { "easy:all": ms, "easy:noflag": ms, ... }
   var identity = load("ms-identity-v1", null);        // { pseudo, token } une fois le premier temps inscrit
+
+  // lien de sauvegarde (#pseudo=...&cle=...) : redonne le pseudo dans ce navigateur.
+  // La clé quitte aussitôt la barre d'adresse ; elle n'est vérifiée qu'au prochain envoi.
+  var restoreNote = "";
+  (function () {
+    var h = new URLSearchParams(location.hash.slice(1)), p = h.get("pseudo"), k = h.get("cle");
+    if (p === null && k === null) return;
+    history.replaceState(null, "", location.pathname + location.search);
+    if (!p || !PSEUDO_RE.test(p) || !/^[0-9a-f]{48}$/.test(k || "")) { restoreNote = "bad"; return; }
+    identity = { pseudo: p, token: k };
+    save("ms-identity-v1", identity);
+    keepStorage();
+    restoreNote = "ok";
+  })();
+
+  // demande au navigateur de ne pas effacer ces données de lui-même (Safari les efface
+  // sinon après quelques jours sans visite). Chrome et Safari décident seuls, Firefox demande.
+  function keepStorage() {
+    try {
+      if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persisted().then(function (on) { if (!on) navigator.storage.persist(); }).catch(function () {});
+      }
+    } catch (e) { /* stockage indisponible */ }
+  }
 
   /* --- Serveur du classement -------------------------------------------------- */
   // mode développeur, uniquement sur localhost : le vrai code du serveur tourne
@@ -504,13 +538,15 @@
     postJson("/scores", { id: g.id, pseudo: pseudo, token: token || undefined, actions: g.actions }).then(function (d) {
       if (d.error) {
         g.submitted = false;
-        if (d.error === "pseudo-taken" && identity && identity.pseudo === pseudo) {
+        var lost = d.error === "pseudo-taken" && identity && identity.pseudo === pseudo;
+        if (lost) {
           // le jeton gardé ne correspond plus : on repart d'un pseudo à choisir
           identity = null;
           save("ms-identity-v1", null);
+          renderMe();
         }
         var fixable = /^pseudo-/.test(d.error);
-        setRankMsg(TEXT.err[d.error] || TEXT.err.replay, "error");
+        setRankMsg(lost ? TEXT.tokenLost.replace("{p}", pseudo) : TEXT.err[d.error] || TEXT.err.replay, "error");
         rankForm.hidden = !fixable;
         if (fixable) pseudoInput.focus();
         return;
@@ -518,6 +554,8 @@
       if (d.token) {
         identity = { pseudo: pseudo, token: d.token };
         save("ms-identity-v1", identity);
+        keepStorage();
+        renderMe();
       }
       rankForm.hidden = true;
       // une seule ligne par pseudo : elle n'est remplacée que par un meilleur temps
@@ -570,6 +608,49 @@
       if (req === rankReq) state.textContent = TEXT.lbError;
     });
   }
+  /* --- Rappel du pseudo et lien de sauvegarde -------------------------------- */
+  // un pseudo long se coupe de préférence après _ . ou - (texte inséré tel quel, jamais en HTML)
+  function nameInto(el, pseudo) {
+    el.textContent = "";
+    pseudo.split(/(?<=[_.-])/).forEach(function (part, n) {
+      if (n) el.appendChild(document.createElement("wbr"));
+      el.appendChild(document.createTextNode(part));
+    });
+  }
+  function renderMe() {
+    var me = $("ms-me");
+    me.textContent = "";
+    if (identity) {
+      var b = document.createElement("strong");
+      nameInto(b, identity.pseudo);
+      me.append(TEXT.meLine, b);
+    } else {
+      me.textContent = TEXT.youAreNot;
+    }
+    $("ms-save").hidden = !identity;
+  }
+  function saveLink() {
+    var h = new URLSearchParams({ pseudo: identity.pseudo, cle: identity.token });
+    return location.href.split("#")[0] + "#" + h.toString();
+  }
+  $("ms-save").addEventListener("click", function () {
+    if (!identity) return;
+    var note = $("ms-save-note"), link = saveLink();
+    var done = false, manual = function () { if (!done) { done = true; note.textContent = TEXT.saveManual + link; } };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // un navigateur qui ne répond pas (autorisation en attente) : le lien s'affiche à copier
+      var slow = setTimeout(manual, 1500);
+      navigator.clipboard.writeText(link).then(function () {
+        clearTimeout(slow);
+        if (!done) { done = true; note.textContent = TEXT.saveCopied; }
+      }, function () { clearTimeout(slow); manual(); });
+    } else {
+      manual();
+    }
+  });
+  renderMe();
+  if (restoreNote) $("ms-save-note").textContent = restoreNote === "ok" ? TEXT.restored.replace("{p}", identity.pseudo) : TEXT.restoreBad;
+
   /* --- Podium : les trois premiers du niveau choisi, visibles dès l'arrivée --- */
   var podiumCache = {}, podiumReq = 0;
   function loadPodium() {
@@ -657,8 +738,9 @@
       crown.appendChild(laurel());
       if (s && k === 0) crown.appendChild(confetti());
       who.className = "ms-step-who";
-      who.textContent = s ? s.pseudo : TEXT.podiumFree;
+      if (s) nameInto(who, s.pseudo); else who.textContent = TEXT.podiumFree;
       if (s) who.title = s.pseudo;
+      if (s && s.pseudo.length > 9) who.classList.add("is-long");
       t.className = "ms-step-time";
       t.textContent = s ? fmt(s.timeMs, true) : "--:--.-";
       block.className = "ms-step-block";
