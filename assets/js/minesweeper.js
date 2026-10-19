@@ -38,7 +38,11 @@
       testShort: "Relâché à {ms} ms : clic normal.", testFlag: "Drapeau posé à {ms} ms.",
       win: "Gagné", lose: "Perdu", winText: "Grille dégagée en {t}.", loseText: "Une mine, après {t}.",
       cell: "Ligne {r}, colonne {c}", flagged: "drapeau", hidden: "cachée", mine: "mine", empty: "vide",
-      up: "Haut", down: "Bas", left: "Gauche", right: "Droite"
+      up: "Haut", down: "Bas", left: "Gauche", right: "Droite",
+      setTenths: "Chrono au dixième de seconde",
+      share: "Partager mon temps", levelName: { easy: "Facile", medium: "Moyen", hard: "Difficile" },
+      shareText: "J'ai terminé le démineur du portfolio de Lucas Boles en niveau {level} en {t}. À toi de battre ce temps :",
+      shareCopied: "Message copié, il n'y a plus qu'à le coller.", shareManual: "Copier ce message : "
     },
     en: {
       pageTitle: "Minesweeper - Lucas Boles", skip: "Skip to the game", back: "Back to the portfolio",
@@ -69,9 +73,22 @@
       testShort: "Released at {ms} ms: normal click.", testFlag: "Flag placed at {ms} ms.",
       win: "You win", lose: "Game over", winText: "Board cleared in {t}.", loseText: "Hit a mine after {t}.",
       cell: "Row {r}, column {c}", flagged: "flag", hidden: "hidden", mine: "mine", empty: "empty",
-      up: "Up", down: "Down", left: "Left", right: "Right"
+      up: "Up", down: "Down", left: "Left", right: "Right",
+      setTenths: "Timer to the tenth of a second",
+      share: "Share my time", levelName: { easy: "Easy", medium: "Medium", hard: "Hard" },
+      shareText: "I cleared the minesweeper on Lucas Boles's portfolio on {level} in {t}. Can you beat it?",
+      shareCopied: "Message copied, just paste it.", shareManual: "Copy this message: "
     }
   }[LANG];
+
+  // mesure d'audience GoatCounter (sans cookie), comme sur le reste du site
+  if (location.protocol === "https:") {
+    var gc = document.createElement("script");
+    gc.async = true;
+    gc.src = "https://gc.zgo.at/count.js";
+    gc.dataset.goatcounter = "https://lucasboles.goatcounter.com/count";
+    document.head.appendChild(gc);
+  }
 
   var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 } };
   var MOVE_TOLERANCE = 10;
@@ -84,7 +101,7 @@
 
   /* --- Réglages, gardés dans le navigateur (aucun envoi) ------------------- */
   var STORE = "ms-settings-v1";
-  var DEFAULTS = { hold: true, holdMs: 500, chord: true, invert: false, vibrate: true, flagKey: "f" };
+  var DEFAULTS = { hold: true, holdMs: 500, chord: true, invert: false, vibrate: true, flagKey: "f", tenths: false };
   var settings = Object.assign({}, DEFAULTS);
   try { Object.assign(settings, JSON.parse(localStorage.getItem(STORE)) || {}); } catch (e) { /* stockage indisponible */ }
   function saveSettings() {
@@ -113,10 +130,17 @@
   }
 
   /* --- État de la partie --------------------------------------------------- */
-  var level = "easy", size, mineTotal, cells, opened, flags, started, over, timer, seconds;
+  var level = "easy", size, mineTotal, cells, opened, flags, started = false, over, timer, startedAt, finalMs = null;
   var flagMode = false, peekNext = false, peek = false;
 
-  function fmt(s) { return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+  // temps écoulé en millisecondes, affiché mm:ss ou mm:ss.d selon le réglage
+  function elapsed() { return finalMs !== null ? finalMs : started ? performance.now() - startedAt : 0; }
+  function fmt(ms) {
+    var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
+    var out = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    return settings.tenths ? out + "." + (tenths % 10) : out;
+  }
+  function renderTime() { timeEl.textContent = fmt(elapsed()); }
 
   function neighbours(i) {
     var r = Math.floor(i / size), c = i % size, out = [];
@@ -139,11 +163,12 @@
     size = LEVELS[level].size;
     mineTotal = LEVELS[level].mines;
     cells = [];
-    opened = flags = seconds = 0;
+    opened = flags = 0;
+    finalMs = null;
     started = over = false;
     peek = peekNext;
     peekNext = false;
-    timeEl.textContent = fmt(0);
+    renderTime();
     statusEl.textContent = hint();
     statusEl.className = "ms-status";
     closeEnd();
@@ -202,7 +227,8 @@
 
   function startTimer() {
     started = true;
-    timer = setInterval(function () { seconds++; timeEl.textContent = fmt(seconds); }, 1000);
+    startedAt = performance.now();
+    timer = setInterval(renderTime, 100);
   }
 
   // révélation en largeur : les zones vides s'ouvrent sans récursion
@@ -259,6 +285,8 @@
   function finish() {
     over = true;
     clearInterval(timer);
+    finalMs = elapsed();
+    renderTime();
   }
 
   function lose(i) {
@@ -279,7 +307,7 @@
       if (cell.mine && !cell.flag) { cell.flag = true; flags++; paint(idx); }
     });
     updateMines();
-    statusEl.textContent = TEXT.win + " - " + fmt(seconds);
+    statusEl.textContent = TEXT.win + " - " + fmt(finalMs);
     statusEl.className = "ms-status is-win";
     showEnd();
   }
@@ -289,7 +317,9 @@
   function showEnd() {
     var won = statusEl.classList.contains("is-win");
     $("ms-end-title").textContent = won ? TEXT.win : TEXT.lose;
-    $("ms-end-text").textContent = (won ? TEXT.winText : TEXT.loseText).replace("{t}", fmt(seconds));
+    $("ms-end-text").textContent = (won ? TEXT.winText : TEXT.loseText).replace("{t}", fmt(finalMs));
+    $("ms-share").hidden = !won;
+    $("ms-share-note").textContent = "";
     lastFocus = document.activeElement;
     endEl.hidden = false;
     $("ms-end-new").focus();
@@ -300,6 +330,26 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   $("ms-end-new").addEventListener("click", newGame);
+
+  // partage : menu natif sur téléphone, sinon copie du message ; ?ref=partage
+  // permet de compter dans GoatCounter les visites venues d'un partage
+  $("ms-share").addEventListener("click", function () {
+    var url = new URL("minesweeper.html", location.href);
+    url.search = "?ref=partage" + (LANG === "en" ? "&lang=en" : "");
+    var text = TEXT.shareText.replace("{level}", TEXT.levelName[level]).replace("{t}", fmt(finalMs));
+    var note = $("ms-share-note");
+    if (navigator.share && coarse) {
+      navigator.share({ title: TEXT.pageTitle, text: text, url: url.href }).catch(function () { /* partage annulé */ });
+      return;
+    }
+    var full = text + " " + url.href;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(full).then(function () { note.textContent = TEXT.shareCopied; },
+        function () { note.textContent = TEXT.shareManual + full; });
+    } else {
+      note.textContent = TEXT.shareManual + full;
+    }
+  });
   $("ms-end-close").addEventListener("click", closeEnd);
   endEl.addEventListener("click", function (e) { if (e.target === endEl) closeEnd(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && codeEl.hidden) closeEnd(); });
@@ -419,6 +469,7 @@
 
   var holdBox = $("set-hold"), holdMs = $("set-hold-ms"), holdOut = $("set-hold-out"), holdBlock = $("ms-hold-block");
   var chordBox = $("set-chord"), invertBox = $("set-invert"), vibrateBox = $("set-vibrate"), keyBtn = $("set-key");
+  var tenthsBox = $("set-tenths");
   if (!canVibrate) $("ms-vibrate-block").hidden = true;
 
   function showSettings() {
@@ -429,6 +480,8 @@
     chordBox.checked = settings.chord;
     invertBox.checked = settings.invert;
     vibrateBox.checked = settings.vibrate;
+    tenthsBox.checked = settings.tenths;
+    renderTime();
     keyBtn.textContent = settings.flagKey.toUpperCase();
     if (!over) statusEl.textContent = hint();
   }
@@ -442,6 +495,7 @@
   chordBox.addEventListener("change", function () { setSetting("chord", chordBox.checked); });
   invertBox.addEventListener("change", function () { setSetting("invert", invertBox.checked); });
   vibrateBox.addEventListener("change", function () { setSetting("vibrate", vibrateBox.checked); });
+  tenthsBox.addEventListener("change", function () { setSetting("tenths", tenthsBox.checked); });
   $("set-reset").addEventListener("click", function () {
     settings = Object.assign({}, DEFAULTS);
     saveSettings();
