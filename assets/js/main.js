@@ -6,7 +6,7 @@
 
   // Mesure d'audience GoatCounter (sans cookie). Laisser vide pour la désactiver.
   // Exemple : "lucasboles" pour https://lucasboles.goatcounter.com
-  var GOATCOUNTER_CODE = "";
+  var GOATCOUNTER_CODE = "lucasboles";
 
   var EN = document.documentElement.lang === "en";
   var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
