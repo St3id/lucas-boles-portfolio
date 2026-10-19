@@ -1,6 +1,6 @@
 /* Portfolio Lucas Boles
    Tout le contenu est lisible sans ce script : il ajoute la navigation mobile,
-   les animations, le radar et la démonstration ferroviaire. */
+   les animations, la simulation radar et la démonstration ferroviaire. */
 (function () {
   "use strict";
 
@@ -74,157 +74,220 @@
     });
   }
 
-  /* --- Radar : balayage lent (un tour en 10 s environ) ---------------------- */
-  function radar(canvas) {
+  /* --- Veille 3D : simulation lente de la pièce et des cibles --------------
+     Reprend la maquette du projet radar (pièce de 6 x 4 x 2,6 m, capteur sur
+     trépied à 1,20 m, meubles qui masquent ce qui est derrière eux), dessinée
+     en Canvas 2D pour ne pas charger de bibliothèque 3D. Unités : millimètres. */
+  function roomSim(canvas) {
     var ctx = canvas.getContext("2d");
-    var green = "127, 209, 174";
-    var targets = [
-      { r: 0.32, a: 0.6, v: 0.004 }, { r: 0.55, a: 2.1, v: -0.002 },
-      { r: 0.72, a: 3.4, v: 0.0015 }, { r: 0.44, a: 4.6, v: 0.003 },
-      { r: 0.83, a: 5.5, v: -0.001 }
+    var RX = 3000, RZ = 2000, RY = 2600, SENSOR_H = 1200, STEP = 120;
+    var SLOW = 0.35;            // vitesse des cibles par rapport à la maquette
+    var SWAY = 0.3, SWAY_SPEED = 0.05; // la caméra oscille de ±17° autour de la vue de la maquette
+    var FRAME_MS = 1000 / 30;
+
+    var furniture = [
+      { x: -2300, z: 900, w: 1800, h: 800, d: 800 },
+      { x: 1400, z: -1000, w: 1400, h: 750, d: 800 },
+      { x: 2750, z: 600, w: 420, h: 1900, d: 1600 },
+      { x: -600, z: -1750, w: 900, h: 1100, d: 420 }
     ];
-    targets.forEach(function (t) { t.glow = 0; });
-    var size = 0, dpr = 1, sweep = 0, last = 0, running = false;
+    var boxes = furniture.map(function (m) {
+      return { x0: m.x - m.w / 2, x1: m.x + m.w / 2, y1: m.h, z0: m.z - m.d / 2, z1: m.z + m.d / 2 };
+    });
 
-    function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      size = canvas.clientWidth;
-      canvas.width = size * dpr;
-      canvas.height = size * dpr;
+    // un point n'est gardé que si le rayon capteur -> point ne traverse aucun meuble
+    function seen(px, py, pz) {
+      for (var i = 1; i < 40; i++) {
+        var t = i / 40, x = px * t, y = SENSOR_H + (py - SENSOR_H) * t, z = pz * t;
+        for (var b = 0; b < boxes.length; b++) {
+          var k = boxes[b];
+          if (x > k.x0 && x < k.x1 && y > 0 && y < k.y1 && z > k.z0 && z < k.z1) return false;
+        }
+      }
+      return true;
     }
 
-    function draw() {
-      var c = size / 2, R = c * 0.94;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, size, size);
-      ctx.strokeStyle = "rgba(" + green + ", 0.25)";
-      ctx.lineWidth = 1;
-      for (var i = 1; i <= 4; i++) {
-        ctx.beginPath();
-        ctx.arc(c, c, (R * i) / 4, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      for (var k = 0; k < 12; k++) {
-        ctx.beginPath();
-        ctx.moveTo(c, c);
-        ctx.lineTo(c + Math.cos(k * Math.PI / 6) * R, c + Math.sin(k * Math.PI / 6) * R);
-        ctx.stroke();
-      }
-      // traînée du balayage : secteurs de plus en plus transparents
-      for (var s = 0; s < 24; s++) {
-        ctx.beginPath();
-        ctx.moveTo(c, c);
-        ctx.arc(c, c, R, sweep - (s + 1) * 0.03, sweep - s * 0.03);
-        ctx.closePath();
-        ctx.fillStyle = "rgba(" + green + ", " + (0.2 * (1 - s / 24)).toFixed(3) + ")";
-        ctx.fill();
-      }
-      ctx.strokeStyle = "rgb(" + green + ")";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(c, c);
-      ctx.lineTo(c + Math.cos(sweep) * R, c + Math.sin(sweep) * R);
-      ctx.stroke();
-      targets.forEach(function (t) {
-        if (t.glow < 0.02) return;
-        var x = c + Math.cos(t.a) * t.r * R, y = c + Math.sin(t.a) * t.r * R;
-        ctx.fillStyle = "rgba(" + green + ", " + t.glow.toFixed(3) + ")";
-        ctx.beginPath();
-        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
-        ctx.fill();
+    // nuage rangé par tranche de hauteur : une couleur par tranche
+    var BANDS = 8, cloud = [], n;
+    for (n = 0; n < BANDS; n++) cloud.push([]);
+    function q(v) { return Math.round(v / 78) * 78; }
+    function add(x, y, z) {
+      if (!seen(x, y, z)) return;
+      cloud[Math.min(BANDS - 1, Math.floor((y / RY) * BANDS))].push(q(x), q(y), q(z));
+    }
+    var x, y, z, f, d;
+    for (x = -RX; x <= RX; x += STEP) for (y = 0; y <= RY; y += STEP) {
+      if (!(x > 700 && x < 1600 && y < 2050)) add(x, y, -RZ); // porte ouverte : pas d'écho
+      add(x, y, RZ);
+    }
+    for (z = -RZ; z <= RZ; z += STEP) for (y = 0; y <= RY; y += STEP) { add(-RX, y, z); add(RX, y, z); }
+    for (x = -RX; x <= RX; x += STEP * 1.7) for (z = -RZ; z <= RZ; z += STEP * 1.7) add(x, 0, z);
+    furniture.forEach(function (m) {
+      var s = STEP * 0.8;
+      for (d = -m.w / 2; d <= m.w / 2; d += s) for (y = 0; y <= m.h; y += s) { add(m.x + d, y, m.z - m.d / 2); add(m.x + d, y, m.z + m.d / 2); }
+      for (d = -m.d / 2; d <= m.d / 2; d += s) for (y = 0; y <= m.h; y += s) { add(m.x - m.w / 2, y, m.z + d); add(m.x + m.w / 2, y, m.z + d); }
+      for (d = -m.w / 2; d <= m.w / 2; d += s) for (f = -m.d / 2; f <= m.d / 2; f += s) add(m.x + d, m.h, m.z + f);
+    });
+    // dégradé de hauteur de la maquette : vert sombre au sol, vert clair au plafond
+    var bandColors = [];
+    for (n = 0; n < BANDS; n++) {
+      var t = n / (BANDS - 1);
+      bandColors.push("rgb(" + Math.round(20 + t * 122) + "," + Math.round(82 + t * 163) + "," + Math.round(60 + t * 140) + ")");
+    }
+
+    var targets = [
+      { id: "T01", x: -1800, z: 1200, y: 950, vx: 620, vz: -430, hist: [] },
+      { id: "T02", x: 1900, z: -300, y: 980, vx: -480, vz: 560, hist: [] },
+      { id: "T03", x: 200, z: 1700, y: 1450, vx: 540, vz: 380, hist: [] }
+    ];
+    function move(dt) {
+      targets.forEach(function (p) {
+        p.x += p.vx * SLOW * dt;
+        p.z += p.vz * SLOW * dt;
+        if (p.x < -RX + 300 || p.x > RX - 300) p.vx *= -1;
+        if (p.z < -RZ + 300 || p.z > RZ - 300) p.vz *= -1;
+        p.hist.push(p.x, p.z);
+        if (p.hist.length > 240) p.hist.splice(0, 2);
       });
     }
+    // quelques secondes d'avance pour que les traînées existent dès le départ
+    for (n = 0; n < 120; n++) move(1 / 30);
 
-    function step(now) {
-      if (!running) return;
-      var dt = Math.min(now - (last || now), 50);
-      last = now;
-      var prev = sweep;
-      sweep = (sweep + dt * 0.0006) % (Math.PI * 2);
-      targets.forEach(function (t) {
-        t.a = (t.a + t.v * dt * 0.02 + Math.PI * 2) % (Math.PI * 2);
-        var crossed = prev <= sweep ? t.a > prev && t.a <= sweep : t.a > prev || t.a <= sweep;
-        t.glow = crossed ? 1 : t.glow * Math.pow(0.99975, dt);
-      });
-      draw();
-      requestAnimationFrame(step);
-    }
-
-    resize();
-    window.addEventListener("resize", function () { resize(); draw(); });
-    if (reducedMotion) {
-      sweep = 5.9;
-      targets.forEach(function (t) { t.glow = 0.8; });
-      draw();
-      return;
-    }
-    // l'animation ne tourne que lorsque le radar est à l'écran
-    new IntersectionObserver(function (entries) {
-      var visible = entries[0].isIntersecting;
-      if (visible && !running) {
-        running = true;
-        last = 0;
-        requestAnimationFrame(step);
-      } else if (!visible) {
-        running = false;
-      }
-    }).observe(canvas);
-  }
-
-  var radarCanvas = document.querySelector(".radar-canvas");
-  if (radarCanvas && radarCanvas.getContext) radar(radarCanvas);
-
-  /* --- Balayage sur la maquette de la veille 3D ----------------------------
-     Le faisceau part du capteur (point rouge de l'image) et tourne à plat sur
-     le sol de la pièce : un cercle aplati pour suivre la perspective. */
-  function sweepOverlay(canvas) {
-    var ctx = canvas.getContext("2d");
-    var SENSOR_X = 0.467, SENSOR_Y = 0.448, FLATTEN = 0.42, TURN_MS = 12000;
-    var w = 0, h = 0, dpr = 1, angle = 0, last = 0, running = false;
-
+    var w = 0, h = 0, dpr = 1, focal = 1, azi = 0.85, clock = 0, ELE = 0.42, DIST = 6800;
+    var cam = {}, right = {}, up = {}, fwd = {};
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = canvas.clientWidth;
       h = canvas.clientHeight;
       canvas.width = w * dpr;
       canvas.height = h * dpr;
+      focal = (h / 2) / Math.tan((58 / 2) * Math.PI / 180);
+    }
+    function placeCamera() {
+      cam.x = DIST * Math.cos(ELE) * Math.sin(azi);
+      cam.y = 900 + DIST * Math.sin(ELE);
+      cam.z = DIST * Math.cos(ELE) * Math.cos(azi);
+      var fx = -cam.x, fy = 900 - cam.y, fz = -cam.z, fl = Math.hypot(fx, fy, fz);
+      fwd.x = fx / fl; fwd.y = fy / fl; fwd.z = fz / fl;
+      var rl = Math.hypot(fwd.z, fwd.x);
+      right.x = -fwd.z / rl; right.y = 0; right.z = fwd.x / rl;
+      up.x = right.y * fwd.z - right.z * fwd.y;
+      up.y = right.z * fwd.x - right.x * fwd.z;
+      up.z = right.x * fwd.y - right.y * fwd.x;
+    }
+    var P = [0, 0, 0];
+    function project(px, py, pz) {
+      var dx = px - cam.x, dy = py - cam.y, dz = pz - cam.z;
+      var zc = dx * fwd.x + dy * fwd.y + dz * fwd.z;
+      if (zc < 100) return false;
+      P[0] = w / 2 + (dx * right.x + dy * right.y + dz * right.z) * focal / zc;
+      P[1] = h / 2 - (dx * up.x + dy * up.y + dz * up.z) * focal / zc;
+      P[2] = zc;
+      return true;
+    }
+    function line(x0, y0, z0, x1, y1, z1) {
+      if (!project(x0, y0, z0)) return;
+      var a = P[0], b = P[1];
+      if (!project(x1, y1, z1)) return;
+      ctx.moveTo(a, b);
+      ctx.lineTo(P[0], P[1]);
     }
 
     function draw() {
-      var R = w * 0.6;
+      placeCamera();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-      ctx.translate(w * SENSOR_X, h * SENSOR_Y);
-      ctx.scale(1, FLATTEN);
-      for (var s = 0; s < 30; s++) {
+      ctx.fillStyle = "#06100c";
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "#11271f";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var g = -4000; g <= 4000; g += 500) { line(g, 0, -4000, g, 0, 4000); line(-4000, 0, g, 4000, 0, g); }
+      ctx.stroke();
+
+      for (var bnd = 0; bnd < BANDS; bnd++) {
+        var pts = cloud[bnd];
+        ctx.fillStyle = bandColors[bnd];
+        for (var i = 0; i < pts.length; i += 3) {
+          if (!project(pts[i], pts[i + 1], pts[i + 2])) continue;
+          var s = Math.max(1.6, 32 * (h / 2) / P[2]);
+          ctx.fillRect(P[0] - s / 2, P[1] - s / 2, s, s);
+        }
+      }
+
+      // le capteur sur son trépied
+      ctx.strokeStyle = "#1c3a2e";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      line(0, 0, 0, 0, SENSOR_H, 0);
+      ctx.stroke();
+      if (project(0, SENSOR_H, 0)) {
+        ctx.fillStyle = "#ff5d3b";
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.arc(0, 0, R, angle - (s + 1) * 0.025, angle - s * 0.025);
-        ctx.closePath();
-        ctx.fillStyle = "rgba(127, 209, 174, " + (0.16 * (1 - s / 30)).toFixed(3) + ")";
+        ctx.arc(P[0], P[1], Math.max(3, 85 * focal / P[2]), 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.strokeStyle = "rgba(127, 209, 174, 0.55)";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(Math.cos(angle) * R, Math.sin(angle) * R);
-      ctx.stroke();
+
+      ctx.font = "600 11px " + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = "center";
+      targets.forEach(function (p) {
+        // traînée
+        ctx.strokeStyle = "#1f7a5a";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (var k = 2; k < p.hist.length; k += 2) line(p.hist[k - 2], p.y, p.hist[k - 1], p.hist[k], p.y, p.hist[k + 1]);
+        ctx.stroke();
+        if (!project(p.x, p.y, p.z)) return;
+        var sx = P[0], sy = P[1], r = Math.max(4, 130 * focal / P[2]);
+        // flèche de vitesse
+        var vl = Math.hypot(p.vx, p.vz), len = Math.min(1400, vl * 1.6);
+        if (project(p.x + (p.vx / vl) * len, p.y, p.z + (p.vz / vl) * len)) {
+          var ax = P[0] - sx, ay = P[1] - sy, al = Math.hypot(ax, ay) || 1;
+          var hx = ax / al, hy = ay / al, hs = Math.min(10, al * 0.3);
+          ctx.strokeStyle = ctx.fillStyle = "#ffd23b";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.lineTo(P[0], P[1]);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(P[0], P[1]);
+          ctx.lineTo(P[0] - hx * hs - hy * hs * 0.6, P[1] - hy * hs + hx * hs * 0.6);
+          ctx.lineTo(P[0] - hx * hs + hy * hs * 0.6, P[1] - hy * hs - hx * hs * 0.6);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#34e29b";
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#d8f5e8";
+        ctx.fillText(p.id, sx, sy - r - 6);
+      });
     }
 
+    var running = false, last = 0, acc = 0;
     function step(now) {
       if (!running) return;
-      var dt = Math.min(now - (last || now), 50);
+      var dt = Math.min(now - (last || now), 100);
       last = now;
-      angle = (angle + (dt / TURN_MS) * Math.PI * 2) % (Math.PI * 2);
-      draw();
+      acc += dt;
+      if (acc >= FRAME_MS) {
+        var sec = acc / 1000;
+        acc = 0;
+        move(sec);
+        clock += sec;
+        azi = 0.85 + SWAY * Math.sin(clock * SWAY_SPEED);
+        draw();
+      }
       requestAnimationFrame(step);
     }
 
-    // sans animation demandée, l'image reste telle quelle
-    if (reducedMotion) return;
     resize();
-    window.addEventListener("resize", resize);
+    draw();
+    window.addEventListener("resize", function () { resize(); draw(); });
+    // sans animation demandée : une seule image, fixe
+    if (reducedMotion) return;
+    // la simulation ne tourne que lorsqu'elle est à l'écran
     new IntersectionObserver(function (entries) {
       var visible = entries[0].isIntersecting;
       if (visible && !running) {
@@ -237,8 +300,8 @@
     }).observe(canvas);
   }
 
-  var sweepCanvas = document.querySelector(".sweep-overlay");
-  if (sweepCanvas && sweepCanvas.getContext) sweepOverlay(sweepCanvas);
+  var roomCanvas = document.querySelector(".room-sim");
+  if (roomCanvas && roomCanvas.getContext) roomSim(roomCanvas);
 
   /* --- Démo ferroviaire : plus court chemin (Dijkstra) et aiguillages ------- */
   function railDemo(root) {

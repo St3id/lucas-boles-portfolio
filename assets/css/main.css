@@ -566,41 +566,30 @@ a.media:hover img,
   color: var(--accent-on-field);
 }
 
-.radar-main {
+/* colonne de droite : la simulation animée, puis la carte réelle */
+.radar-visuals {
   grid-column: 7 / -1;
-  align-self: center;
+  display: grid;
+  gap: clamp(24px, 3vw, 40px);
+  align-content: start;
 }
 
-.radar-main .media {
-  aspect-ratio: 920 / 690;
-}
-
-/* les deux visuels secondaires se partagent la ligne du dessous */
-.radar-small {
-  grid-column: span 6;
-  margin-top: clamp(8px, 2vw, 24px);
-}
-
-.radar-small .media {
+.radar-visuals .media {
+  position: relative;
   aspect-ratio: 4 / 3;
 }
 
-.radar-scope {
-  display: grid;
-  place-items: center;
-  background: #0b1210;
-}
-
-.radar-canvas {
-  height: 92%;
-  width: auto;
-  aspect-ratio: 1;
+/* la toile recouvre l'image fixe, qui reste en repli sans JavaScript */
+.room-sim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 @media (max-width: 860px) {
   .radar-text,
-  .radar-main,
-  .radar-small {
+  .radar-visuals {
     grid-column: 1 / -1;
   }
 }
@@ -1243,19 +1232,6 @@ a.media:hover img,
   margin-top: 1.5em;
 }
 
-/* balayage lent posé sur la maquette de la veille 3D */
-.radar-main .media {
-  position: relative;
-}
-
-.sweep-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
 
 /* très petits écrans (320 px) : « Compétences » doit tenir sur une ligne */
 @media (max-width: 360px) {
