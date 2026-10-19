@@ -50,7 +50,7 @@
       shareCopied: "Message copié, il n'y a plus qu'à le coller.", shareManual: "Copier ce message : ",
       category: "Catégorie", catAll: "Tous", catNoflag: "Sans drapeau",
       podiumTitle: "Meilleurs temps en {level}", seeAll: "Tout le classement",
-      podiumEmpty: "Personne pour l'instant : le premier temps s'affichera ici.",
+      podiumEmpty: "Personne pour l'instant : le premier temps s'affichera ici.", podiumFree: "Place libre",
       lbLoading: "Chargement...", lbEmpty: "Personne pour l'instant. À vous de jouer !", lbError: "Classement indisponible pour le moment.",
       youAre: "Vos temps sont inscrits au nom de {p}.", youAreNot: "Gagnez une partie pour choisir votre pseudo.",
       pseudoLabel: "Pseudo pour le classement", send: "Inscrire",
@@ -110,7 +110,7 @@
       shareCopied: "Message copied, just paste it.", shareManual: "Copy this message: ",
       category: "Category", catAll: "All", catNoflag: "No flags",
       podiumTitle: "Best times on {level}", seeAll: "Full leaderboard",
-      podiumEmpty: "No one yet: the first time will show up here.",
+      podiumEmpty: "No one yet: the first time will show up here.", podiumFree: "Open spot",
       lbLoading: "Loading...", lbEmpty: "Nobody yet. Your turn!", lbError: "Leaderboard unavailable right now.",
       youAre: "Your times are recorded as {p}.", youAreNot: "Win a game to choose your name.",
       pseudoLabel: "Name for the leaderboard", send: "Submit",
@@ -589,24 +589,38 @@
       if (req === podiumReq) box.hidden = true;
     });
   }
+  // trois marches toujours présentes : une place vide donne envie de la prendre
+  var FLAG_SVG = '<svg class="ms-step-flag" viewBox="0 0 24 24" aria-hidden="true">' +
+    '<path class="pole" d="M7 3v19"/><path class="cloth" d="M8 4h11l-3.5 4.5L19 13H8z"/></svg>';
   function renderPodium(scores) {
-    var list = $("ms-podium-list");
+    var list = $("ms-podium-list"), box = $("ms-podium");
     list.textContent = "";
     $("ms-podium-empty").textContent = scores.length ? "" : TEXT.podiumEmpty;
-    scores.slice(0, 3).forEach(function (s, k) {
-      var li = document.createElement("li"), rank = document.createElement("span"),
-        who = document.createElement("span"), t = document.createElement("span");
-      rank.className = "rank";
-      rank.textContent = TEXT.ordinal(k + 1);
-      who.className = "who";
-      who.textContent = s.pseudo;
-      who.title = s.pseudo;
-      t.className = "t";
-      t.textContent = fmt(s.timeMs, true);
-      li.append(rank, who, t);
-      if (identity && sameName(s.pseudo, identity.pseudo)) li.classList.add("is-me");
+    for (var k = 0; k < 3; k++) {
+      var s = scores[k], li = document.createElement("li");
+      li.className = "ms-step" + (s ? "" : " is-empty");
+      var who = document.createElement("span"), t = document.createElement("span"), block = document.createElement("span"), rank = document.createElement("span");
+      who.className = "ms-step-who";
+      who.textContent = s ? s.pseudo : TEXT.podiumFree;
+      if (s) who.title = s.pseudo;
+      t.className = "ms-step-time";
+      t.textContent = s ? fmt(s.timeMs, true) : "--:--.-";
+      block.className = "ms-step-block";
+      rank.className = "ms-step-rank";
+      rank.textContent = String(k + 1);
+      rank.setAttribute("aria-hidden", "true");
+      block.appendChild(rank);
+      li.append(who, t);
+      li.insertAdjacentHTML("beforeend", FLAG_SVG);   // dessin fixe, aucune donnée du serveur dedans
+      li.appendChild(block);
+      li.setAttribute("aria-label", TEXT.ordinal(k + 1) + " : " + (s ? s.pseudo + ", " + fmt(s.timeMs, true) : TEXT.podiumFree));
+      if (s && identity && sameName(s.pseudo, identity.pseudo)) li.classList.add("is-me");
       list.appendChild(li);
-    });
+    }
+    // relance l'entrée des marches et des drapeaux
+    box.classList.remove("is-in");
+    void box.offsetWidth;
+    box.classList.add("is-in");
   }
 
   function setTabs(attr, value) {
