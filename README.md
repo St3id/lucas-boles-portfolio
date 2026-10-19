@@ -12,7 +12,8 @@ en/index.html            version anglaise, générée par tools/build.py
 mentions-legales.html    mentions légales
 confidentialite.html     politique de confidentialité (RGPD)
 404.html                 page d'erreur (chemins absolus, servie pour toute adresse inconnue)
-minesweeper.html         démineur (assets/css/minesweeper.css, assets/js/minesweeper.js)
+minesweeper.html         démineur (assets/css/minesweeper.css, assets/js/minesweeper.js, assets/js/ms-core.js)
+leaderboard/             serveur du classement du démineur (Cloudflare), guide dans leaderboard/README.md
 assets/css/main.css      styles (tokens de couleur et de typo en tête de fichier)
 assets/js/main.js        menu mobile, animations, radar, démo ferroviaire, mesure d'audience
 assets/vendor/           GSAP 3.13 + ScrollTrigger, hébergés ici (aucun CDN)
@@ -20,7 +21,7 @@ assets/fonts/            police Archivo (variable), hébergée ici (pas de Googl
 assets/img/              images WebP générées par tools/optimize_images.py
 assets/docs/             CV et analyse fonctionnelle (PDF)
 sitemap.xml, robots.txt, site.webmanifest, favicon.*
-_config.yml              exclut CLAUDE.md, README.md et tools/ du site publié
+_config.yml              exclut CLAUDE.md, README.md, tools/ et leaderboard/ du site publié
 ```
 
 ## Tâches courantes

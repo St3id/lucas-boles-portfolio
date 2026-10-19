@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ["assets/css/main.css", "assets/js/main.js", "assets/css/minesweeper.css", "assets/js/minesweeper.js"]
+ASSETS = ["assets/css/main.css", "assets/js/main.js", "assets/css/minesweeper.css", "assets/js/minesweeper.js", "assets/js/ms-core.js"]
 PAGES = ["index.html", "en/index.html", "mentions-legales.html", "confidentialite.html", "404.html", "minesweeper.html"]
 
 

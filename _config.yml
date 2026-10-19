@@ -3,4 +3,5 @@ exclude:
   - CLAUDE.md
   - README.md
   - tools/
+  - leaderboard/
   - assets/img/manifest.json

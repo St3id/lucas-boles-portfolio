@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- Tests de l'interface du démineur avec le serveur simulé : ouvrir http://localhost:8000/leaderboard/test-interface.html (python -m http.server à la racine du dépôt). -->
+<meta charset="utf-8">
+<body>
+<pre id="out">pending</pre>
+<iframe id="f" src="../minesweeper.html" style="width:1300px;height:900px"></iframe>
+<script>
+var log = [], step = 0;
+function ok(c, l) { log.push((c ? "OK    " : "ECHEC ") + l); }
+function tap(w, el) {
+  var r = el.getBoundingClientRect(), o = { bubbles: true, pointerType: "mouse", button: 0, clientX: r.left + 5, clientY: r.top + 5 };
+  el.dispatchEvent(new w.PointerEvent("pointerdown", o));
+  el.dispatchEvent(new w.PointerEvent("pointerup", o));
+}
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+// gagne la partie en cours en révélant les cases sûres, gap ms entre deux clics
+async function winGame(w, d, gap, flagFirst) {
+  var cells = function () { return d.querySelectorAll(".ms-board .ms-cell"); };
+  await wait(400);                                  // laisse la graine arriver du serveur
+  var g = w.__ms.game(), level = w.__ms.level();
+  tap(w, cells()[0]);
+  var b = w.MSCore.makeBoard(level, g.seed, 0);
+  if (flagFirst) { await wait(gap); var m = b.mine.indexOf(true); cells()[m].dispatchEvent(new w.MouseEvent("contextmenu", { bubbles: true, cancelable: true })); }
+  for (var i = 0; i < b.mine.length && !g.submitted && d.getElementById("ms-end").hidden; i++) {
+    if (!b.mine[i] && !cells()[i].classList.contains("is-open")) { await wait(gap); tap(w, cells()[i]); }
+  }
+  await wait(600);
+  return g;
+}
+f.onload = async function () {
+  step++;
+  var w = f.contentWindow, d = f.contentDocument;
+  if (step === 1) {
+    w.localStorage.clear();
+    w.localStorage.setItem("ms-api-dev", JSON.stringify("mock"));
+    w.location.reload();
+    return;
+  }
+  if (step !== 2) return;
+  await wait(500);
+  ok(!d.getElementById("ms-ranking-tile").hidden, "tuile Classement visible (serveur configuré)");
+
+  // 1re victoire : formulaire de pseudo
+  var g = await winGame(w, d, 150);
+  ok(g.ranked, "partie classée (graine reçue du serveur)");
+  ok(!d.getElementById("ms-rank-form").hidden, "formulaire de pseudo affiché à la 1re victoire");
+  ok(d.getElementById("ms-badges").textContent.indexOf("record") >= 0, "badges : " + d.getElementById("ms-badges").textContent);
+  ok(d.getElementById("ms-best").textContent !== "-", "record affiché : " + d.getElementById("ms-best").textContent);
+  var input = d.getElementById("ms-pseudo");
+  input.value = "Connard";
+  d.getElementById("ms-rank-form").requestSubmit();
+  await wait(400);
+  ok(/pas accepté/.test(d.getElementById("ms-rank-msg").textContent), "pseudo grossier refusé : " + d.getElementById("ms-rank-msg").textContent);
+  input.value = "Lucas38";
+  d.getElementById("ms-rank-form").requestSubmit();
+  await wait(400);
+  ok(/Inscrit au nom de Lucas38 : 1er/.test(d.getElementById("ms-rank-msg").textContent), "inscrit : " + d.getElementById("ms-rank-msg").textContent);
+  var id = JSON.parse(w.localStorage.getItem("ms-identity-v1"));
+  ok(id && id.pseudo === "Lucas38" && id.token, "pseudo et jeton mémorisés dans le navigateur");
+
+  // 2e victoire : inscription automatique, sans formulaire
+  d.getElementById("ms-end-new").click();
+  await winGame(w, d, 120);
+  ok(d.getElementById("ms-rank-form").hidden, "2e victoire : pas de formulaire");
+  ok(/Inscrit au nom de Lucas38/.test(d.getElementById("ms-rank-msg").textContent), "2e victoire inscrite automatiquement : " + d.getElementById("ms-rank-msg").textContent);
+
+  // classement affiché
+  d.getElementById("ms-end-close").click();
+  d.getElementById("ms-ranking-tile").click();
+  await wait(500);
+  var rows = d.querySelectorAll("#ms-rank-list li");
+  ok(rows.length === 1 && rows[0].classList.contains("is-me"), "classement : " + rows.length + " ligne(s), la mienne en surbrillance : " + (rows[0] && rows[0].textContent));
+  ok(/Lucas38/.test(d.getElementById("ms-rank-me").textContent), "« Vos temps sont inscrits au nom de Lucas38 »");
+  d.querySelector('[data-rank-cat="noflag"]').click();
+  await wait(400);
+  ok(d.querySelectorAll("#ms-rank-list li").length === 1, "catégorie Sans drapeau : partie sans drapeau présente");
+  d.querySelector("#ms-ranking [data-close]").click();
+
+  // un autre navigateur ne peut pas prendre « lucas38 » : on simule en oubliant l'identité
+  w.localStorage.removeItem("ms-identity-v1");
+  // (l'identité en mémoire de la page est toujours là : on teste donc via le serveur)
+  
+
+  // partie avec le code Konami : hors classement
+  var t = d.querySelector(".ms-title");
+  for (var k = 0; k < 30; k++) t.click();
+  ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"].forEach(function (key) { d.querySelector('[data-key="' + key + '"]').click(); });
+  await wait(900);
+  var cellsK = d.querySelectorAll(".ms-board .ms-cell");
+  tap(w, cellsK[0]);
+  await wait(200);
+  Array.prototype.forEach.call(d.querySelectorAll(".ms-board .ms-cell"), function (c) { if (!c.classList.contains("is-open") && !c.classList.contains("is-peek")) tap(w, c); });
+  await wait(500);
+  ok(/code secret/.test(d.getElementById("ms-rank-msg").textContent) && d.getElementById("ms-rank-form").hidden, "partie Konami : " + d.getElementById("ms-rank-msg").textContent);
+  ok(!/record/.test(d.getElementById("ms-badges").textContent), "partie Konami : pas de record");
+
+  document.getElementById("out").textContent = log.join("\n");
+};
+window.addEventListener("error", function (e) { log.push("ERREUR " + e.message); });
+</script>

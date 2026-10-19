@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; connect-src 'self' https://*.goatcounter.com; style-src 'self'; font-src 'self'; img-src 'self' data: https://*.goatcounter.com; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; connect-src 'self' https://*.goatcounter.com https://*.workers.dev; style-src 'self'; font-src 'self'; img-src 'self' data: https://*.goatcounter.com; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
   <title>Démineur - Lucas Boles</title>
-  <meta name="description" content="Un démineur codé en JavaScript pour le portfolio de Lucas Boles.">
+  <meta name="description" content="Un démineur codé en JavaScript pour le portfolio de Lucas Boles, avec records et classement.">
   <link rel="canonical" href="https://st3id.github.io/lucas-boles-portfolio/minesweeper.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Démineur - Lucas Boles">
@@ -20,8 +20,9 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=16e05981">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=b4741f60">
-  <script src="assets/js/minesweeper.js?v=6847e0de" defer></script>
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=16d2d25b">
+  <script src="assets/js/ms-core.js?v=cb55856e" defer></script>
+  <script src="assets/js/minesweeper.js?v=3dabf077" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -34,31 +35,37 @@
   </header>
 
   <main id="jeu" class="page wrap ms">
-    <h1 class="ms-title" data-i18n="title">Démineur</h1>
-    <p class="lead ms-lead" data-i18n="lead">Trouver toutes les cases sûres sans toucher une mine.</p>
+    <div class="ms-layout">
+      <div class="ms-side">
+        <h1 class="ms-title" data-i18n="title">Démineur</h1>
+        <p class="ms-lead" data-i18n="lead">Trouver toutes les cases sûres sans toucher une mine.</p>
 
-    <div class="ms-bar">
-      <div class="ms-levels" role="group" aria-label="Difficulté" data-i18n-aria="levels">
-        <button type="button" class="ms-level" data-level="easy" aria-pressed="true" data-i18n="easy">Facile</button>
-        <button type="button" class="ms-level" data-level="medium" aria-pressed="false" data-i18n="medium">Moyen</button>
-        <button type="button" class="ms-level" data-level="hard" aria-pressed="false" data-i18n="hard">Difficile</button>
+        <div class="ms-levels" role="group" aria-label="Difficulté" data-i18n-aria="levels">
+          <button type="button" class="ms-level" data-level="easy" aria-pressed="true" data-i18n="easy">Facile</button>
+          <button type="button" class="ms-level" data-level="medium" aria-pressed="false" data-i18n="medium">Moyen</button>
+          <button type="button" class="ms-level" data-level="hard" aria-pressed="false" data-i18n="hard">Difficile</button>
+        </div>
+
+        <dl class="ms-stats">
+          <div><dt data-i18n="minesLeft">Mines restantes</dt><dd id="ms-mines">10</dd></div>
+          <div><dt data-i18n="time">Temps</dt><dd id="ms-time">00:00</dd></div>
+          <div><dt data-i18n="record">Record</dt><dd id="ms-best">-</dd></div>
+        </dl>
+
+        <div class="ms-tools">
+          <button type="button" class="button" id="ms-new" data-i18n="newGame">Nouvelle partie</button>
+          <button type="button" class="ms-flag-mode" id="ms-flag-mode" aria-pressed="false" data-i18n="flagMode">Mode drapeau</button>
+        </div>
+
+        <p class="ms-status" id="ms-status" aria-live="polite"></p>
       </div>
-      <dl class="ms-stats">
-        <div><dt data-i18n="minesLeft">Mines restantes</dt><dd id="ms-mines">10</dd></div>
-        <div><dt data-i18n="time">Temps</dt><dd id="ms-time">00:00</dd></div>
-      </dl>
-    </div>
 
-    <div class="ms-tools">
-      <button type="button" class="ms-flag-mode" id="ms-flag-mode" aria-pressed="false" data-i18n="flagMode">Mode drapeau</button>
-      <button type="button" class="button" id="ms-new" data-i18n="newGame">Nouvelle partie</button>
+      <div class="ms-stage">
+        <div class="ms-board-wrap">
+          <div class="ms-board" id="ms-board" role="grid" aria-label="Grille du démineur" data-i18n-aria="board"></div>
+        </div>
+      </div>
     </div>
-
-    <div class="ms-board-wrap">
-      <div class="ms-board" id="ms-board" role="grid" aria-label="Grille du démineur" data-i18n-aria="board"></div>
-    </div>
-
-    <p class="ms-status" id="ms-status" aria-live="polite"></p>
 
     <div class="ms-more">
       <button type="button" class="ms-more-btn" data-open="ms-rules">
@@ -68,6 +75,10 @@
       <button type="button" class="ms-more-btn" data-open="ms-settings">
         <span class="ms-more-title" data-i18n="controls">Commandes</span>
         <span class="ms-more-sub" data-i18n="controlsSub">Drapeau, durée de l'appui long, raccourcis</span>
+      </button>
+      <button type="button" class="ms-more-btn" data-open="ms-ranking" id="ms-ranking-tile" hidden>
+        <span class="ms-more-title" data-i18n="ranking">Classement</span>
+        <span class="ms-more-sub" data-i18n="rankingSub">Les meilleurs temps, avec ou sans drapeau</span>
       </button>
     </div>
   </main>
@@ -123,10 +134,40 @@
     <button type="button" class="ms-reset" id="set-reset" data-i18n="reset">Réinitialiser les réglages</button>
   </dialog>
 
+  <dialog class="ms-sheet" id="ms-ranking" aria-labelledby="ms-ranking-title">
+    <div class="ms-sheet-head">
+      <h2 id="ms-ranking-title" data-i18n="ranking">Classement</h2>
+      <button type="button" class="ms-sheet-close" data-close aria-label="Fermer" data-i18n-aria="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="ms-tabs" role="group" aria-label="Difficulté" data-i18n-aria="levels">
+      <button type="button" class="ms-tab" data-rank-level="easy" aria-pressed="true" data-i18n="easy">Facile</button>
+      <button type="button" class="ms-tab" data-rank-level="medium" aria-pressed="false" data-i18n="medium">Moyen</button>
+      <button type="button" class="ms-tab" data-rank-level="hard" aria-pressed="false" data-i18n="hard">Difficile</button>
+    </div>
+    <div class="ms-tabs ms-tabs-cat" role="group" aria-label="Catégorie" data-i18n-aria="category">
+      <button type="button" class="ms-tab" data-rank-cat="all" aria-pressed="true" data-i18n="catAll">Tous</button>
+      <button type="button" class="ms-tab" data-rank-cat="noflag" aria-pressed="false" data-i18n="catNoflag">Sans drapeau</button>
+    </div>
+    <ol class="ms-rank-list" id="ms-rank-list"></ol>
+    <p class="ms-rank-state" id="ms-rank-state" aria-live="polite"></p>
+    <p class="ms-rank-me" id="ms-rank-me"></p>
+  </dialog>
+
   <div class="ms-end" id="ms-end" hidden>
     <div class="ms-end-card" role="dialog" aria-modal="true" aria-labelledby="ms-end-title">
       <h2 id="ms-end-title"></h2>
       <p id="ms-end-text"></p>
+      <p class="ms-badges" id="ms-badges"></p>
+      <div class="ms-rank-block" id="ms-rank-block" hidden>
+        <form class="ms-rank-form" id="ms-rank-form" novalidate>
+          <label for="ms-pseudo" data-i18n="pseudoLabel">Pseudo pour le classement</label>
+          <div class="ms-rank-row">
+            <input id="ms-pseudo" name="pseudo" maxlength="16" autocomplete="nickname" spellcheck="false" autocapitalize="off">
+            <button type="submit" class="button" data-i18n="send">Inscrire</button>
+          </div>
+        </form>
+        <p class="ms-rank-msg" id="ms-rank-msg" aria-live="polite"></p>
+      </div>
       <p class="ms-share-note" id="ms-share-note" aria-live="polite"></p>
       <div class="ms-end-actions">
         <button type="button" class="button" id="ms-end-new" data-i18n="newGame">Nouvelle partie</button>

@@ -1,38 +1,63 @@
-/* Démineur : reprend les tokens de main.css (fond, encre, accent, police). */
+/* Démineur : reprend les tokens de main.css (fond, encre, accent, police).
+   La grille est la pièce maîtresse, posée sur un panneau foncé comme le bloc
+   radar de l'accueil ; les commandes et les chiffres sont dans la colonne de gauche. */
 
 .ms {
-  padding-top: clamp(32px, 5vw, 72px);
+  padding-top: clamp(24px, 4vw, 56px);
 }
 
-.ms-title {
+/* --- Mise en page : colonne de commandes + scène de jeu ------------------- */
+.ms-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 4fr) 8fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+}
+
+.ms-side {
+  position: sticky;
+  top: 96px;
+  container-type: inline-size;
+}
+
+/* taille déduite de la largeur de la colonne : « Minesweeper » (le plus long)
+   tient sur une ligne, sans couper le mot */
+.ms .ms-title {
+  /* plus précis que « .page h1 » de main.css, qui couperait le mot */
+  max-width: none;
+  margin-bottom: 0;
+  hyphens: manual;
+  overflow-wrap: normal;
+  font-size: clamp(2rem, 11.5cqw, 5.5rem);
+  font-weight: 850;
+  font-stretch: 125%;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
   cursor: default;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 .ms-lead {
-  margin-bottom: clamp(24px, 3vw, 40px);
+  margin-top: 16px;
+  font-size: var(--step-lead);
+  line-height: 1.3;
+  max-width: 22ch;
 }
 
-.ms-bar,
-.ms-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 32px;
-}
-
-.ms-tools {
-  margin: 20px 0;
-}
-
-.ms-levels {
+.ms-levels,
+.ms-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
+.ms-levels {
+  margin-top: clamp(24px, 3vw, 36px);
+}
+
 .ms-level,
+.ms-tab,
 .ms-flag-mode,
 .ms-end-close {
   font: inherit;
@@ -47,6 +72,7 @@
 }
 
 .ms-level:hover,
+.ms-tab:hover,
 .ms-flag-mode:hover,
 .ms-end-close:hover {
   background: var(--ink);
@@ -54,19 +80,25 @@
 }
 
 .ms-level:active,
+.ms-tab:active,
 .ms-flag-mode:active {
   transform: scale(0.96);
 }
 
 .ms-level[aria-pressed="true"],
+.ms-tab[aria-pressed="true"],
 .ms-flag-mode[aria-pressed="true"] {
   background: var(--accent);
   color: var(--accent-ink);
 }
 
+/* chiffres en grand : c'est ce qu'on regarde pendant la partie */
 .ms-stats {
-  display: flex;
-  gap: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: 8px clamp(20px, 3vw, 40px);
+  margin-top: clamp(28px, 3vw, 40px);
 }
 
 .ms-stats dt {
@@ -75,29 +107,61 @@
 }
 
 .ms-stats dd {
-  font-size: 1.75rem;
-  font-weight: 750;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 800;
   font-stretch: 112%;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
-/* La grille défile si elle dépasse (niveau Difficile sur téléphone). */
+.ms-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: clamp(24px, 3vw, 36px);
+}
+
+.ms-status {
+  min-height: 1.6em;
+  margin-top: 16px;
+  font-size: var(--step-small);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.ms-status.is-win {
+  color: var(--accent);
+}
+
+.ms-status.is-lose {
+  color: #b42318;
+}
+
+/* --- Scène : la grille sur fond foncé ------------------------------------- */
+.ms-stage {
+  background: var(--field);
+  padding: clamp(16px, 3vw, 40px);
+  min-height: clamp(320px, 42vw, 640px);
+  display: grid;
+  place-items: center;
+}
+
+/* la grille défile si elle dépasse (niveau Difficile sur téléphone) */
 .ms-board-wrap {
   overflow: auto;
   max-width: 100%;
-  max-height: 78vh;
+  max-height: 80vh;
+  width: 100%;
   -webkit-overflow-scrolling: touch;
 }
 
 .ms-board {
   --cell: 34px;
   display: grid;
-  gap: 2px;
+  gap: 3px;
   width: max-content;
   margin-inline: auto;
-  padding: 2px;
-  background: #c9ccc4;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -105,32 +169,35 @@
 }
 
 .ms-cell {
+  position: relative;
+  overflow: hidden;
   width: var(--cell);
   height: var(--cell);
   padding: 0;
   border: 0;
-  background: #e4e6df;
+  background: #2b3631;
   font: inherit;
   font-size: calc(var(--cell) * 0.5);
   font-weight: 800;
   line-height: 1;
-  color: var(--ink);
+  color: var(--on-field);
   cursor: pointer;
   display: grid;
   place-items: center;
+  transition: background-color 0.12s ease;
 }
 
 .ms-cell:hover {
-  background: #d5d8cf;
+  background: #3a4842;
 }
 
 .ms-cell:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--accent-on-field);
   outline-offset: -3px;
 }
 
 .ms-cell.is-open {
-  background: var(--ground);
+  background: #e7e9e2;
   cursor: default;
 }
 
@@ -143,251 +210,31 @@
 .ms-cell.is-open.n7 { color: #111814; }
 .ms-cell.is-open.n8 { color: #57534e; }
 
+.ms-cell.is-flag {
+  color: #ffd23b;
+}
+
 .ms-cell.is-mine {
   background: #f3d2cc;
+  color: #111814;
 }
 
 .ms-cell.is-boom {
   background: #b42318;
+  color: #ffffff;
 }
 
 .ms-cell.is-wrong {
   background: #f3d2cc;
+  color: #b42318;
   text-decoration: line-through;
 }
 
 .ms-cell.is-peek {
-  box-shadow: inset 0 0 0 2px #b42318;
+  box-shadow: inset 0 0 0 2px #e5484d;
 }
 
-.ms-status {
-  min-height: 1.6em;
-  margin-top: 16px;
-  font-weight: 600;
-}
-
-.ms-status.is-win {
-  color: var(--accent);
-}
-
-.ms-status.is-lose {
-  color: #b42318;
-}
-
-/* Fin de partie */
-.ms-end {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  background: rgb(17 24 20 / 0.55);
-}
-
-.ms-end[hidden] {
-  display: none;
-}
-
-.ms-end-card {
-  width: min(420px, 100%);
-  padding: 32px;
-  background: var(--ground);
-  box-shadow: 0 24px 48px rgb(17 24 20 / 0.3);
-}
-
-.ms-end-card h2 {
-  font-size: 2rem;
-  font-weight: 800;
-  font-stretch: 112%;
-  letter-spacing: -0.02em;
-}
-
-.ms-end-card p {
-  margin-top: 8px;
-}
-
-.ms-end-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-@media (max-width: 520px) {
-  .ms-stats {
-    gap: 24px;
-  }
-
-  .ms-stats dd {
-    font-size: 1.4rem;
-  }
-}
-
-/* téléphone : on garde la langue et le retour, le nom prendrait deux lignes */
-@media (max-width: 520px) {
-  .ms-page .site-header .wordmark {
-    display: none;
-  }
-
-  .ms-page .site-header .lang-link {
-    margin-right: auto;
-  }
-}
-
-/* Fenêtre du code secret : une croix et deux boutons, façon manette */
-.ms-code {
-  position: fixed;
-  inset: 0;
-  z-index: 110;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  background: rgb(6 16 12 / 0.75);
-}
-
-.ms-code[hidden] {
-  display: none;
-}
-
-.ms-code-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: clamp(28px, 7vw, 64px);
-  padding: clamp(40px, 6vw, 56px) clamp(24px, 6vw, 56px);
-  background: var(--field);
-  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
-}
-
-.ms-code-card.is-wrong {
-  animation: ms-shake 0.35s ease;
-}
-
-.ms-code-card.is-ok .ms-key {
-  background: var(--accent-on-field);
-  color: var(--field);
-}
-
-@keyframes ms-shake {
-  20%, 60% { transform: translateX(-8px); }
-  40%, 80% { transform: translateX(8px); }
-}
-
-.ms-code-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  background: none;
-  color: var(--on-field-soft);
-  cursor: pointer;
-}
-
-.ms-code-close svg {
-  width: 22px;
-  height: 22px;
-  stroke: currentColor;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  fill: none;
-}
-
-.ms-code-close:hover {
-  color: var(--on-field);
-}
-
-.ms-pad {
-  display: grid;
-  grid-template-columns: repeat(3, var(--key));
-  grid-template-rows: repeat(3, var(--key));
-  --key: clamp(58px, 16vw, 72px);
-}
-
-.ms-key-up { grid-column: 2; grid-row: 1; }
-.ms-key-left { grid-column: 1; grid-row: 2; }
-.ms-pad-center { grid-column: 2; grid-row: 2; background: #26302b; }
-.ms-key-right { grid-column: 3; grid-row: 2; }
-.ms-key-down { grid-column: 2; grid-row: 3; }
-
-.ms-key {
-  display: grid;
-  place-items: center;
-  border: 0;
-  background: #26302b;
-  color: var(--on-field);
-  font: inherit;
-  font-size: 1.5rem;
-  font-weight: 800;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
-}
-
-.ms-key svg {
-  width: 62%;
-  height: 62%;
-  fill: currentColor;
-}
-
-.ms-key:hover {
-  background: #33403a;
-}
-
-.ms-key.is-down {
-  background: var(--accent-on-field);
-  color: var(--field);
-  transform: scale(0.94);
-}
-
-.ms-ab {
-  display: flex;
-  gap: 16px;
-  /* A un peu plus haut que B, comme sur la manette */
-  align-items: flex-end;
-}
-
-.ms-key-round {
-  width: clamp(56px, 14vw, 72px);
-  height: clamp(56px, 14vw, 72px);
-  border-radius: 50%;
-  background: #b42318;
-  color: #ffffff;
-}
-
-.ms-key-round:hover {
-  background: #c9372b;
-}
-
-.ms-ab .ms-key-round:last-child {
-  margin-bottom: 24px;
-}
-
-@media (max-width: 420px) {
-  .ms-code-card {
-    flex-direction: column;
-    gap: 28px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ms-code-card.is-wrong {
-    animation: none;
-  }
-}
-
-
-/* --- Appui long : une barre se remplit sous la case --------------------- */
-.ms-cell {
-  position: relative;
-  overflow: hidden;
-}
-
+/* appui long : une barre se remplit sous la case */
 .ms-cell.is-holding::after {
   content: "";
   position: absolute;
@@ -395,7 +242,7 @@
   right: 0;
   bottom: 0;
   height: 4px;
-  background: var(--accent);
+  background: var(--accent-on-field);
   transform-origin: left;
   animation: ms-hold var(--hold, 500ms) linear forwards;
 }
@@ -405,25 +252,29 @@
   to { transform: scaleX(1); }
 }
 
-/* --- Tuiles Règles / Commandes ---------------------------------------- */
+/* --- Règles / Commandes / Classement -------------------------------------- */
 .ms-more {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--gap);
-  margin-top: clamp(40px, 5vw, 72px);
+  margin-top: clamp(32px, 4vw, 56px);
 }
 
 .ms-more-btn {
   display: grid;
   gap: 6px;
   text-align: left;
-  padding: clamp(20px, 3vw, 32px);
+  padding: clamp(20px, 2.5vw, 28px);
   border: 0;
   background: var(--surface);
   color: var(--ink);
   font: inherit;
   cursor: pointer;
   transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s var(--ease-out);
+}
+
+.ms-more-btn[hidden] {
+  display: none;
 }
 
 .ms-more-btn:hover {
@@ -445,12 +296,6 @@
 .ms-more-sub {
   font-size: var(--step-small);
   opacity: 0.8;
-}
-
-@media (max-width: 520px) {
-  .ms-more {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* --- Fenêtres (élément dialog natif) ------------------------------------ */
@@ -655,13 +500,167 @@
   color: var(--accent);
 }
 
-/* mouvement réduit : main.css coupe les animations, mais la barre sert de
-   repère de durée. Elle apparaît d'un coup à la fin, sans glisser. */
-@media (prefers-reduced-motion: reduce) {
-  .ms-cell.is-holding::after {
-    animation-duration: var(--hold, 500ms) !important;
-    animation-timing-function: steps(1, end);
-  }
+/* --- Classement ------------------------------------------------------------- */
+.ms-tabs-cat {
+  margin-top: 8px;
+}
+
+.ms-rank-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  counter-reset: rank;
+}
+
+.ms-rank-list li {
+  counter-increment: rank;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ms-rank-list li:nth-child(odd) {
+  background: var(--surface);
+}
+
+.ms-rank-list li::before {
+  content: counter(rank);
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.ms-rank-list li:nth-child(-n + 3)::before {
+  color: var(--accent);
+}
+
+.ms-rank-list .who {
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.ms-rank-list .t {
+  font-weight: 750;
+}
+
+.ms-rank-list li.is-me {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.ms-rank-list li.is-me::before {
+  color: var(--accent-ink);
+}
+
+.ms-rank-state,
+.ms-rank-me {
+  margin-top: 12px;
+  font-size: var(--step-small);
+  color: var(--ink-soft);
+}
+
+.ms-rank-state:empty,
+.ms-rank-me:empty {
+  display: none;
+}
+
+/* --- Fin de partie ---------------------------------------------------------- */
+.ms-end {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(17 24 20 / 0.55);
+}
+
+.ms-end[hidden] {
+  display: none;
+}
+
+.ms-end-card {
+  width: min(460px, 100%);
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  padding: 32px;
+  background: var(--ground);
+  box-shadow: 0 24px 48px rgb(17 24 20 / 0.3);
+}
+
+.ms-end-card h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+}
+
+.ms-end-card > p {
+  margin-top: 8px;
+}
+
+.ms-badges {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.ms-badges:empty,
+.ms-share-note:empty,
+.ms-rank-msg:empty {
+  display: none;
+}
+
+.ms-rank-block {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--surface);
+}
+
+.ms-rank-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ms-rank-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ms-rank-row input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 2px solid transparent;
+  background: var(--ground);
+  color: var(--ink);
+  font: inherit;
+}
+
+.ms-rank-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ms-rank-row .button {
+  min-height: 48px;
+}
+
+.ms-rank-msg {
+  margin-top: 10px;
+  font-size: var(--step-small);
+  font-weight: 600;
+}
+
+.ms-rank-msg.is-ok {
+  color: var(--accent);
+}
+
+.ms-rank-msg.is-error {
+  color: #b42318;
 }
 
 .ms-share-note {
@@ -671,6 +670,195 @@
   overflow-wrap: anywhere;
 }
 
-.ms-share-note:empty {
+.ms-end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* --- Fenêtre du code secret : une croix et deux boutons, façon manette ---- */
+.ms-code {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(6 16 12 / 0.75);
+}
+
+.ms-code[hidden] {
   display: none;
+}
+
+.ms-code-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(28px, 7vw, 64px);
+  padding: clamp(40px, 6vw, 56px) clamp(24px, 6vw, 56px);
+  background: var(--field);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
+}
+
+.ms-code-card.is-wrong {
+  animation: ms-shake 0.35s ease;
+}
+
+.ms-code-card.is-ok .ms-key {
+  background: var(--accent-on-field);
+  color: var(--field);
+}
+
+@keyframes ms-shake {
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.ms-code-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--on-field-soft);
+  cursor: pointer;
+}
+
+.ms-code-close svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.ms-code-close:hover {
+  color: var(--on-field);
+}
+
+.ms-pad {
+  display: grid;
+  grid-template-columns: repeat(3, var(--key));
+  grid-template-rows: repeat(3, var(--key));
+  --key: clamp(58px, 16vw, 72px);
+}
+
+.ms-key-up { grid-column: 2; grid-row: 1; }
+.ms-key-left { grid-column: 1; grid-row: 2; }
+.ms-pad-center { grid-column: 2; grid-row: 2; background: #26302b; }
+.ms-key-right { grid-column: 3; grid-row: 2; }
+.ms-key-down { grid-column: 2; grid-row: 3; }
+
+.ms-key {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: #26302b;
+  color: var(--on-field);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.ms-key svg {
+  width: 62%;
+  height: 62%;
+  fill: currentColor;
+}
+
+.ms-key:hover {
+  background: #33403a;
+}
+
+.ms-key.is-down {
+  background: var(--accent-on-field);
+  color: var(--field);
+  transform: scale(0.94);
+}
+
+.ms-ab {
+  display: flex;
+  gap: 16px;
+  /* A un peu plus haut que B, comme sur la manette */
+  align-items: flex-end;
+}
+
+.ms-key-round {
+  width: clamp(56px, 14vw, 72px);
+  height: clamp(56px, 14vw, 72px);
+  border-radius: 50%;
+  background: #b42318;
+  color: #ffffff;
+}
+
+.ms-key-round:hover {
+  background: #c9372b;
+}
+
+.ms-ab .ms-key-round:last-child {
+  margin-bottom: 24px;
+}
+
+/* --- Tablette et téléphone ----------------------------------------------------- */
+@media (max-width: 960px) {
+  .ms-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ms-side {
+    position: static;
+  }
+
+  .ms-lead {
+    max-width: 40ch;
+  }
+
+  .ms-stage {
+    min-height: 0;
+    margin-inline: calc(var(--margin) * -1);
+  }
+}
+
+@media (max-width: 520px) {
+  /* le nom prendrait deux lignes : on garde la langue et le retour */
+  .ms-page .site-header .wordmark {
+    display: none;
+  }
+
+  .ms-page .site-header .lang-link {
+    margin-right: auto;
+  }
+
+  .ms-stats {
+    gap: 6px 22px;
+  }
+
+  .ms-code-card {
+    flex-direction: column;
+    gap: 28px;
+  }
+}
+
+/* mouvement réduit : main.css coupe les animations, mais la barre d'appui long
+   sert de repère de durée. Elle apparaît d'un coup à la fin, sans glisser. */
+@media (prefers-reduced-motion: reduce) {
+  .ms-cell.is-holding::after {
+    animation-duration: var(--hold, 500ms) !important;
+    animation-timing-function: steps(1, end);
+  }
+
+  .ms-code-card.is-wrong {
+    animation: none;
+  }
 }

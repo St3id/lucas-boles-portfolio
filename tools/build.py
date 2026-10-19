@@ -2,7 +2,8 @@
 
     python tools/build.py
 
-1. génère en/index.html depuis index.html (s'arrête si une traduction manque) ;
+1. recopie le cœur du démineur (ms-core.js) dans le serveur du classement ;
+   génère en/index.html depuis index.html (s'arrête si une traduction manque) ;
 2. met à jour les empreintes ?v= des CSS et JS (contre le cache des navigateurs) ;
 3. met la date du jour dans sitemap.xml.
 """
@@ -21,6 +22,16 @@ def run(script, *args):
     if result.returncode:
         sys.exit(f"Arrêt : {script} a échoué, rien n'a été mis à jour après lui.")
 
+
+# le cœur du démineur doit être identique dans le jeu et sur le serveur du classement
+core = (ROOT / "assets/js/ms-core.js").read_text(encoding="utf-8")
+block = core[core.index("// --- CORE START"):core.index("// --- CORE END")]
+worker_path = ROOT / "leaderboard/worker.js"
+worker = worker_path.read_text(encoding="utf-8")
+synced = worker[:worker.index("// --- CORE START")] + block + worker[worker.index("// --- CORE END"):]
+if synced != worker:
+    worker_path.write_text(synced, encoding="utf-8")
+    print("leaderboard/worker.js : cœur du démineur mis à jour (à recoller dans Cloudflare)")
 
 run("build_en.py", ".")
 run("version_assets.py")

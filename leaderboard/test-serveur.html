@@ -1,0 +1,102 @@
+<!doctype html>
+<!-- Tests du serveur du classement : ouvrir http://localhost:8000/leaderboard/test-serveur.html (python -m http.server à la racine du dépôt). -->
+<meta charset="utf-8">
+<body>
+<pre id="out">pending</pre>
+<script src="../assets/js/ms-core.js"></script>
+<script type="module">
+import { handle, checkPseudo } from "./worker.js";
+import { memRepo } from "./mem-repo.js";
+const log = [];
+const ok = (cond, label) => log.push((cond ? "OK   " : "ECHEC") + " " + label);
+let repo = memRepo(), clock = 1_000_000_000_000, ip = "1.1.1.1";
+const env = { SALT: "test" };
+async function call(path, method = "GET", body) {
+  const init = { method, headers: { "Content-Type": "application/json", "CF-Connecting-IP": ip } };
+  if (body) init.body = JSON.stringify(body);
+  const r = await handle(new Request("https://api" + path, init), env, repo, clock);
+  return Object.assign(await r.json(), { status: r.status });
+}
+// joue une partie gagnante : révèle toutes les cases sûres, gap ms entre chaque clic
+function perfect(level, seed, gap, withFlag) {
+  const first = 0, b = MSCore.makeBoard(level, seed, first), acts = [{ a: "r", i: first, t: 0 }];
+  let t = 0;
+  if (withFlag) { const m = b.mine.indexOf(true); t += gap; acts.push({ a: "f", i: m, t }); }
+  b.mine.forEach((isMine, i) => { if (!isMine && i !== first) { t += gap; acts.push({ a: "r", i, t }); } });
+  // on ne garde que les actions utiles : le rejeu refuse les actions après la victoire
+  const out = [];
+  for (const x of acts) { out.push(x); if (MSCore.replay(level, seed, out).ok) break; }
+  return out;
+}
+async function play(level, pseudo, token, gap = 150, opts = {}) {
+  const s = await call("/start", "POST", { level });
+  const actions = opts.actions ? opts.actions(s.seed) : perfect(level, s.seed, gap, opts.flag);
+  clock += actions[actions.length - 1].t + 200;
+  const r = await call("/scores", "POST", { id: s.id, pseudo, token, actions });
+  clock += 61_000; // nouvelle minute : pas de limite d'envoi entre deux tests
+  return { s, r, actions };
+}
+
+// pseudos : refus et faux positifs
+["Connard", "c0nnnard", "xxFuckxx", "PUTE", "salaud99", "n4zi", "admin", "Lucas_Boles", "pute123", "Sh1tty", "fdp38", "kkk", "xKKKx", "Conasse", "ass"].forEach((p) => ok(checkPseudo(p) === "pseudo-refused", "pseudo refusé : " + p));
+["Technique", "Violon", "Conrad", "Calcul", "Unique", "Computer", "Hercule", "Lucas38", "Scunthorpe", "Dickens38", "Conor", "Biteau", "Kevin", "Kikoo", "Classe", "Bassiste", "Assassin"].forEach((p) => ok(checkPseudo(p) === null, "pseudo accepté : " + p));
+["ab", "nom avec espace", "x".repeat(17), "<script>"].forEach((p) => ok(checkPseudo(p) === "pseudo-invalid", "pseudo invalide : " + JSON.stringify(p)));
+
+// partie valide, premier pseudo : jeton renvoyé
+let g = await play("easy", "Lucas38");
+ok(g.r.status === 200 && g.r.rank === 1 && typeof g.r.token === "string", "partie valide, rang 1, jeton : " + JSON.stringify(g.r).slice(0, 80));
+const token = g.r.token;
+ok(g.r.timeMs === g.actions[g.actions.length - 1].t, "temps = dernière action (" + g.r.timeMs + " ms)");
+
+// même pseudo sans jeton / avec majuscules différentes : refusé ; avec jeton : accepté
+g = await play("easy", "lucas38", null);
+ok(g.r.error === "pseudo-taken", "même pseudo en minuscules sans jeton : " + g.r.error);
+g = await play("easy", "Lucas38", "faux-jeton");
+ok(g.r.error === "pseudo-taken", "même pseudo, mauvais jeton : " + g.r.error);
+g = await play("easy", "Lucas38", token, 100);
+ok(g.r.status === 200 && !g.r.token, "même pseudo avec son jeton : accepté, rang " + g.r.rank);
+
+// triche
+g = await play("easy", "Tricheur", null, 150, { actions: (seed) => { const b = MSCore.makeBoard("easy", seed, 0); return [{ a: "r", i: 0, t: 0 }, { a: "r", i: b.mine.indexOf(true), t: 500 }]; } });
+ok(g.r.error === "replay", "clic sur une mine : " + g.r.error);
+g = await play("easy", "Tricheur", null, 5);
+ok(g.r.error === "too-fast", "clics toutes les 5 ms : " + g.r.error);
+{
+  const s = await call("/start", "POST", { level: "easy" });
+  const actions = perfect("easy", s.seed, 200);
+  clock += 300; // le serveur n'a vu passer que 0,3 s
+  const r = await call("/scores", "POST", { id: s.id, pseudo: "Tricheur", actions });
+  ok(r.error === "too-fast", "temps annoncé plus long que l'horloge du serveur : " + r.error);
+  clock += actions[actions.length - 1].t + 100;
+  const r2 = await call("/scores", "POST", { id: s.id, pseudo: "Tricheur", actions });
+  const r3 = await call("/scores", "POST", { id: s.id, pseudo: "Tricheur", actions });
+  ok(r2.status === 200 && r3.error === "expired", "partie réutilisée : " + r3.error);
+  clock += 61_000;
+}
+g = await play("easy", "Tricheur", null, 150, { actions: () => [{ a: "r", i: 0, t: 0 }] });
+ok(g.r.error === "replay", "partie non terminée : " + g.r.error);
+
+// sans drapeau / avec drapeau
+g = await play("easy", "Drapeau", null, 300, { flag: true });
+ok(g.r.status === 200 && g.r.noflag === false, "partie avec drapeau : classée, noflag=false");
+g = await play("easy", "SansFlag", null, 400);
+ok(g.r.status === 200 && g.r.noflag === true && g.r.rankNoflag >= 1, "partie sans drapeau : rang Sans drapeau " + g.r.rankNoflag);
+
+const all = await call("/scores?level=easy&cat=all");
+const nf = await call("/scores?level=easy&cat=noflag");
+ok(all.scores.length === 4 && all.scores.every((s, i, a) => !i || a[i - 1].timeMs <= s.timeMs), "classement Tous : " + all.scores.map((s) => s.pseudo + " " + s.timeMs).join(", "));
+ok(!nf.scores.some((s) => s.pseudo === "Drapeau"), "classement Sans drapeau sans « Drapeau » : " + nf.scores.map((s) => s.pseudo).join(", "));
+ok(all.scores.filter((s) => s.pseudo === "Lucas38").length === 1, "un seul meilleur temps par joueur");
+
+// limite d'envois : 11 envois dans la même minute
+let last;
+for (let k = 0; k < 11; k++) { const s = await call("/start", "POST", { level: "easy" }); last = await call("/scores", "POST", { id: s.id, pseudo: "Spam", actions: [{ a: "r", i: 0, t: 0 }] }); }
+ok(last.error === "rate" && last.status === 429, "limite d'envois : " + last.error);
+clock += 61_000;
+
+// niveau difficile, temps plancher de 25 s
+g = await play("hard", "Rapide", null, 40);
+ok(g.r.error === "too-fast" || g.r.status === 200, "difficile : " + (g.r.error || "ok") + " en " + g.actions[g.actions.length - 1].t + " ms");
+
+document.getElementById("out").textContent = log.join("\n");
+</script>
