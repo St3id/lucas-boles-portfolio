@@ -507,6 +507,10 @@ a.media:hover img,
   .now-intro {
     position: static;
   }
+
+  .now-roles {
+    margin-top: 24px;
+  }
 }
 
 /* --- Projects ---------------------------------------------------------------- */
@@ -950,8 +954,10 @@ a.media:hover img,
 
 /* --- En dehors du travail ---------------------------------------------------- */
 
+/* largeur fixée : sinon min-height + aspect-ratio élargissent l'image sur mobile */
 .outside-hero {
   position: relative;
+  width: 100%;
   aspect-ratio: 16 / 7;
   min-height: 320px;
 }
@@ -1117,8 +1123,13 @@ a.media:hover img,
   color: var(--accent-on-field);
 }
 
+/* « Lucas Boles » mesure 7,17 fois la taille de police : on la déduit de la largeur utile */
+.site-footer .wrap {
+  container-type: inline-size;
+}
+
 .footer-name {
-  font-size: clamp(3.5rem, 15.4vw, 15rem);
+  font-size: calc(100cqw / 7.35);
   font-weight: 850;
   font-stretch: 125%;
   letter-spacing: -0.05em;
@@ -1160,6 +1171,15 @@ a.media:hover img,
   line-height: 0.92;
   margin-bottom: 24px;
   max-width: 16ch;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* sur téléphone, la largeur normale évite qu'un long mot (« confidentialité ») déborde */
+@media (max-width: 520px) {
+  .page h1 {
+    font-stretch: 100%;
+  }
 }
 
 .page h2 {
@@ -1221,4 +1241,25 @@ a.media:hover img,
   flex-wrap: wrap;
   gap: 8px 28px;
   margin-top: 1.5em;
+}
+
+/* balayage lent posé sur la maquette de la veille 3D */
+.radar-main .media {
+  position: relative;
+}
+
+.sweep-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* très petits écrans (320 px) : « Compétences » doit tenir sur une ligne */
+@media (max-width: 360px) {
+  .section-title {
+    font-size: 2rem;
+  }
 }

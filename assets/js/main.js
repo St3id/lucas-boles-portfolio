@@ -174,6 +174,72 @@
   var radarCanvas = document.querySelector(".radar-canvas");
   if (radarCanvas && radarCanvas.getContext) radar(radarCanvas);
 
+  /* --- Balayage sur la maquette de la veille 3D ----------------------------
+     Le faisceau part du capteur (point rouge de l'image) et tourne à plat sur
+     le sol de la pièce : un cercle aplati pour suivre la perspective. */
+  function sweepOverlay(canvas) {
+    var ctx = canvas.getContext("2d");
+    var SENSOR_X = 0.467, SENSOR_Y = 0.448, FLATTEN = 0.42, TURN_MS = 12000;
+    var w = 0, h = 0, dpr = 1, angle = 0, last = 0, running = false;
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth;
+      h = canvas.clientHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+    }
+
+    function draw() {
+      var R = w * 0.6;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      ctx.translate(w * SENSOR_X, h * SENSOR_Y);
+      ctx.scale(1, FLATTEN);
+      for (var s = 0; s < 30; s++) {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, R, angle - (s + 1) * 0.025, angle - s * 0.025);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(127, 209, 174, " + (0.16 * (1 - s / 30)).toFixed(3) + ")";
+        ctx.fill();
+      }
+      ctx.strokeStyle = "rgba(127, 209, 174, 0.55)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(angle) * R, Math.sin(angle) * R);
+      ctx.stroke();
+    }
+
+    function step(now) {
+      if (!running) return;
+      var dt = Math.min(now - (last || now), 50);
+      last = now;
+      angle = (angle + (dt / TURN_MS) * Math.PI * 2) % (Math.PI * 2);
+      draw();
+      requestAnimationFrame(step);
+    }
+
+    // sans animation demandée, l'image reste telle quelle
+    if (reducedMotion) return;
+    resize();
+    window.addEventListener("resize", resize);
+    new IntersectionObserver(function (entries) {
+      var visible = entries[0].isIntersecting;
+      if (visible && !running) {
+        running = true;
+        last = 0;
+        requestAnimationFrame(step);
+      } else if (!visible) {
+        running = false;
+      }
+    }).observe(canvas);
+  }
+
+  var sweepCanvas = document.querySelector(".sweep-overlay");
+  if (sweepCanvas && sweepCanvas.getContext) sweepOverlay(sweepCanvas);
+
   /* --- Démo ferroviaire : plus court chemin (Dijkstra) et aiguillages ------- */
   function railDemo(root) {
     var SVG = "http://www.w3.org/2000/svg";
