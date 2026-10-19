@@ -732,6 +732,35 @@ a.media:hover img,
   }
 }
 
+/* Ferroviaire : schéma et cartes KiCad, même hauteur grâce aux proportions des colonnes */
+.rail-boards {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.458fr 0.551fr;
+  gap: var(--gap);
+  margin-top: clamp(16px, 2vw, 32px);
+  align-items: start;
+}
+
+.rail-boards .media {
+  display: block;
+  background: #ffffff;
+}
+
+.rail-boards img {
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .rail-boards {
+    grid-template-columns: 1fr;
+  }
+
+  .rail-boards figure:last-child .media {
+    max-width: 320px;
+  }
+}
+
 /* Transport sur rail */
 .tsr-figure {
   grid-column: 1 / span 6;

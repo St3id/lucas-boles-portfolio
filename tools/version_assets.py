@@ -1,4 +1,4 @@
-"""Ajoute une empreinte du contenu aux liens vers main.css et main.js (?v=...).
+"""Ajoute une empreinte du contenu aux liens vers les CSS et JS du site (?v=...).
 
 Usage : python tools/version_assets.py
 
@@ -11,8 +11,8 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ["assets/css/main.css", "assets/js/main.js"]
-PAGES = ["index.html", "en/index.html", "mentions-legales.html", "confidentialite.html", "404.html"]
+ASSETS = ["assets/css/main.css", "assets/js/main.js", "assets/css/minesweeper.css", "assets/js/minesweeper.js"]
+PAGES = ["index.html", "en/index.html", "mentions-legales.html", "confidentialite.html", "404.html", "minesweeper.html"]
 
 
 def main() -> None:

@@ -19,6 +19,9 @@ OUT = ROOT / "assets" / "img"
 WIDTHS = (480, 960, 1600)
 QUALITY = 78
 
+# dessins à traits fins (schémas, routages) : moins de compression pour rester nets
+QUALITY_OVERRIDE = {"rail-schema": 92, "rail-pcb": 90}
+
 # recadrages (largeur/hauteur, centre horizontal) appliqués avant l'export
 CROPS = {"portrait": (4 / 5, 0.48)}
 
@@ -32,6 +35,8 @@ SOURCES = {
     "Robot suiveur de ligne photo de case.png": "robot-piste",
     "radar-veille-maquette.png": "radar-veille",
     "radar-carte-simulation.png": "radar-carte",
+    "rail-schema-electrique.png": "rail-schema",
+    "rail-cartes-pcb.png": "rail-pcb",
     "CEA.png": "cea",
     "Photo CNRS.jpg": "cnrs",
     "SDMR.jpg": "sdmr",
@@ -59,7 +64,7 @@ def export(src: Path, slug: str) -> dict:
         if sizes and w <= sizes[-1]:
             break
         h = round(im.height * w / im.width)
-        im.resize((w, h), Image.LANCZOS).save(OUT / f"{slug}-{w}.webp", "WEBP", quality=QUALITY, method=6)
+        im.resize((w, h), Image.LANCZOS).save(OUT / f"{slug}-{w}.webp", "WEBP", quality=QUALITY_OVERRIDE.get(slug, QUALITY), method=6)
         sizes.append(w)
     return {"w": im.width, "h": im.height, "sizes": sizes}
 

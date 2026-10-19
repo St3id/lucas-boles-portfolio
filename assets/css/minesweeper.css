@@ -1,0 +1,253 @@
+/* Démineur : reprend les tokens de main.css (fond, encre, accent, police). */
+
+.ms {
+  padding-top: clamp(32px, 5vw, 72px);
+}
+
+.ms-title {
+  cursor: default;
+  user-select: none;
+}
+
+.ms-lead {
+  margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.ms-bar,
+.ms-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+}
+
+.ms-tools {
+  margin: 20px 0;
+}
+
+.ms-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ms-level,
+.ms-flag-mode,
+.ms-end-close {
+  font: inherit;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s var(--ease-out);
+}
+
+.ms-level:hover,
+.ms-flag-mode:hover,
+.ms-end-close:hover {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.ms-level:active,
+.ms-flag-mode:active {
+  transform: scale(0.96);
+}
+
+.ms-level[aria-pressed="true"],
+.ms-flag-mode[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.ms-stats {
+  display: flex;
+  gap: 32px;
+}
+
+.ms-stats dt {
+  font-size: var(--step-small);
+  color: var(--ink-soft);
+}
+
+.ms-stats dd {
+  font-size: 1.75rem;
+  font-weight: 750;
+  font-stretch: 112%;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+/* La grille défile si elle dépasse (niveau Difficile sur téléphone). */
+.ms-board-wrap {
+  overflow: auto;
+  max-width: 100%;
+  max-height: 78vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ms-board {
+  --cell: 34px;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  margin-inline: auto;
+  padding: 2px;
+  background: #c9ccc4;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-x pan-y;
+}
+
+.ms-cell {
+  width: var(--cell);
+  height: var(--cell);
+  padding: 0;
+  border: 0;
+  background: #e4e6df;
+  font: inherit;
+  font-size: calc(var(--cell) * 0.5);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.ms-cell:hover {
+  background: #d5d8cf;
+}
+
+.ms-cell:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.ms-cell.is-open {
+  background: var(--ground);
+  cursor: default;
+}
+
+.ms-cell.is-open.n1 { color: #1d4ed8; }
+.ms-cell.is-open.n2 { color: #0b6e4f; }
+.ms-cell.is-open.n3 { color: #b42318; }
+.ms-cell.is-open.n4 { color: #5b21b6; }
+.ms-cell.is-open.n5 { color: #8a1c1c; }
+.ms-cell.is-open.n6 { color: #0e7490; }
+.ms-cell.is-open.n7 { color: #111814; }
+.ms-cell.is-open.n8 { color: #57534e; }
+
+.ms-cell.is-mine {
+  background: #f3d2cc;
+}
+
+.ms-cell.is-boom {
+  background: #b42318;
+}
+
+.ms-cell.is-wrong {
+  background: #f3d2cc;
+  text-decoration: line-through;
+}
+
+.ms-cell.is-peek {
+  box-shadow: inset 0 0 0 2px #b42318;
+}
+
+.ms-status {
+  min-height: 1.6em;
+  margin-top: 16px;
+  font-weight: 600;
+}
+
+.ms-status.is-win {
+  color: var(--accent);
+}
+
+.ms-status.is-lose {
+  color: #b42318;
+}
+
+.ms-help {
+  margin-top: clamp(40px, 5vw, 72px);
+  max-width: 62ch;
+}
+
+.ms-help h2 {
+  margin-top: 0;
+}
+
+.ms-help ul {
+  padding-left: 1.2em;
+}
+
+.ms-help li + li {
+  margin-top: 6px;
+}
+
+/* Fin de partie */
+.ms-end {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(17 24 20 / 0.55);
+}
+
+.ms-end[hidden] {
+  display: none;
+}
+
+.ms-end-card {
+  width: min(420px, 100%);
+  padding: 32px;
+  background: var(--ground);
+  box-shadow: 0 24px 48px rgb(17 24 20 / 0.3);
+}
+
+.ms-end-card h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+}
+
+.ms-end-card p {
+  margin-top: 8px;
+}
+
+.ms-end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media (max-width: 520px) {
+  .ms-stats {
+    gap: 24px;
+  }
+
+  .ms-stats dd {
+    font-size: 1.4rem;
+  }
+}
+
+/* téléphone : on garde la langue et le retour, le nom prendrait deux lignes */
+@media (max-width: 520px) {
+  .ms-page .site-header .wordmark {
+    display: none;
+  }
+
+  .ms-page .site-header .lang-link {
+    margin-right: auto;
+  }
+}

@@ -91,6 +91,10 @@ R = [
  ("<title id=\"rail-svg-title\">Schéma d'un petit réseau ferré avec cinq gares reliées par des voies</title>", '<title id="rail-svg-title">Diagram of a small rail network with five stations linked by tracks</title>'),
  ('<p id="rail-label">Choisir une gare de destination :</p>', '<p id="rail-label">Pick a destination station:</p>'),
  ('Réseau fictif et simplifié, pour montrer le principe. Les nombres sont les longueurs des voies.', 'A simplified, made-up network to show the idea. Numbers are track lengths.'),
+ ('alt="Schéma électrique KiCad des trois cartes : commande ESP32, puissance et capteurs"', 'alt="KiCad schematic of the three boards: ESP32 control, power and sensors"'),
+ ('<figcaption>Schéma électrique sous KiCad (ouvrir en grand)</figcaption>', '<figcaption>Schematic in KiCad (open full size)</figcaption>'),
+ ('alt="Routage des trois cartes électroniques sous KiCad"', 'alt="PCB layout of the three boards in KiCad"'),
+ ('<figcaption>Les trois cartes : commande ESP32, puissance, capteurs, prévues pour être empilées en étages</figcaption>', '<figcaption>The three boards: ESP32 control, power, sensors, designed to be stacked</figcaption>'),
  ("alt=\"Banc d'essai du système de transport sur rail à deux chariots\"", 'alt="Test bench of the two-carriage rail transport system"'),
  ("<figcaption>Le banc d'essai de l'IUT</figcaption>", '<figcaption>The test bench at the university</figcaption>'),
  ('<h3 id="p-tsr">Transport automatisé sur rail</h3>', '<h3 id="p-tsr">Automated rail transport system</h3>'),
@@ -98,7 +102,7 @@ R = [
  ('<p>Deux chariots transfèrent des paniers codés entre des cuves de traitement chimique.</p>', '<p>Two carriages move coded baskets between chemical treatment tanks.</p>'),
  ("<p>Analyse fonctionnelle, grafcets, gestion des alarmes et des variateurs, puis programmation d'un automate Schneider M340 sous Control Expert (Ladder) et d'une IHM sous Vijeo Designer. Validation sur banc d'essai.</p>",
   "<p>Functional analysis, GRAFCET charts, alarm and drive handling, then programming a Schneider M340 PLC in Control Expert (Ladder) and an HMI in Vijeo Designer. Validated on a test bench.</p>"),
- ("Lire l'analyse fonctionnelle (PDF, 5,6 Mo)", 'Read the functional analysis (PDF in French, 5.6 MB)'),
+ ("Lire l'analyse fonctionnelle (PDF, 3,9 Mo)", 'Read the functional analysis (PDF in French, 3.9 MB)'),
  ('<h3 id="p-robot">Robot suiveur de ligne</h3>', '<h3 id="p-robot">Line-following robot</h3>'),
  ('<p class="meta">IUT 1, Université Grenoble Alpes - janvier à mai 2025, en binôme</p>', '<p class="meta">IUT 1, Grenoble Alpes University - January to May 2025, in a pair</p>'),
  ('<p>Du cahier des charges au dossier technique : conception du PCB sous KiCad, brasure, tests, CAO du châssis et programmation du microcontrôleur.</p>',
@@ -164,8 +168,26 @@ R = [
  ('>Confidentialité</a>', '>Privacy (French)</a>'),
  ('>Démineur</a>', '>Minesweeper</a>'),
 ]
+# le démineur s'ouvre en anglais depuis la version anglaise
+s = s.replace('href="../minesweeper.html"', 'href="../minesweeper.html?lang=en"')
+
+missing = []
 for a, b in R:
     if a not in s:
-        print('MISSING:', a[:80])
+        missing.append(a)
     s = s.replace(a, b)
+if missing:
+    # on n'écrit rien : une page anglaise à moitié traduite ne doit pas partir en ligne
+    for a in missing:
+        print('MISSING (phrase française introuvable dans index.html) :', a[:100])
+    sys.exit(1)
+
+# mots français restés tels quels dans le texte visible (hors noms propres connus)
+ALLOWED = ('Lycée', 'Université', 'Villard', 'Domène', 'Chambéry', 'française', 'Esisar', 'Perchoir')
+visible = re.sub(r'<script.*?</script>|<!--.*?-->|<[^>]+>', ' ', s, flags=re.S)
+suspects = sorted({w for w in re.findall(r"\w*[àâçéèêëîïôûùœ]\w*", visible) if not any(x in w for x in ALLOWED)})
+if suspects:
+    print('ATTENTION, mots français possibles dans en/index.html :', ', '.join(suspects))
+
 open(root + '/en/index.html', 'w', encoding='utf-8').write(s)
+print('en/index.html généré')
