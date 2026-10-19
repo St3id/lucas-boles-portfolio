@@ -49,6 +49,8 @@
       shareText: "J'ai terminé le démineur du portfolio de Lucas Boles en niveau {level} en {t}. À toi de battre ce temps :",
       shareCopied: "Message copié, il n'y a plus qu'à le coller.", shareManual: "Copier ce message : ",
       category: "Catégorie", catAll: "Tous", catNoflag: "Sans drapeau",
+      podiumTitle: "Meilleurs temps en {level}", seeAll: "Tout le classement",
+      podiumEmpty: "Personne pour l'instant : le premier temps s'affichera ici.",
       lbLoading: "Chargement...", lbEmpty: "Personne pour l'instant. À vous de jouer !", lbError: "Classement indisponible pour le moment.",
       youAre: "Vos temps sont inscrits au nom de {p}.", youAreNot: "Gagnez une partie pour choisir votre pseudo.",
       pseudoLabel: "Pseudo pour le classement", send: "Inscrire",
@@ -107,6 +109,8 @@
       shareText: "I cleared the minesweeper on Lucas Boles's portfolio on {level} in {t}. Can you beat it?",
       shareCopied: "Message copied, just paste it.", shareManual: "Copy this message: ",
       category: "Category", catAll: "All", catNoflag: "No flags",
+      podiumTitle: "Best times on {level}", seeAll: "Full leaderboard",
+      podiumEmpty: "No one yet: the first time will show up here.",
       lbLoading: "Loading...", lbEmpty: "Nobody yet. Your turn!", lbError: "Leaderboard unavailable right now.",
       youAre: "Your times are recorded as {p}.", youAreNot: "Win a game to choose your name.",
       pseudoLabel: "Name for the leaderboard", send: "Submit",
@@ -521,6 +525,8 @@
         .replace("{rank}", TEXT.ordinal(d.all.rank)).replace("{best}", fmt(d.all.best, true));
       if (d.nf) msg += TEXT.rankNoflag.replace("{rank}", TEXT.ordinal(d.nf.rank));
       setRankMsg(msg, "ok");
+      podiumCache = {};
+      loadPodium();
     }).catch(function () {
       g.submitted = false;
       setRankMsg(TEXT.err.network, "error");
@@ -564,6 +570,45 @@
       if (req === rankReq) state.textContent = TEXT.lbError;
     });
   }
+  /* --- Podium : les trois premiers du niveau choisi, visibles dès l'arrivée --- */
+  var podiumCache = {}, podiumReq = 0;
+  function loadPodium() {
+    var box = $("ms-podium");
+    if (!rankingOn) return;
+    box.hidden = false;
+    $("ms-podium-title").textContent = TEXT.podiumTitle.replace("{level}", TEXT.levelName[level]);
+    var lvl = level, req = ++podiumReq, cached = podiumCache[lvl];
+    // gardé une minute : changer de niveau en boucle ne relance pas de requête
+    if (cached && Date.now() - cached.at < 60000) { renderPodium(cached.scores); return; }
+    api("/scores?level=" + lvl + "&cat=all").then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.scores) throw new Error("format");
+      podiumCache[lvl] = { at: Date.now(), scores: d.scores };
+      if (req === podiumReq) renderPodium(d.scores);
+    }).catch(function () {
+      // serveur injoignable : on retire le podium plutôt que d'afficher une erreur
+      if (req === podiumReq) box.hidden = true;
+    });
+  }
+  function renderPodium(scores) {
+    var list = $("ms-podium-list");
+    list.textContent = "";
+    $("ms-podium-empty").textContent = scores.length ? "" : TEXT.podiumEmpty;
+    scores.slice(0, 3).forEach(function (s, k) {
+      var li = document.createElement("li"), rank = document.createElement("span"),
+        who = document.createElement("span"), t = document.createElement("span");
+      rank.className = "rank";
+      rank.textContent = TEXT.ordinal(k + 1);
+      who.className = "who";
+      who.textContent = s.pseudo;
+      who.title = s.pseudo;
+      t.className = "t";
+      t.textContent = fmt(s.timeMs, true);
+      li.append(rank, who, t);
+      if (identity && sameName(s.pseudo, identity.pseudo)) li.classList.add("is-me");
+      list.appendChild(li);
+    });
+  }
+
   function setTabs(attr, value) {
     document.querySelectorAll("[" + attr + "]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute(attr) === value)); });
   }
@@ -665,6 +710,7 @@
       level = btn.dataset.level;
       document.querySelectorAll(".ms-level").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
       newGame();
+      loadPodium();
     });
   });
   flagModeBtn.addEventListener("click", function () {
@@ -888,7 +934,8 @@
 
   showSettings();
   newGame();
+  loadPodium();
 
   // mode développeur uniquement : lecture de la partie en cours pour les tests
-  if (devMock) window.__ms = { game: function () { return game; }, level: function () { return level; } };
+  if (devMock) window.__ms = { game: function () { return game; }, level: function () { return level; }, api: api, podium: function () { podiumCache = {}; loadPodium(); } };
 })();

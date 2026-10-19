@@ -15,9 +15,16 @@
 }
 
 .ms-side {
-  position: sticky;
-  top: 96px;
   container-type: inline-size;
+}
+
+/* la colonne reste visible pendant qu'on fait défiler une grande grille,
+   seulement si l'écran est assez haut pour la montrer en entier (podium compris) */
+@media (min-height: 900px) and (min-width: 961px) {
+  .ms-side {
+    position: sticky;
+    top: 96px;
+  }
 }
 
 /* taille déduite de la largeur de la colonne : « Minesweeper » (le plus long)
@@ -136,6 +143,109 @@
 
 .ms-status.is-lose {
   color: #b42318;
+}
+
+/* --- Podium : les trois meilleurs temps du niveau choisi --------------------
+   Le 1er reprend le fond foncé de la grille et passe plus grand ; les 2e et 3e
+   sont sur le ton clair. Pas de médailles : la hiérarchie vient du contraste. */
+.ms-podium {
+  margin-top: clamp(28px, 3vw, 40px);
+}
+
+.ms-podium[hidden] {
+  display: none;
+}
+
+.ms .ms-podium-title {
+  margin: 0 0 12px;
+  font-size: 1.125rem;
+  font-weight: 750;
+  font-stretch: 112%;
+  letter-spacing: -0.01em;
+}
+
+.ms-podium-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.ms-podium-list li {
+  display: grid;
+  grid-template-columns: 2.4em minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.ms-podium-list .rank {
+  font-weight: 800;
+  font-stretch: 125%;
+  color: var(--accent);
+}
+
+.ms-podium-list .who {
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ms-podium-list .t {
+  font-weight: 800;
+  font-stretch: 112%;
+}
+
+.ms-podium-list li:first-child {
+  padding: 18px 16px;
+  background: var(--field);
+  color: var(--on-field);
+  font-size: 1.375rem;
+}
+
+.ms-podium-list li:first-child .rank {
+  color: var(--accent-on-field);
+}
+
+/* votre ligne, si vous êtes sur le podium */
+.ms-podium-list li.is-me {
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.ms-podium-list li:first-child.is-me {
+  box-shadow: inset 4px 0 0 var(--accent-on-field);
+}
+
+.ms-podium-empty {
+  font-size: var(--step-small);
+  color: var(--ink-soft);
+}
+
+.ms-podium-empty:empty {
+  display: none;
+}
+
+.ms-podium-more {
+  margin-top: 12px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+  transition: color 0.2s ease, text-underline-offset 0.25s var(--ease-out);
+}
+
+.ms-podium-more:hover {
+  color: var(--accent);
+  text-underline-offset: 0.4em;
 }
 
 /* --- Scène : la grille sur fond foncé ------------------------------------- */
@@ -814,10 +924,6 @@
 @media (max-width: 960px) {
   .ms-layout {
     grid-template-columns: 1fr;
-  }
-
-  .ms-side {
-    position: static;
   }
 
   .ms-lead {

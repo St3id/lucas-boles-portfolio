@@ -20,9 +20,9 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=16e05981">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=aa02ec58">
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=f9efe0c8">
   <script src="assets/js/ms-core.js?v=eb2c10e6" defer></script>
-  <script src="assets/js/minesweeper.js?v=3e57753a" defer></script>
+  <script src="assets/js/minesweeper.js?v=a5d9d982" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -58,6 +58,13 @@
         </div>
 
         <p class="ms-status" id="ms-status" aria-live="polite"></p>
+
+        <section class="ms-podium" id="ms-podium" aria-labelledby="ms-podium-title" hidden>
+          <h2 class="ms-podium-title" id="ms-podium-title"></h2>
+          <ol class="ms-podium-list" id="ms-podium-list"></ol>
+          <p class="ms-podium-empty" id="ms-podium-empty"></p>
+          <button type="button" class="ms-podium-more" data-open="ms-ranking" data-i18n="seeAll">Tout le classement</button>
+        </section>
       </div>
 
       <div class="ms-stage">
