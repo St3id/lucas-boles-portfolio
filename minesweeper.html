@@ -20,9 +20,9 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=dd1a259e">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=83426e63">
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=d48c9c8e">
   <script src="assets/js/ms-core.js?v=eb2c10e6" defer></script>
-  <script src="assets/js/minesweeper.js?v=e3d208dd" defer></script>
+  <script src="assets/js/minesweeper.js?v=c286a2f1" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -40,12 +40,6 @@
         <h1 class="ms-title" data-i18n="title">Démineur</h1>
         <p class="ms-lead" data-i18n="lead">Trouver toutes les cases sûres sans toucher une mine.</p>
 
-        <div class="ms-levels" role="group" aria-label="Difficulté" data-i18n-aria="levels">
-          <button type="button" class="ms-level" data-level="easy" aria-pressed="true" data-i18n="easy">Facile</button>
-          <button type="button" class="ms-level" data-level="medium" aria-pressed="false" data-i18n="medium">Moyen</button>
-          <button type="button" class="ms-level" data-level="hard" aria-pressed="false" data-i18n="hard">Difficile</button>
-        </div>
-
         <dl class="ms-stats">
           <div><dt data-i18n="minesLeft">Mines restantes</dt><dd id="ms-mines">10</dd></div>
           <div><dt data-i18n="time">Temps</dt><dd id="ms-time">00:00</dd></div>
@@ -62,6 +56,11 @@
         <section class="ms-podium" id="ms-podium" aria-labelledby="ms-podium-title" hidden>
           <h2 class="ms-podium-title" id="ms-podium-title"></h2>
           <ol class="ms-podium-list" id="ms-podium-list"></ol>
+          <div class="ms-podium-nav" role="group" aria-label="Niveau du podium" data-i18n-aria="podiumLevels">
+            <button type="button" class="ms-podium-arrow" id="ms-podium-prev" aria-label="Niveau précédent" data-i18n-aria="prevLevel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <span class="ms-podium-level" id="ms-podium-level" aria-live="polite"></span>
+            <button type="button" class="ms-podium-arrow" id="ms-podium-next" aria-label="Niveau suivant" data-i18n-aria="nextLevel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
           <p class="ms-podium-empty" id="ms-podium-empty"></p>
           <p class="ms-me" id="ms-me"></p>
           <div class="ms-podium-links">
@@ -97,6 +96,35 @@
       </button>
     </div>
   </main>
+
+  <dialog class="ms-sheet ms-pick" id="ms-pick" aria-labelledby="ms-pick-title" data-level="easy">
+    <div class="ms-sheet-head">
+      <h2 id="ms-pick-title" data-i18n="newGame">Nouvelle partie</h2>
+      <button type="button" class="ms-sheet-close" data-close aria-label="Fermer" data-i18n-aria="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="ms-pick-show">
+      <div class="ms-pick-field" aria-hidden="true"><canvas class="ms-pick-grid" id="ms-pick-grid"></canvas></div>
+      <div class="ms-pick-info">
+        <span class="ms-pick-heat" aria-hidden="true"></span>
+        <p class="ms-pick-name" id="ms-pick-name"></p>
+        <dl class="ms-pick-facts">
+          <div><dt data-i18n="grid">Grille</dt><dd><span id="ms-pick-size">9</span>&nbsp;×&nbsp;<span id="ms-pick-size2">9</span></dd></div>
+          <div><dt data-i18n="mines">Mines</dt><dd id="ms-pick-mines">10</dd></div>
+        </dl>
+      </div>
+    </div>
+    <p class="ms-pick-top" id="ms-pick-top"></p>
+    <p class="ms-pick-me" id="ms-pick-me"></p>
+    <div class="ms-pick-slider">
+      <div class="ms-pick-track" aria-hidden="true"><span class="ms-pick-fill"></span><i></i><i></i><i></i></div>
+      <span class="ms-pick-thumb" aria-hidden="true"><span class="ms-pick-flag">⚑</span><span class="ms-pick-mine">✹</span></span>
+      <input type="range" id="ms-pick-range" min="0" max="200" step="1" value="0" aria-label="Difficulté" data-i18n-aria="levels">
+    </div>
+    <div class="ms-pick-actions">
+      <button type="button" class="button" id="ms-pick-go" data-i18n="go">C'est parti</button>
+      <button type="button" class="ms-end-close" id="ms-pick-cancel" data-i18n="cancel">Annuler</button>
+    </div>
+  </dialog>
 
   <dialog class="ms-sheet" id="ms-rules" aria-labelledby="ms-rules-title">
     <div class="ms-sheet-head">
@@ -185,7 +213,8 @@
       </div>
       <p class="ms-share-note" id="ms-share-note" aria-live="polite"></p>
       <div class="ms-end-actions">
-        <button type="button" class="button" id="ms-end-new" data-i18n="newGame">Nouvelle partie</button>
+        <button type="button" class="button" id="ms-end-new" data-i18n="replay">Rejouer</button>
+        <button type="button" class="ms-end-close" id="ms-end-level" data-i18n="changeLevel">Changer de niveau</button>
         <button type="button" class="ms-end-close ms-share" id="ms-share" data-i18n="share" hidden>Partager mon temps</button>
         <button type="button" class="ms-end-close" id="ms-end-close" data-i18n="close">Fermer</button>
       </div>

@@ -94,6 +94,23 @@ f.onload = async function () {
   ok(/code secret/.test(d.getElementById("ms-rank-msg").textContent) && d.getElementById("ms-rank-form").hidden, "partie Konami : " + d.getElementById("ms-rank-msg").textContent);
   ok(!/record/.test(d.getElementById("ms-badges").textContent), "partie Konami : pas de record");
 
+  // Nouvelle partie : fenêtre avec le slider de difficulté
+  d.getElementById("ms-end-close").click();
+  d.getElementById("ms-new").click();
+  var pick = d.getElementById("ms-pick"), range = d.getElementById("ms-pick-range");
+  ok(pick.open && d.getElementById("ms-pick-name").textContent === "Bac à sable", "fenêtre Nouvelle partie ouverte sur le niveau en cours");
+  range.dispatchEvent(new w.KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+  range.dispatchEvent(new w.KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+  d.getElementById("ms-pick-go").click();
+  ok(!pick.open && w.__ms.level() === "hard" && d.querySelectorAll(".ms-board .ms-cell").length === 22 * 22, "deux crans à droite puis C'est parti : partie en Champ de mines");
+  ok(JSON.parse(w.localStorage.getItem("ms-level-v1")) === "hard", "niveau gardé pour la prochaine visite");
+  ok(d.getElementById("ms-podium-level").textContent === "Champ de mines", "podium sur le niveau en cours");
+  d.getElementById("ms-podium-next").click();
+  ok(d.getElementById("ms-podium-level").textContent === "Bac à sable" && w.__ms.level() === "hard", "flèche du podium : autre niveau affiché, partie inchangée");
+  d.getElementById("ms-new").click();
+  d.getElementById("ms-pick-cancel").click();
+  ok(!pick.open && w.__ms.level() === "hard", "Annuler : rien ne change");
+
   document.getElementById("out").textContent = log.join("\n");
 };
 window.addEventListener("error", function (e) { log.push("ERREUR " + e.message); });

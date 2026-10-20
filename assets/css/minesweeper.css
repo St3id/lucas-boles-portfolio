@@ -52,7 +52,6 @@
     max-width: 32ch;
   }
 
-  .ms .ms-levels,
   .ms .ms-stats,
   .ms .ms-tools,
   .ms .ms-podium {
@@ -97,18 +96,12 @@
   max-width: 22ch;
 }
 
-.ms-levels,
 .ms-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.ms-levels {
-  margin-top: clamp(24px, 3vw, 36px);
-}
-
-.ms-level,
 .ms-tab,
 .ms-flag-mode,
 .ms-end-close {
@@ -124,7 +117,6 @@
 }
 
 @media (hover: hover) {
-  .ms-level:hover,
   .ms-tab:hover,
   .ms-flag-mode:hover,
   .ms-end-close:hover {
@@ -133,13 +125,11 @@
   }
 }
 
-.ms-level:active,
 .ms-tab:active,
 .ms-flag-mode:active {
   transform: scale(0.96);
 }
 
-.ms-level[aria-pressed="true"],
 .ms-tab[aria-pressed="true"],
 .ms-flag-mode[aria-pressed="true"] {
   background: var(--accent);
@@ -593,6 +583,67 @@
 
 .ms-podium-empty:empty {
   display: none;
+}
+
+/* sous les marches : le niveau du podium, en petit, entre deux flèches.
+   Le podium montre le niveau en cours ; les flèches font le tour des trois. */
+.ms-podium-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.ms-podium-arrow {
+  width: 44px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.25s var(--ease-out);
+}
+
+.ms-podium-arrow svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (hover: hover) {
+  .ms-podium-arrow:hover {
+    color: var(--accent);
+  }
+
+  #ms-podium-prev:hover {
+    transform: translateX(-3px);
+  }
+
+  #ms-podium-next:hover {
+    transform: translateX(3px);
+  }
+}
+
+.ms-podium-arrow:active {
+  transform: scale(0.88);
+}
+
+.ms-podium-level {
+  min-width: 10.5em;
+  text-align: center;
+  font-size: var(--step-small);
+  font-weight: 650;
+  color: var(--ink-soft);
 }
 
 /* rappel du pseudo, sous le podium */
@@ -1080,6 +1131,327 @@
   display: none;
 }
 
+/* --- Fenêtre Nouvelle partie : slider de difficulté et aperçu --------------
+   Position et couleur du curseur sont posées par minesweeper.js, en transform. */
+.ms-pick {
+  width: min(520px, calc(100% - 32px));
+  max-width: none;
+}
+
+.ms-pick-show {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* l'aperçu garde toujours la même taille : seules ses cases changent */
+.ms-pick-field {
+  flex: none;
+  width: clamp(124px, 34vw, 176px);
+  aspect-ratio: 1;
+  padding: 10px;
+  background: var(--field);
+}
+
+.ms-pick-grid {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ms-pick-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ms-pick-name {
+  font-size: clamp(1.375rem, 5.4vw, 2rem);
+  font-weight: 850;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* un trait au-dessus du nom, qui s'allonge et chauffe avec la difficulté */
+.ms-pick-heat {
+  display: block;
+  width: 100px;
+  height: 6px;
+  margin-bottom: 12px;
+  background: rgb(47 158 110);
+  transform: scaleX(0.28);
+  transform-origin: left;
+}
+
+.ms-pick-facts {
+  display: flex;
+  gap: 20px;
+  margin-top: 14px;
+}
+
+.ms-pick-facts dt {
+  font-size: var(--step-small);
+  color: var(--ink-soft);
+}
+
+.ms-pick-facts dd {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-stretch: 112%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.ms-pick-top {
+  min-height: 1.5em;
+  margin-top: 20px;
+  font-size: var(--step-small);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.ms-pick-me {
+  font-size: var(--step-small);
+  color: var(--ink-soft);
+}
+
+/* le slider : un vrai curseur HTML (clavier, lecteurs d'écran) posé invisible
+   par-dessus le dessin ; le curseur dessiné est une case du jeu */
+.ms-pick-slider {
+  position: relative;
+  height: 56px;
+  margin-top: 18px;
+}
+
+.ms-pick-track {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 50%;
+  height: 8px;
+  margin-top: -4px;
+  background: var(--surface);
+}
+
+.ms-pick-fill {
+  position: absolute;
+  inset: 0;
+  background: rgb(47 158 110);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.ms-pick-track i {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  background: var(--ground);
+  box-shadow: inset 0 0 0 3px #b9bfb4;
+}
+
+.ms-pick-track i:nth-of-type(1) { left: 0; }
+.ms-pick-track i:nth-of-type(2) { left: 50%; }
+.ms-pick-track i:nth-of-type(3) { left: 100%; }
+
+.ms-pick-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  display: grid;
+  place-items: center;
+  background: #2b3631;
+  box-shadow: 0 6px 16px rgb(17 24 20 / 0.28), inset 0 -4px 0 rgb(0 0 0 / 0.28);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+  will-change: transform;
+  transition: background-color 0.25s ease;
+}
+
+.ms-pick-thumb > span {
+  grid-area: 1 / 1;
+  transition: transform 0.35s var(--ease-out), opacity 0.2s ease, color 0.25s ease;
+}
+
+.ms-pick-flag {
+  color: #ffd23b;
+  transform-origin: 30% 90%;
+}
+
+.ms-pick-mine {
+  color: #ffffff;
+  opacity: 0;
+  transform: scale(0);
+}
+
+/* moyen : le drapeau penche ; difficile : il laisse place à une mine qui tremble */
+.ms-pick[data-level="medium"] .ms-pick-flag {
+  color: #ffb648;
+  transform: rotate(-24deg);
+}
+
+.ms-pick[data-level="hard"] .ms-pick-thumb {
+  background: #d2342c;
+}
+
+.ms-pick[data-level="hard"] .ms-pick-flag {
+  opacity: 0;
+  transform: rotate(-70deg) scale(0);
+}
+
+.ms-pick[data-level="hard"] .ms-pick-mine {
+  opacity: 1;
+  transform: none;
+}
+
+.ms-pick-slider input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: grab;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.ms-pick-slider input:active {
+  cursor: grabbing;
+}
+
+/* même largeur de curseur que le dessin : le doigt tombe pile dessus */
+.ms-pick-slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 48px;
+  height: 48px;
+}
+
+.ms-pick-slider input::-moz-range-thumb {
+  width: 48px;
+  height: 48px;
+  border: 0;
+}
+
+.ms-pick-slider:has(input:focus-visible) .ms-pick-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.ms-pick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ms-pick[open] {
+    animation: ms-pick-in 0.4s var(--ease-out);
+  }
+
+  .ms-pick[open]::backdrop {
+    animation: ms-fade 0.3s ease;
+  }
+
+  .ms-pick-thumb.is-swap {
+    animation: ms-thumb-pop 0.45s var(--ease-out);
+  }
+
+  .ms-pick[data-level="hard"] .ms-pick-mine {
+    animation: ms-tremble 0.2s linear 0.35s infinite;
+  }
+
+  .ms-pick-name.is-swap,
+  .ms-pick-top.is-swap,
+  .ms-podium-level.is-swap {
+    animation: ms-swap 0.38s var(--ease-out) both;
+  }
+
+  .ms-podium-level.is-from-left {
+    animation-name: ms-swap-left;
+  }
+
+  .ms-podium-level.is-from-right {
+    animation-name: ms-swap-right;
+  }
+}
+
+@keyframes ms-pick-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+}
+
+/* « scale » et non « transform » : le curseur est déjà placé par un transform */
+@keyframes ms-thumb-pop {
+  40% { scale: 1.22; }
+}
+
+@keyframes ms-tremble {
+  0%, 100% { transform: none; }
+  25% { transform: translate(-1px, 1px) rotate(-7deg); }
+  50% { transform: translate(1px, -1px) rotate(6deg); }
+  75% { transform: translate(-1px, -1px) rotate(-3deg); }
+}
+
+@keyframes ms-swap {
+  from { opacity: 0; transform: translateY(35%); }
+}
+
+@keyframes ms-swap-left {
+  from { opacity: 0; transform: translateX(-28px); }
+}
+
+@keyframes ms-swap-right {
+  from { opacity: 0; transform: translateX(28px); }
+}
+
+/* téléphone : la fenêtre monte du bas de l'écran, à portée de pouce */
+@media (max-width: 600px) {
+  .ms-pick {
+    width: 100%;
+    margin: auto 0 0;
+    max-height: calc(100% - 24px);
+    overflow: auto;
+    padding: 20px 16px max(20px, env(safe-area-inset-bottom));
+  }
+
+  .ms-pick .ms-sheet-head {
+    margin-bottom: 14px;
+  }
+
+  .ms-pick .ms-sheet-head h2 {
+    font-size: clamp(1.5rem, 8vw, 2rem);
+    line-height: 1.05;
+  }
+
+  .ms-pick-show {
+    gap: 16px;
+  }
+
+  .ms-pick-facts dd {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 600px) and (prefers-reduced-motion: no-preference) {
+  .ms-pick[open] {
+    animation: ms-sheet-up 0.42s var(--ease-out);
+  }
+}
+
+@keyframes ms-sheet-up {
+  from { transform: translateY(100%); }
+}
+
 /* --- Fin de partie ---------------------------------------------------------- */
 .ms-end {
   position: fixed;
@@ -1346,7 +1718,7 @@
     display: contents;
   }
 
-  /* ordre : titre, niveaux, podium (on le voit en arrivant), puis compteurs et
+  /* ordre : titre, podium (on le voit en arrivant), puis compteurs et
      « Nouvelle partie » collés à la grille, puis l'aide et le message de fin */
   .ms-podium {
     order: 1;
@@ -1389,7 +1761,6 @@
     font-size: 1.0625rem;
   }
 
-  .ms-levels,
   .ms-tools {
     margin-top: 14px;
   }

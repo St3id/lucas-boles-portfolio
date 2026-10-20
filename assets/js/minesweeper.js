@@ -17,8 +17,12 @@
     fr: {
       pageTitle: "Démineur - Lucas Boles", skip: "Aller au jeu", back: "Retour au portfolio",
       title: "Démineur", lead: "Trouver toutes les cases sûres sans toucher une mine.",
-      levels: "Difficulté", easy: "Facile", medium: "Moyen", hard: "Difficile",
+      levels: "Difficulté", easy: "Bac à sable", medium: "Terrain glissant", hard: "Champ de mines",
       minesLeft: "Mines restantes", time: "Temps", record: "Record", flagMode: "Mode drapeau", newGame: "Nouvelle partie",
+      replay: "Rejouer", changeLevel: "Changer de niveau", go: "C'est parti", cancel: "Annuler",
+      grid: "Grille", mines: "Mines", pickTop: "À battre : ", pickTopTime: " en {t}",
+      pickFree: "Podium vide : la 1re place est à prendre.", pickMine: "Votre record : {t}", pickNoMine: "Pas encore de record à ce niveau.",
+      podiumLevels: "Niveau du podium", prevLevel: "Niveau précédent", nextLevel: "Niveau suivant",
       board: "Grille du démineur", close: "Fermer",
       rules: "Règles", rulesSub: "Comment jouer, ce que veulent dire les chiffres",
       controls: "Commandes", controlsSub: "Drapeau, durée de l'appui long, raccourcis",
@@ -45,11 +49,11 @@
       testShort: "Relâché à {ms} ms : clic normal.", testFlag: "Drapeau posé à {ms} ms.",
       win: "Gagné", lose: "Perdu", winText: "Grille dégagée en {t}.", loseText: "Une mine, après {t}.",
       newRecord: "Nouveau record !", noflagWin: "Sans drapeau !",
-      share: "Partager mon temps", levelName: { easy: "Facile", medium: "Moyen", hard: "Difficile" },
-      shareText: "J'ai terminé le démineur du portfolio de Lucas Boles en niveau {level} en {t}. À toi de battre ce temps :",
+      share: "Partager mon temps",
+      shareText: "J'ai terminé le démineur du portfolio de Lucas Boles (niveau « {level} ») en {t}. À toi de battre ce temps :",
       shareCopied: "Message copié, il n'y a plus qu'à le coller.", shareManual: "Copier ce message : ",
       category: "Catégorie", catAll: "Tous", catNoflag: "Sans drapeau",
-      podiumTitle: "Meilleurs temps en {level}", seeAll: "Tout le classement",
+      podiumTitle: "Meilleurs temps", seeAll: "Tout le classement",
       podiumEmpty: "Personne pour l'instant : le premier temps s'affichera ici.", podiumFree: "Place libre",
       lbLoading: "Chargement...", lbEmpty: "Personne pour l'instant. À vous de jouer !", lbError: "Classement indisponible pour le moment.",
       youAre: "Vos temps sont inscrits au nom de {p}.", youAreNot: "Gagnez une partie pour choisir votre pseudo.",
@@ -82,8 +86,12 @@
     en: {
       pageTitle: "Minesweeper - Lucas Boles", skip: "Skip to the game", back: "Back to the portfolio",
       title: "Minesweeper", lead: "Find every safe cell without hitting a mine.",
-      levels: "Difficulty", easy: "Easy", medium: "Medium", hard: "Hard",
+      levels: "Difficulty", easy: "Sandbox", medium: "Slippery slope", hard: "Minefield",
       minesLeft: "Mines left", time: "Time", record: "Best", flagMode: "Flag mode", newGame: "New game",
+      replay: "Play again", changeLevel: "Change level", go: "Let's go", cancel: "Cancel",
+      grid: "Grid", mines: "Mines", pickTop: "To beat: ", pickTopTime: " in {t}",
+      pickFree: "Empty podium: first place is up for grabs.", pickMine: "Your best: {t}", pickNoMine: "No best time on this level yet.",
+      podiumLevels: "Podium level", prevLevel: "Previous level", nextLevel: "Next level",
       board: "Minesweeper board", close: "Close",
       rules: "Rules", rulesSub: "How to play, what the numbers mean",
       controls: "Controls", controlsSub: "Flags, long-press timing, shortcuts",
@@ -110,11 +118,11 @@
       testShort: "Released at {ms} ms: normal click.", testFlag: "Flag placed at {ms} ms.",
       win: "You win", lose: "Game over", winText: "Board cleared in {t}.", loseText: "Hit a mine after {t}.",
       newRecord: "New personal best!", noflagWin: "No flags!",
-      share: "Share my time", levelName: { easy: "Easy", medium: "Medium", hard: "Hard" },
-      shareText: "I cleared the minesweeper on Lucas Boles's portfolio on {level} in {t}. Can you beat it?",
+      share: "Share my time",
+      shareText: "I cleared the minesweeper on Lucas Boles's portfolio (level \"{level}\") in {t}. Can you beat it?",
       shareCopied: "Message copied, just paste it.", shareManual: "Copy this message: ",
       category: "Category", catAll: "All", catNoflag: "No flags",
-      podiumTitle: "Best times on {level}", seeAll: "Full leaderboard",
+      podiumTitle: "Best times", seeAll: "Full leaderboard",
       podiumEmpty: "No one yet: the first time will show up here.", podiumFree: "Open spot",
       lbLoading: "Loading...", lbEmpty: "Nobody yet. Your turn!", lbError: "Leaderboard unavailable right now.",
       youAre: "Your times are recorded as {p}.", youAreNot: "Win a game to choose your name.",
@@ -250,7 +258,9 @@
   }
 
   /* --- État de la partie --------------------------------------------------- */
-  var level = "easy", size, mineTotal, cells, opened, flags, over, timer, startedAt;
+  var LEVEL_KEYS = ["easy", "medium", "hard"];
+  var level = LEVEL_KEYS.indexOf(load("ms-level-v1", "easy")) >= 0 ? load("ms-level-v1", "easy") : "easy";
+  var size, mineTotal, cells, opened, flags, over, timer, startedAt;
   var started = false, finalMs = null, flagMode = false, peekNext = false, peek = false;
   var game = null, gameSeq = 0;
 
@@ -525,6 +535,7 @@
     window.scrollTo({ top: top, behavior: reduceMotion.matches ? "auto" : "smooth" });
   }
   $("ms-end-new").addEventListener("click", function () { newGame(); showBoard(); });
+  $("ms-end-level").addEventListener("click", function () { closeEnd(); openPick(); });
   $("ms-end-close").addEventListener("click", closeEnd);
   endEl.addEventListener("click", function (e) { if (e.target === endEl) closeEnd(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && codeEl.hidden) closeEnd(); });
@@ -674,25 +685,49 @@
   renderMe();
   if (restoreNote) $("ms-save-note").textContent = restoreNote === "ok" ? TEXT.restored.replace("{p}", identity.pseudo) : TEXT.restoreBad;
 
-  /* --- Podium : les trois premiers du niveau choisi, visibles dès l'arrivée --- */
-  var podiumCache = {}, podiumReq = 0;
-  function loadPodium() {
-    var box = $("ms-podium");
-    if (!rankingOn) return;
-    box.hidden = false;
-    $("ms-podium-title").textContent = TEXT.podiumTitle.replace("{level}", TEXT.levelName[level]);
-    var lvl = level, req = ++podiumReq, cached = podiumCache[lvl];
-    // gardé une minute : changer de niveau en boucle ne relance pas de requête
-    if (cached && Date.now() - cached.at < 60000) { renderPodium(cached.scores); return; }
-    api("/scores?level=" + lvl + "&cat=all").then(function (r) { return r.json(); }).then(function (d) {
+  /* --- Podium : les trois premiers, visibles dès l'arrivée ---------------------
+     Il montre le niveau en cours ; les flèches sous les marches passent aux autres. */
+  var podiumCache = {}, podiumReq = 0, podiumLevel = level;
+  // meilleurs temps d'un niveau, gardés une minute : passer d'un niveau à l'autre
+  // en boucle (podium, fenêtre Nouvelle partie) ne relance pas de requête
+  function topScores(lvl) {
+    var cached = podiumCache[lvl];
+    if (cached && Date.now() - cached.at < 60000) return Promise.resolve(cached.scores);
+    return api("/scores?level=" + lvl + "&cat=all").then(function (r) { return r.json(); }).then(function (d) {
       if (!d.scores) throw new Error("format");
       podiumCache[lvl] = { at: Date.now(), scores: d.scores };
-      if (req === podiumReq) renderPodium(d.scores);
+      return d.scores;
+    });
+  }
+  function loadPodium(lvl, dir) {
+    var box = $("ms-podium"), name = $("ms-podium-level");
+    if (!rankingOn) return;
+    box.hidden = false;
+    podiumLevel = lvl || level;
+    $("ms-podium-title").textContent = TEXT.podiumTitle;
+    name.textContent = TEXT[podiumLevel];
+    swapIn(name, dir < 0 ? "is-from-left" : dir > 0 ? "is-from-right" : "");
+    var req = ++podiumReq;
+    topScores(podiumLevel).then(function (scores) {
+      if (req === podiumReq) renderPodium(scores);
     }).catch(function () {
       // serveur injoignable : on retire le podium plutôt que d'afficher une erreur
       if (req === podiumReq) box.hidden = true;
     });
   }
+  // relance l'animation d'entrée d'un texte qui vient de changer
+  function swapIn(el, extra) {
+    el.classList.remove("is-swap", "is-from-left", "is-from-right");
+    void el.offsetWidth;
+    el.classList.add("is-swap");
+    if (extra) el.classList.add(extra);
+  }
+  [["ms-podium-prev", -1], ["ms-podium-next", 1]].forEach(function (a) {
+    $(a[0]).addEventListener("click", function () {
+      var n = (LEVEL_KEYS.indexOf(podiumLevel) + a[1] + 3) % 3;
+      loadPodium(LEVEL_KEYS[n], a[1]);
+    });
+  });
   // trois marches toujours présentes : une place vide donne envie de la prendre.
   // Chaque place porte le laurier du démineur, dessiné case par case par tools/make_podium_art.py.
   var STEP_ROWS = [8, 6, 4], CELL = 14;
@@ -894,20 +929,11 @@
   });
 
   /* --- Commandes de la page ---------------------------------------------------- */
-  document.querySelectorAll(".ms-level").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      level = btn.dataset.level;
-      document.querySelectorAll(".ms-level").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
-      newGame();
-      loadPodium();
-      showBoard();
-    });
-  });
   flagModeBtn.addEventListener("click", function () {
     flagMode = !flagMode;
     flagModeBtn.setAttribute("aria-pressed", String(flagMode));
   });
-  $("ms-new").addEventListener("click", function () { newGame(); showBoard(); });
+  $("ms-new").addEventListener("click", openPick);
   window.addEventListener("resize", fitCells);
 
   // partage : menu natif sur téléphone, sinon copie du message ; ?ref=partage
@@ -915,7 +941,7 @@
   $("ms-share").addEventListener("click", function () {
     var url = new URL("minesweeper.html", location.href);
     url.search = "?ref=partage" + (LANG === "en" ? "&lang=en" : "");
-    var text = TEXT.shareText.replace("{level}", TEXT.levelName[level]).replace("{t}", fmt(finalMs, true));
+    var text = TEXT.shareText.replace("{level}", TEXT[level]).replace("{t}", fmt(finalMs, true));
     var note = $("ms-share-note");
     if (navigator.share && coarse) {
       navigator.share({ title: TEXT.pageTitle, text: text, url: url.href }).catch(function () { /* partage annulé */ });
@@ -935,7 +961,7 @@
     btn.addEventListener("click", function () {
       $(btn.dataset.open).showModal();
       if (btn.dataset.open === "ms-ranking") {
-        rankLevel = level;
+        rankLevel = podiumLevel;
         setTabs("data-rank-level", rankLevel);
         loadRanking();
       }
@@ -943,11 +969,197 @@
   });
   document.querySelectorAll(".ms-sheet").forEach(function (dlg) {
     dlg.querySelector("[data-close]").addEventListener("click", function () { dlg.close(); });
-    // clic sur le fond assombri (en dehors de la fenêtre) : on ferme
-    dlg.addEventListener("click", function (e) {
+    // clic sur le fond assombri (en dehors de la fenêtre) : on ferme, si l'appui y a
+    // aussi commencé (un glissé du slider relâché dehors ne ferme rien)
+    var outside = function (e) {
       var r = dlg.getBoundingClientRect();
-      if (e.target === dlg && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) dlg.close();
+      return e.target === dlg && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom);
+    };
+    var downOut = false;
+    dlg.addEventListener("pointerdown", function (e) { downOut = outside(e); });
+    dlg.addEventListener("click", function (e) {
+      if (outside(e) && (downOut || e.detail === 0)) dlg.close();
+      downOut = false;
     });
+  });
+
+  /* --- Fenêtre Nouvelle partie : un slider de 3 crans pour la difficulté ------
+     Le curseur suit le doigt, s'aimante au cran le plus proche au relâcher (avec un
+     petit dépassement), et chauffe du vert au rouge. Au-dessus, un aperçu suit en
+     direct : mini-grille à la taille du niveau, mines qui tombent, chiffres qui
+     défilent, temps à battre et record personnel. */
+  // pendant un glissé, seules des transformations changent (curseur, remplissage, trait) :
+  // le navigateur les déplace sans recalculer la mise en page de la fenêtre
+  var pick = $("ms-pick"), pickRange = $("ms-pick-range"), pickSlider = pick.querySelector(".ms-pick-slider");
+  var pickThumb = pick.querySelector(".ms-pick-thumb"), pickFill = pick.querySelector(".ms-pick-fill");
+  var pickHeat = pick.querySelector(".ms-pick-heat"), pickW = 0;
+  var HEAT = [[47, 158, 110], [224, 138, 30], [210, 52, 44]];
+  // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là)
+  var pickAt = 0, pickGoal = null, pickShown = -1, snapRaf = 0, rolls = {};
+  function heat(p) {
+    var k = Math.min(1, Math.floor(p)), f = p - k, a = HEAT[k], b = HEAT[k + 1];
+    return "rgb(" + a.map(function (v, n) { return Math.round(v + (b[n] - v) * f); }).join(" ") + ")";
+  }
+  // p va de 0 (premier cran) à 2 (dernier), valeurs intermédiaires pendant un glissé
+  function setPick(p) {
+    pickAt = p;
+    var q = Math.max(0, Math.min(2, p)), x = q / 2, h = heat(q);
+    if (Number(pickRange.value) !== Math.round(q * 100)) pickRange.value = Math.round(q * 100);
+    pickThumb.style.transform = "translateX(" + (x * (pickW - 48)).toFixed(1) + "px)";
+    pickFill.style.transform = "scaleX(" + x.toFixed(4) + ")";
+    pickFill.style.backgroundColor = h;
+    pickHeat.style.transform = "scaleX(" + (0.28 + 0.72 * x).toFixed(4) + ")";
+    pickHeat.style.backgroundColor = h;
+    var n = Math.round(q);
+    if (n !== pickShown) showPick(n);
+  }
+  function showPick(n) {
+    var lvl = LEVEL_KEYS[n], L = MSCore.LEVELS[lvl], first = pickShown < 0;
+    pickShown = n;
+    pick.dataset.level = lvl;
+    pickRange.setAttribute("aria-valuetext", TEXT[lvl]);
+    $("ms-pick-name").textContent = TEXT[lvl];
+    swapIn($("ms-pick-name"));
+    if (!first) swapIn(pickThumb);
+    roll("ms-pick-size", L.size, first);
+    roll("ms-pick-size2", L.size, first);
+    roll("ms-pick-mines", L.mines, first);
+    miniGrid(L.size, L.mines);
+    pickScores(lvl);
+  }
+  // un chiffre défile jusqu'à sa nouvelle valeur
+  function roll(id, to, fromZero) {
+    var el = $(id), from = fromZero ? 0 : Number(el.textContent) || 0, t0 = performance.now();
+    cancelAnimationFrame(rolls[id]);
+    if (reduceMotion.matches || from === to) { el.textContent = to; return; }
+    (function step(now) {
+      var k = Math.max(0, Math.min(1, (now - t0) / 450));
+      el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) rolls[id] = requestAnimationFrame(step);
+    })(t0);
+  }
+  // mini-grille, dessinée dans un canvas (484 cases en Champ de mines : en éléments
+  // HTML, le glissé ramait) : les cases apparaissent en vague depuis un coin, puis les
+  // mines tombent une à une (positions au hasard, juste pour l'aperçu) ; au plus
+  // difficile, la grille tremble à la fin
+  var miniCanvas = $("ms-pick-grid"), miniCtx = miniCanvas.getContext("2d"), miniRaf = 0;
+  function miniGrid(n, mines) {
+    var total = n * n, spots = [], taken = {};
+    while (spots.length < mines) {
+      var r = Math.floor(Math.random() * total);
+      if (!taken[r]) { taken[r] = true; spots.push(r); }
+    }
+    var side = miniCanvas.clientWidth, dpr = window.devicePixelRatio || 1;
+    if (!side) return;
+    if (miniCanvas.width !== Math.round(side * dpr)) miniCanvas.width = miniCanvas.height = Math.round(side * dpr);
+    var gap = 18 / n, cell = (side - gap * (n - 1)) / n, wave = 260 / (2 * n - 2), drop = 420 / mines;
+    var shake = n === MSCore.LEVELS.hard.size, t0 = performance.now();
+    var easeOut = function (k) { return 1 - Math.pow(1 - k, 3); };
+    cancelAnimationFrame(miniRaf);
+    (function draw(now) {
+      var t = reduceMotion.matches ? 1e6 : Math.max(0, now - t0), k, i;
+      miniCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      miniCtx.clearRect(0, 0, side, side);
+      if (shake && t > 720 && t < 1170) {
+        var f = (t - 720) / 450;
+        miniCtx.translate(Math.sin(f * 28) * 3 * (1 - f), Math.cos(f * 23) * 1.2 * (1 - f));
+      }
+      miniCtx.fillStyle = "#2b3631";
+      for (i = 0; i < total; i++) {
+        k = Math.min(1, (t - (Math.floor(i / n) + i % n) * wave) / 300);
+        if (k <= 0) continue;
+        var sz = cell * easeOut(k), x = (i % n) * (cell + gap) + (cell - sz) / 2, y = Math.floor(i / n) * (cell + gap) + (cell - sz) / 2;
+        miniCtx.globalAlpha = k;
+        miniCtx.fillRect(x, y, sz, sz);
+      }
+      miniCtx.fillStyle = "#e5484d";
+      spots.forEach(function (i, m) {
+        var k = Math.min(1, (t - 260 - m * drop) / 420);
+        if (k <= 0) return;
+        // chute avec un léger rebond : petite et haute, puis grosse, puis à sa place
+        var scale = k < 0.6 ? 0.4 + 0.9 * (k / 0.6) : 1.3 - 0.3 * ((k - 0.6) / 0.4);
+        var fall = (1 - easeOut(Math.min(1, k / 0.6))) * cell * 1.6;
+        miniCtx.globalAlpha = Math.min(1, k / 0.6);
+        miniCtx.beginPath();
+        miniCtx.arc((i % n) * (cell + gap) + cell / 2, Math.floor(i / n) * (cell + gap) + cell / 2 - fall, cell * 0.36 * scale, 0, Math.PI * 2);
+        miniCtx.fill();
+      });
+      miniCtx.globalAlpha = 1;
+      if (t < 1200) miniRaf = requestAnimationFrame(draw);
+    })(t0);
+  }
+  function pickScores(lvl) {
+    var top = $("ms-pick-top"), best = records[lvl + ":all"];
+    $("ms-pick-me").textContent = best ? TEXT.pickMine.replace("{t}", fmt(best, true)) : TEXT.pickNoMine;
+    top.textContent = "";
+    if (!rankingOn) return;
+    topScores(lvl).then(function (scores) {
+      if (LEVEL_KEYS[pickShown] !== lvl) return;
+      top.textContent = "";
+      if (!scores.length) { top.textContent = TEXT.pickFree; return; }
+      var who = document.createElement("strong");
+      nameInto(who, scores[0].pseudo);
+      top.append(TEXT.pickTop, who, TEXT.pickTopTime.replace("{t}", fmt(scores[0].timeMs, true)));
+      swapIn(top);
+    }).catch(function () { /* serveur injoignable : rien à battre affiché */ });
+  }
+  // le curseur rejoint un cran : courbe qui dépasse un peu puis revient (ease-out-back)
+  function snapTo(n) {
+    cancelAnimationFrame(snapRaf);
+    var from = pickAt, t0 = performance.now();
+    pickGoal = n;
+    if (reduceMotion.matches || from === n) { setPick(n); return; }
+    (function step(now) {
+      var k = Math.max(0, Math.min(1, (now - t0) / 420)), c = 1.9;
+      var e = 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2);
+      setPick(from + (n - from) * e);
+      if (k < 1) snapRaf = requestAnimationFrame(step);
+    })(t0);
+  }
+  function openPick() {
+    cancelAnimationFrame(snapRaf);
+    pickGoal = null;
+    pickShown = -1;
+    // ouverte d'abord : la largeur du slider et du canvas se mesure à l'écran
+    pick.showModal();
+    pickW = pickSlider.clientWidth;
+    setPick(LEVEL_KEYS.indexOf(level));
+    pickRange.focus();
+  }
+  function pickGo() {
+    cancelAnimationFrame(snapRaf);
+    level = LEVEL_KEYS[pickGoal !== null ? pickGoal : Math.max(0, Math.min(2, Math.round(pickAt)))];
+    save("ms-level-v1", level);
+    pick.close();
+    newGame();
+    loadPodium();
+    showBoard();
+  }
+  pickRange.addEventListener("input", function () {
+    cancelAnimationFrame(snapRaf);
+    pickGoal = null;
+    setPick(pickRange.value / 100);
+  });
+  pickRange.addEventListener("change", function () { snapTo(Math.round(pickRange.value / 100)); });
+  // clavier : un cran par flèche, Entrée lance la partie
+  pickRange.addEventListener("keydown", function (e) {
+    var n = pickGoal !== null ? pickGoal : Math.round(pickAt), to = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "PageUp") to = Math.min(2, n + 1);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown" || e.key === "PageDown") to = Math.max(0, n - 1);
+    else if (e.key === "Home") to = 0;
+    else if (e.key === "End") to = 2;
+    else if (e.key === "Enter") { e.preventDefault(); pickGo(); return; }
+    if (to === null) return;
+    e.preventDefault();
+    snapTo(to);
+  });
+  $("ms-pick-go").addEventListener("click", pickGo);
+  $("ms-pick-cancel").addEventListener("click", function () { pick.close(); });
+  pick.addEventListener("close", function () { cancelAnimationFrame(snapRaf); cancelAnimationFrame(miniRaf); });
+  window.addEventListener("resize", function () {
+    if (!pick.open) return;
+    pickW = pickSlider.clientWidth;
+    setPick(pickAt);
   });
 
   var holdBox = $("set-hold"), holdMs = $("set-hold-ms"), holdOut = $("set-hold-out"), holdBlock = $("ms-hold-block");
