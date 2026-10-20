@@ -1286,9 +1286,34 @@
 }
 
 /* --- Tablette et téléphone ----------------------------------------------------- */
+/* une seule colonne (téléphone, tablette en hauteur) : la grille vient juste sous
+   « Nouvelle partie », le podium passe en dessous. La colonne de gauche s'efface
+   (display: contents) pour que ses blocs se rangent autour de la grille ; la mesure
+   des tailles (cqw) se fait alors sur la mise en page, de même largeur. */
 @media (max-width: 960px) {
   .ms-layout {
     grid-template-columns: 1fr;
+    row-gap: 0;
+    container-type: inline-size;
+  }
+
+  .ms-side {
+    display: contents;
+  }
+
+  .ms-stage {
+    order: 1;
+    margin-top: 20px;
+  }
+
+  /* l'aide « Tap : révéler... » et le message de fin passent sous la grille */
+  .ms-status {
+    order: 2;
+    margin-top: 12px;
+  }
+
+  .ms-podium {
+    order: 3;
   }
 
   .ms-lead {
@@ -1298,6 +1323,29 @@
   .ms-stage {
     min-height: 0;
     margin-inline: calc(var(--margin) * -1);
+  }
+}
+
+/* téléphone : le haut de page se resserre pour que la grille arrive vite à l'écran */
+@media (max-width: 600px) {
+  .ms {
+    padding-top: 12px;
+  }
+
+  .ms-lead {
+    margin-top: 6px;
+    max-width: none;
+    font-size: 1.0625rem;
+  }
+
+  .ms-levels,
+  .ms-stats,
+  .ms-tools {
+    margin-top: 14px;
+  }
+
+  .ms-stage {
+    margin-top: 14px;
   }
 }
 

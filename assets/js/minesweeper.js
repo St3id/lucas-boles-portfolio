@@ -501,7 +501,17 @@
     endEl.hidden = true;
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
-  $("ms-end-new").addEventListener("click", newGame);
+  // une seule colonne (téléphone) : après « Nouvelle partie » ou un changement de niveau,
+  // la page descend pour montrer les compteurs et la grille, si la grille n'est pas
+  // déjà entièrement à l'écran
+  function showBoard() {
+    if (window.matchMedia("(min-width: 961px)").matches) return;
+    var b = boardEl.getBoundingClientRect();
+    if (b.top >= 0 && b.bottom <= window.innerHeight) return;
+    var top = $("ms-mines").closest(".ms-stats").getBoundingClientRect().top + window.scrollY - 12;
+    window.scrollTo({ top: top, behavior: reduceMotion.matches ? "auto" : "smooth" });
+  }
+  $("ms-end-new").addEventListener("click", function () { newGame(); showBoard(); });
   $("ms-end-close").addEventListener("click", closeEnd);
   endEl.addEventListener("click", function (e) { if (e.target === endEl) closeEnd(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && codeEl.hidden) closeEnd(); });
@@ -877,13 +887,14 @@
       document.querySelectorAll(".ms-level").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
       newGame();
       loadPodium();
+      showBoard();
     });
   });
   flagModeBtn.addEventListener("click", function () {
     flagMode = !flagMode;
     flagModeBtn.setAttribute("aria-pressed", String(flagMode));
   });
-  $("ms-new").addEventListener("click", newGame);
+  $("ms-new").addEventListener("click", function () { newGame(); showBoard(); });
   window.addEventListener("resize", fitCells);
 
   // partage : menu natif sur téléphone, sinon copie du message ; ?ref=partage
