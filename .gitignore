@@ -1,2 +1,7 @@
 # Notes personnelles de contexte (non publiées)
 CLAUDE.md
+
+# Clés et secrets locaux (jamais publiés : les vraies clés sont dans Cloudflare)
+.env
+.env.*
+.dev.vars
