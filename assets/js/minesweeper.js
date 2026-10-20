@@ -27,7 +27,7 @@
       board: "Grille du démineur", close: "Fermer",
       rules: "Règles", rulesSub: "Comment jouer, ce que veulent dire les chiffres",
       controls: "Commandes", controlsSub: "Drapeau, durée de l'appui long, raccourcis",
-      ranking: "Classement", rankingSub: "Les meilleurs temps, avec ou sans drapeau",
+      ranking: "Classement", rankingSub: "Les meilleurs temps de chaque niveau",
       hintMouse: "Clic : révéler. Clic droit ou appui long : drapeau.",
       hintTouch: "Tap : révéler. Appui long ou Drapeau sous la grille : drapeau.",
       hintInvert: "Clics inversés : clic pour un drapeau, clic droit pour révéler.",
@@ -96,7 +96,7 @@
       board: "Minesweeper board", close: "Close",
       rules: "Rules", rulesSub: "How to play, what the numbers mean",
       controls: "Controls", controlsSub: "Flags, long-press timing, shortcuts",
-      ranking: "Leaderboard", rankingSub: "Best times, with or without flags",
+      ranking: "Leaderboard", rankingSub: "Best times for each level",
       hintMouse: "Click: reveal. Right click or long press: flag.",
       hintTouch: "Tap: reveal. Long press or Flag below the board: flag.",
       hintInvert: "Swapped clicks: click to flag, right click to reveal.",
@@ -353,7 +353,15 @@
     view.s = s;
     applyView();
   }
-  function scrollPage(dy) { if (Math.abs(dy) > 0.5) window.scrollBy(0, -dy); }
+  // défilement immédiat : avec le « scroll-behavior: smooth » de la page, chaque petit pas
+  // deviendrait une animation coupée par la suivante et la page suivrait le doigt au ralenti
+  var rootStyle = document.documentElement.style;
+  function scrollPage(dy) {
+    if (Math.abs(dy) <= 0.5) return;
+    rootStyle.scrollBehavior = "auto";
+    window.scrollBy(0, -dy);
+    rootStyle.scrollBehavior = "";
+  }
   function points() { return Object.keys(touches).map(function (k) { return touches[k]; }); }
   function pinchOf(p) {
     return { mode: "pinch", d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) || 1, mx: (p[0].x + p[1].x) / 2, my: (p[0].y + p[1].y) / 2 };
@@ -388,7 +396,7 @@
     touches[e.pointerId] = { x: e.clientX, y: e.clientY };
     var p = points();
     if (p.length === 1) gesture = { mode: "wait", sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, v: [] };
-    else if (p.length === 2) { cancelPress(); gesture = pinchOf(p); }
+    else if (p.length === 2) { cancelPress(); gesture = pinchOf(p); wrapEl.classList.add("is-panning"); }
   });
   window.addEventListener("pointermove", function (e) {
     if (!touches[e.pointerId] || !gesture) return;
@@ -423,6 +431,7 @@
     if (gesture.mode === "pinch") {
       // un doigt reste posé après le pincement : il continue de déplacer la grille
       gesture = p.length ? { mode: "pan", lx: p[0].x, ly: p[0].y, v: [] } : null;
+      if (!gesture) wrapEl.classList.remove("is-panning");
       return;
     }
     if (p.length) return;

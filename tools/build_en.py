@@ -97,7 +97,7 @@ R = [
  ("<p>Mes parties : la <strong>conception de l’électronique</strong> sous KiCad et la fonction <strong>choix d'une gare</strong>. Le programme calcule le plus court chemin avec l'algorithme de Dijkstra, puis commande les aiguillages pour que le train y arrive seul.</p>",
   "<p>My contributions were the <strong>electronic design</strong> in KiCad and the <strong>pick a station</strong> feature. The program computes the shortest route with Dijkstra's algorithm, then sets the switches so the train gets there on its own.</p>"),
  ("<title id=\"rail-svg-title\">Schéma d'un petit réseau ferré avec cinq gares reliées par des voies</title>", '<title id="rail-svg-title">Diagram of a small rail network with five stations linked by tracks</title>'),
- ('<p id="rail-label">Choisir une gare de destination :</p>', '<p id="rail-label">Pick a destination station:</p>'),
+ ('<p id="rail-label">Choisir une gare de destination&nbsp;:</p>', '<p id="rail-label">Pick a destination station:</p>'),
  ('Réseau fictif et simplifié, pour montrer le principe. Les nombres sont les longueurs des voies.', 'A simplified, made-up network to show the idea. Numbers are track lengths.'),
  ('alt="Schéma électrique KiCad des trois cartes : commande ESP32, puissance et capteurs"', 'alt="KiCad schematic of the three boards: ESP32 control, power and sensors"'),
  ('<figcaption>Schéma électrique sous KiCad (ouvrir en grand)</figcaption>', '<figcaption>Schematic in KiCad (open full size)</figcaption>'),

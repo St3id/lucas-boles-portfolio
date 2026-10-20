@@ -805,6 +805,11 @@
   cursor: grabbing;
 }
 
+/* pendant le geste, la grille a son propre calque : la déplacer ne redessine pas les cases */
+.ms-board-wrap.is-panning .ms-board {
+  will-change: transform;
+}
+
 .ms-board {
   --cell: 34px;
   display: grid;
@@ -2032,12 +2037,13 @@ button.ms-pick-cell {
 }
 
 @media (max-width: 520px) {
-  /* le nom prendrait deux lignes : on garde la langue et le retour */
+  /* le nom prendrait deux lignes : on garde le retour, à gauche, et la langue à droite */
   .ms-page .site-header .wordmark {
     display: none;
   }
 
-  .ms-page .site-header .lang-link {
+  .ms-page .site-header .text-link {
+    order: -1;
     margin-right: auto;
   }
 

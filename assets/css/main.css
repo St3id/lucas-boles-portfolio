@@ -537,6 +537,10 @@ figure figcaption {
   margin-bottom: 14px;
 }
 
+.role p + p {
+  margin-top: 1em;
+}
+
 .tool-list {
   display: flex;
   flex-wrap: wrap;
@@ -971,6 +975,10 @@ figure figcaption {
   .path-col {
     grid-column: 1 / -1;
   }
+
+  .path-col + .path-col {
+    margin-top: clamp(24px, 6vw, 40px);
+  }
 }
 
 @media (max-width: 640px) {
@@ -1329,8 +1337,12 @@ figure figcaption {
 }
 
 
-/* très petits écrans (320 px) : « Compétences » doit tenir sur une ligne */
+/* très petits écrans (320 px) : « Compétences » doit tenir sur une ligne, et l'en-tête aussi */
 @media (max-width: 360px) {
+  .site-header .wrap {
+    column-gap: 14px;
+  }
+
   .section-title {
     font-size: min(2rem, 10.5vw);
   }
