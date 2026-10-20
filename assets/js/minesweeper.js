@@ -270,10 +270,23 @@
 
   function neighbours(i) { return MSCore.neighbours(i, size); }
 
+  // taille des cases : la grille prend toute la place du panneau. Sur ordinateur, elle
+  // tient aussi en hauteur dans l'écran, à tous les niveaux, sans défiler pour jouer.
+  // Sur téléphone, seule la largeur compte (cases de 28 px au moins, pour le doigt).
+  var wide = window.matchMedia("(min-width: 961px)");
   function fitCells() {
-    var avail = boardEl.parentNode.clientWidth - 4;
-    var cell = Math.floor((avail - (size - 1) * 3) / size);
-    boardEl.style.setProperty("--cell", Math.max(28, Math.min(56, cell)) + "px");
+    var gaps = (size - 1) * 3;
+    var cell = Math.floor((boardEl.parentNode.clientWidth - 4 - gaps) / size);
+    if (wide.matches) {
+      // hauteur libre sous le haut du panneau, page en haut (en-tête et titre compris)
+      var stage = boardEl.closest(".ms-stage"), pad = parseFloat(getComputedStyle(stage).paddingTop) || 0;
+      var top = stage.getBoundingClientRect().top + window.scrollY;
+      var tall = window.innerHeight - top - 2 * pad - 16;
+      cell = Math.max(20, Math.min(72, cell, Math.floor((tall - gaps) / size)));
+    } else {
+      cell = Math.max(28, Math.min(56, cell));
+    }
+    boardEl.style.setProperty("--cell", cell + "px");
   }
 
   function randomSeed() { return crypto.getRandomValues(new Uint32Array(1))[0]; }

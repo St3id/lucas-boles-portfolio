@@ -27,6 +27,51 @@
   }
 }
 
+/* ordinateur : le panneau sombre descend aussi bas que la colonne de gauche (pas de
+   vide blanc sous une petite grille), la grille y est centrée et tient dans l'écran
+   (taille des cases calculée dans minesweeper.js) ; les espacements de la colonne
+   suivent la hauteur de l'écran pour que le podium arrive vite */
+@media (min-width: 961px) {
+  .ms {
+    padding-top: clamp(16px, 2.6vh, 40px);
+  }
+
+  /* la grille commence en haut du panneau : elle est dimensionnée pour tenir dans
+     l'écran à partir de là */
+  .ms .ms-stage {
+    align-self: stretch;
+    place-items: start center;
+    min-height: 0;
+  }
+
+  .ms .ms-board-wrap {
+    max-height: none;
+  }
+
+  .ms .ms-lead {
+    max-width: 32ch;
+  }
+
+  .ms .ms-levels,
+  .ms .ms-stats,
+  .ms .ms-tools,
+  .ms .ms-podium {
+    margin-top: clamp(14px, 2.6vh, 32px);
+  }
+}
+
+/* ordinateur à l'écran peu haut (portable) : podium plus ramassé pour qu'il arrive
+   plus haut dans la colonne ; marches moins hautes, lauriers un peu plus petits */
+@media (min-width: 961px) and (max-height: 1000px) {
+  .ms .ms-step:nth-child(1) .ms-step-block { height: 84px; }
+  .ms .ms-step:nth-child(2) .ms-step-block { height: 62px; }
+  .ms .ms-step:nth-child(3) .ms-step-block { height: 42px; }
+  .ms .ms-step-crown { width: min(72px, 76%); }
+  .ms .ms-step:nth-child(1) .ms-step-crown { width: min(92px, 96%); }
+  .ms .ms-step:nth-child(1) .ms-step-rank { font-size: 2.25rem; }
+  .ms .ms-step-rank { font-size: 1.75rem; }
+}
+
 /* taille déduite de la largeur de la colonne : « Minesweeper » (le plus long)
    tient sur une ligne, sans couper le mot */
 .ms .ms-title {
@@ -610,9 +655,9 @@
 
 /* la grille défile si elle dépasse (niveau Difficile sur téléphone) */
 .ms-board-wrap {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   max-width: 100%;
-  max-height: 80vh;
   width: 100%;
   -webkit-overflow-scrolling: touch;
 }
@@ -1301,19 +1346,25 @@
     display: contents;
   }
 
-  .ms-stage {
+  /* ordre : titre, niveaux, podium (on le voit en arrivant), puis compteurs et
+     « Nouvelle partie » collés à la grille, puis l'aide et le message de fin */
+  .ms-podium {
     order: 1;
+  }
+
+  .ms-stats,
+  .ms-tools {
+    order: 2;
+  }
+
+  .ms-stage {
+    order: 3;
     margin-top: 20px;
   }
 
-  /* l'aide « Tap : révéler... » et le message de fin passent sous la grille */
   .ms-status {
-    order: 2;
+    order: 4;
     margin-top: 12px;
-  }
-
-  .ms-podium {
-    order: 3;
   }
 
   .ms-lead {
@@ -1339,9 +1390,12 @@
   }
 
   .ms-levels,
-  .ms-stats,
   .ms-tools {
     margin-top: 14px;
+  }
+
+  .ms-stats {
+    margin-top: 28px;
   }
 
   .ms-stage {
