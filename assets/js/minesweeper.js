@@ -19,7 +19,7 @@
       title: "Démineur", lead: "Trouver toutes les cases sûres sans toucher une mine.",
       levels: "Difficulté", easy: "Bac à sable", medium: "Terrain glissant", hard: "Champ de mines", noflag: "Sans drapeau",
       closedCell: "Case fermée", hintNoflagMouse: "Clic : révéler. Pas de drapeau dans ce mode.", hintNoflagTouch: "Tap : révéler. Pas de drapeau dans ce mode.",
-      minesLeft: "Mines restantes", time: "Temps", record: "Record", flagMode: "Mode drapeau", newGame: "Nouvelle partie",
+      minesLeft: "Mines restantes", time: "Temps", record: "Record", shovel: "Pelle", flag: "Drapeau", tapAction: "Action d'un tap", newGame: "Nouvelle partie",
       replay: "Rejouer", changeLevel: "Changer de niveau", go: "C'est parti", cancel: "Annuler",
       grid: "Grille", mines: "Mines", pickTop: "À battre : ", pickTopTime: " en {t}",
       pickFree: "Podium vide : la 1re place est à prendre.", pickMine: "Votre record : {t}", pickNoMine: "Pas encore de record à ce niveau.",
@@ -29,12 +29,12 @@
       controls: "Commandes", controlsSub: "Drapeau, durée de l'appui long, raccourcis",
       ranking: "Classement", rankingSub: "Les meilleurs temps, avec ou sans drapeau",
       hintMouse: "Clic : révéler. Clic droit ou appui long : drapeau.",
-      hintTouch: "Tap : révéler. Appui long ou Mode drapeau : drapeau.",
+      hintTouch: "Tap : révéler. Appui long ou Drapeau sous la grille : drapeau.",
       hintInvert: "Clics inversés : clic pour un drapeau, clic droit pour révéler.",
       rulesList: [
         "Le but : révéler toutes les cases qui ne cachent pas de mine.",
         "Un chiffre indique combien de mines touchent la case, en comptant les diagonales.",
-        "Un drapeau marque une mine supposée : clic droit, appui long ou Mode drapeau.",
+        "Un drapeau marque une mine supposée : clic droit, appui long, ou Drapeau sous la grille sur écran tactile.",
         "Clic sur un chiffre déjà révélé : si autant de drapeaux que le chiffre l'entourent, ses autres voisins s'ouvrent.",
         "Le premier clic ne tombe jamais sur une mine, ni sur une case voisine d'une mine. Les drapeaux se posent après ce premier clic.",
         "Au clavier : flèches pour se déplacer, Entrée pour révéler, la touche drapeau (F par défaut) pour marquer.",
@@ -87,7 +87,7 @@
       title: "Minesweeper", lead: "Find every safe cell without hitting a mine.",
       levels: "Difficulty", easy: "Sandbox", medium: "Slippery slope", hard: "Minefield", noflag: "No flags",
       closedCell: "Closed cell", hintNoflagMouse: "Click: reveal. No flags in this mode.", hintNoflagTouch: "Tap: reveal. No flags in this mode.",
-      minesLeft: "Mines left", time: "Time", record: "Best", flagMode: "Flag mode", newGame: "New game",
+      minesLeft: "Mines left", time: "Time", record: "Best", shovel: "Shovel", flag: "Flag", tapAction: "What a tap does", newGame: "New game",
       replay: "Play again", changeLevel: "Change level", go: "Let's go", cancel: "Cancel",
       grid: "Grid", mines: "Mines", pickTop: "To beat: ", pickTopTime: " in {t}",
       pickFree: "Empty podium: first place is up for grabs.", pickMine: "Your best: {t}", pickNoMine: "No best time on this level yet.",
@@ -97,12 +97,12 @@
       controls: "Controls", controlsSub: "Flags, long-press timing, shortcuts",
       ranking: "Leaderboard", rankingSub: "Best times, with or without flags",
       hintMouse: "Click: reveal. Right click or long press: flag.",
-      hintTouch: "Tap: reveal. Long press or Flag mode: flag.",
+      hintTouch: "Tap: reveal. Long press or Flag below the board: flag.",
       hintInvert: "Swapped clicks: click to flag, right click to reveal.",
       rulesList: [
         "The goal: reveal every cell that does not hide a mine.",
         "A number tells how many mines touch the cell, diagonals included.",
-        "A flag marks a suspected mine: right click, long press or Flag mode.",
+        "A flag marks a suspected mine: right click, long press, or Flag below the board on a touch screen.",
         "Click a revealed number: if it is surrounded by as many flags as its value, its other neighbours open.",
         "The first click never lands on a mine, nor next to one. Flags can be placed after that first click.",
         "Keyboard: arrows to move, Enter to reveal, the flag key (F by default) to mark.",
@@ -158,7 +158,7 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var boardEl = $("ms-board"), minesEl = $("ms-mines"), timeEl = $("ms-time"), bestEl = $("ms-best"), statusEl = $("ms-status");
-  var flagModeBtn = $("ms-flag-mode"), endEl = $("ms-end");
+  var toolEl = $("ms-tool"), endEl = $("ms-end");
   var coarse = window.matchMedia("(pointer: coarse)").matches;
   var canVibrate = "vibrate" in navigator && coarse;
 
@@ -291,14 +291,30 @@
     var cell = Math.floor((boardEl.parentNode.clientWidth - 4 - gaps) / size);
     if (wide.matches) {
       // hauteur libre sous le haut du panneau, page en haut (en-tête et titre compris)
-      var stage = boardEl.closest(".ms-stage"), pad = parseFloat(getComputedStyle(stage).paddingTop) || 0;
+      var stage = boardEl.closest(".ms-stage"), cs = getComputedStyle(stage);
+      var pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
       var top = stage.getBoundingClientRect().top + window.scrollY;
-      var tall = window.innerHeight - top - 2 * pad - 16;
+      var gap = parseFloat(cs.rowGap) || 0, above = $("ms-stage-level").offsetHeight + gap;
+      var below = toolEl.hidden ? 0 : toolEl.offsetHeight + gap;
+      var tall = window.innerHeight - top - pad - 16 - above - below;
       cell = Math.max(20, Math.min(72, cell, Math.floor((tall - gaps) / size)));
     } else {
       cell = Math.max(28, Math.min(56, cell));
     }
     boardEl.style.setProperty("--cell", cell + "px");
+  }
+
+  // rappel du niveau en cours, en haut du panneau de la grille
+  function renderStageLevel() { $("ms-stage-level").textContent = TEXT[level]; }
+
+  // commutateur Pelle / Drapeau : ce que fait un tap (les clics inversés des réglages
+  // donnent le point de départ, le commutateur montre toujours l'action réelle)
+  function renderTool() {
+    var flagTap = flagMode !== settings.invert;
+    toolEl.classList.toggle("is-flag", flagTap);
+    toolEl.querySelectorAll("[data-tool]").forEach(function (b) {
+      b.setAttribute("aria-checked", String((b.dataset.tool === "flag") === flagTap));
+    });
   }
 
   function randomSeed() { return crypto.getRandomValues(new Uint32Array(1))[0]; }
@@ -315,7 +331,11 @@
     peekNext = false;
     statusEl.textContent = hint();
     statusEl.className = "ms-status";
-    flagModeBtn.hidden = !coarse || noFlags();
+    // chaque partie commence à la pelle
+    flagMode = false;
+    toolEl.hidden = !coarse || noFlags();
+    renderTool();
+    renderStageLevel();
     closeEnd();
 
     // la graine vient du serveur quand le classement est actif, sinon du navigateur
@@ -925,9 +945,11 @@
   });
 
   /* --- Commandes de la page ---------------------------------------------------- */
-  flagModeBtn.addEventListener("click", function () {
-    flagMode = !flagMode;
-    flagModeBtn.setAttribute("aria-pressed", String(flagMode));
+  toolEl.querySelectorAll("[data-tool]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      flagMode = (b.dataset.tool === "flag") !== settings.invert;
+      renderTool();
+    });
   });
   $("ms-new").addEventListener("click", openPick);
   window.addEventListener("resize", fitCells);
@@ -1285,6 +1307,7 @@
     keyBtn.textContent = settings.flagKey.toUpperCase();
     if (cells) renderTime();
     if (!over) statusEl.textContent = hint();
+    renderTool();
   }
   function setSetting(name, value) {
     settings[name] = value;

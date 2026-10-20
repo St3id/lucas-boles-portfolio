@@ -20,9 +20,9 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=dd1a259e">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=1bf9777a">
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=f3ecf45a">
   <script src="assets/js/ms-core.js?v=f9da3d42" defer></script>
-  <script src="assets/js/minesweeper.js?v=4df42c71" defer></script>
+  <script src="assets/js/minesweeper.js?v=1f37265b" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -48,7 +48,6 @@
 
         <div class="ms-tools">
           <button type="button" class="button" id="ms-new" data-i18n="newGame">Nouvelle partie</button>
-          <button type="button" class="ms-flag-mode" id="ms-flag-mode" aria-pressed="false" data-i18n="flagMode">Mode drapeau</button>
         </div>
 
         <p class="ms-status" id="ms-status" aria-live="polite"></p>
@@ -75,8 +74,15 @@
       </div>
 
       <div class="ms-stage">
+        <p class="ms-stage-level" id="ms-stage-level"></p>
         <div class="ms-board-wrap">
           <div class="ms-board" id="ms-board" role="grid" aria-label="Grille du démineur" data-i18n-aria="board"></div>
+        </div>
+        <!-- écran tactile : ce que fait un tap, sous la grille, à portée de pouce -->
+        <div class="ms-tool" id="ms-tool" role="radiogroup" aria-label="Action d'un tap" data-i18n-aria="tapAction" hidden>
+          <span class="ms-tool-knob" aria-hidden="true"></span>
+          <button type="button" role="radio" aria-checked="true" data-tool="dig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 11.5L19 5M17 3l4 4"/><path d="M10 9l5 5-5.5 5.5C7 22 3 21 3 21s-1-4 1.5-6.5z"/></svg><span data-i18n="shovel">Pelle</span></button>
+          <button type="button" role="radio" aria-checked="false" data-tool="flag"><span class="ms-tool-flag" aria-hidden="true">⚑</span><span data-i18n="flag">Drapeau</span></button>
         </div>
       </div>
     </div>
@@ -156,7 +162,7 @@
 
     <div class="ms-setting ms-hold-setting" id="ms-hold-block">
       <label for="set-hold-ms"><span data-i18n="setHoldMs">Durée de l'appui long</span> <output id="set-hold-out" for="set-hold-ms">500 ms</output></label>
-      <input type="range" id="set-hold-ms" min="150" max="1200" step="50" value="500">
+      <input type="range" id="set-hold-ms" min="100" max="1200" step="50" value="500">
       <div class="ms-hold-test">
         <button type="button" class="ms-cell ms-test-cell" id="ms-test-cell" aria-describedby="ms-test-text"></button>
         <p id="ms-test-text" data-i18n="testIdle">Rester appuyé sur la case pour essayer.</p>

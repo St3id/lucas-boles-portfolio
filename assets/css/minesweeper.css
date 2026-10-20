@@ -41,6 +41,10 @@
   .ms .ms-stage {
     align-self: stretch;
     place-items: start center;
+    align-content: start;
+    /* le rappel du niveau occupe le haut du panneau, à la place de la marge */
+    padding-top: 12px;
+    row-gap: 8px;
     min-height: 0;
   }
 
@@ -103,7 +107,6 @@
 }
 
 .ms-tab,
-.ms-flag-mode,
 .ms-end-close {
   font: inherit;
   font-weight: 600;
@@ -118,20 +121,17 @@
 
 @media (hover: hover) {
   .ms-tab:hover,
-  .ms-flag-mode:hover,
   .ms-end-close:hover {
     background: var(--ink);
     color: var(--ground);
   }
 }
 
-.ms-tab:active,
-.ms-flag-mode:active {
+.ms-tab:active {
   transform: scale(0.96);
 }
 
-.ms-tab[aria-pressed="true"],
-.ms-flag-mode[aria-pressed="true"] {
+.ms-tab[aria-pressed="true"] {
   background: var(--accent);
   color: var(--accent-ink);
 }
@@ -699,9 +699,92 @@
 .ms-stage {
   background: var(--field);
   padding: clamp(16px, 3vw, 40px);
+  align-content: center;
+  row-gap: 12px;
   min-height: clamp(320px, 42vw, 640px);
   display: grid;
   place-items: center;
+}
+
+/* rappel du niveau en cours, au-dessus de la grille : le nom, rien d'autre */
+.ms-stage-level {
+  min-height: 24px;
+  font-size: var(--step-small);
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--on-field-soft);
+  text-align: center;
+}
+
+/* commutateur Pelle / Drapeau sous la grille (écran tactile) : une pastille claire
+   glisse sous l'outil choisi */
+.ms-tool {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(280px, 100%);
+  padding: 4px;
+  background: #2b3631;
+}
+
+.ms-tool[hidden] {
+  display: none;
+}
+
+.ms-tool-knob {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  background: var(--accent-on-field);
+  transition: transform 0.3s var(--ease-out), background-color 0.3s ease;
+}
+
+.ms-tool.is-flag .ms-tool-knob {
+  transform: translateX(100%);
+  background: #ffd23b;
+}
+
+.ms-tool button {
+  position: relative;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--on-field);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.ms-tool button[aria-checked="true"] {
+  color: var(--field);
+}
+
+.ms-tool svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ms-tool-flag {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.ms-tool button:focus-visible {
+  outline: 3px solid var(--on-field);
+  outline-offset: -3px;
 }
 
 /* la grille défile si elle dépasse (niveau Difficile sur téléphone) */
@@ -711,6 +794,9 @@
   max-width: 100%;
   width: 100%;
   -webkit-overflow-scrolling: touch;
+  /* barre de défilement fine et sombre, dans le ton du panneau */
+  scrollbar-width: thin;
+  scrollbar-color: #4a5a53 transparent;
 }
 
 .ms-board {
