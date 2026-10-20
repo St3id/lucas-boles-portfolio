@@ -71,9 +71,7 @@ f.onload = async function () {
   var rows = d.querySelectorAll("#ms-rank-list li");
   ok(rows.length === 1 && rows[0].classList.contains("is-me"), "classement : " + rows.length + " ligne(s), la mienne en surbrillance : " + (rows[0] && rows[0].textContent));
   ok(/Lucas38/.test(d.getElementById("ms-rank-me").textContent), "« Vos temps sont inscrits au nom de Lucas38 »");
-  d.querySelector('[data-rank-cat="noflag"]').click();
-  await wait(400);
-  ok(d.querySelectorAll("#ms-rank-list li").length === 1, "catégorie Sans drapeau : partie sans drapeau présente");
+  ok(d.querySelectorAll("[data-rank-level]").length === 4 && !d.querySelector("[data-rank-cat]"), "classement : 4 onglets de niveau, plus de catégorie");
   d.querySelector("#ms-ranking [data-close]").click();
 
   // un autre navigateur ne peut pas prendre « lucas38 » : on simule en oubliant l'identité
@@ -106,10 +104,30 @@ f.onload = async function () {
   ok(JSON.parse(w.localStorage.getItem("ms-level-v1")) === "hard", "niveau gardé pour la prochaine visite");
   ok(d.getElementById("ms-podium-level").textContent === "Champ de mines", "podium sur le niveau en cours");
   d.getElementById("ms-podium-next").click();
-  ok(d.getElementById("ms-podium-level").textContent === "Bac à sable" && w.__ms.level() === "hard", "flèche du podium : autre niveau affiché, partie inchangée");
+  ok(d.getElementById("ms-podium-level").textContent === "Sans drapeau" && w.__ms.level() === "hard", "flèche du podium : niveau suivant (Sans drapeau) affiché, partie inchangée");
+  d.getElementById("ms-podium-next").click();
+  ok(d.getElementById("ms-podium-level").textContent === "Bac à sable", "flèche du podium : après Sans drapeau, retour au début");
   d.getElementById("ms-new").click();
   d.getElementById("ms-pick-cancel").click();
   ok(!pick.open && w.__ms.level() === "hard", "Annuler : rien ne change");
+
+  // mode Sans drapeau : caché tant que la case n'est pas creusée
+  d.getElementById("ms-new").click();
+  ok(d.getElementById("ms-pick-nf").hidden && !pick.classList.contains("is-unlocked"), "Sans drapeau caché au départ");
+  d.querySelector('[data-dig="no"]').click();
+  ok(!pick.classList.contains("is-unlocked"), "case incertaine : rien ne s'ouvre");
+  d.getElementById("ms-pick-key").click();
+  await wait(1600);
+  ok(pick.classList.contains("is-unlocked") && JSON.parse(w.localStorage.getItem("ms-noflag-v1")) === true, "case sûre creusée : chemin débloqué et gardé");
+  ok(d.getElementById("ms-pick-name").textContent === "Sans drapeau", "le curseur part sur le chemin : Sans drapeau");
+  d.getElementById("ms-pick-go").click();
+  ok(w.__ms.level() === "noflag" && d.querySelectorAll(".ms-board .ms-cell").length === 16 * 16 && /Pas de drapeau/.test(d.getElementById("ms-status").textContent), "partie Sans drapeau lancée, 16 × 16");
+  await wait(400);
+  var nfCells = d.querySelectorAll(".ms-board .ms-cell");
+  tap(w, nfCells[0]);
+  var shut = Array.prototype.find.call(d.querySelectorAll(".ms-board .ms-cell"), function (c) { return !c.classList.contains("is-open"); });
+  shut.dispatchEvent(new w.MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+  ok(!d.querySelector(".ms-board .is-flag") && w.__ms.game().actions.every(function (x) { return x.a !== "f"; }), "Sans drapeau : clic droit sans effet");
 
   document.getElementById("out").textContent = log.join("\n");
 };

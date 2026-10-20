@@ -5,6 +5,7 @@
  *   POST /scores  { id, pseudo, token?, actions }  -> { timeMs, noflag, all, nf, token? }
  *                 all / nf : { improved, best, rank } (nf seulement pour une partie sans drapeau)
  *   GET  /scores?level=easy&cat=all|noflag         -> { scores: [{ pseudo, timeMs }] }
+ *        level : easy, medium, hard ou noflag (mode Sans drapeau : tout drapeau y est refusé)
  *
  * Anti-triche : le serveur choisit la graine de chaque partie, rejoue la liste
  * des clics reçue (même code que le jeu, bloc CORE ci-dessous) et compare le temps
@@ -23,7 +24,9 @@
 
 // --- CORE START
 var MSCore = (function () {
-  var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 } };
+  // noflag : mode Sans drapeau, grille de Terrain glissant où tout drapeau est refusé
+  var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 },
+    noflag: { size: 16, mines: 40, noflag: true } };
 
   // vrai niveau seulement : LEVELS["constructor"] ou LEVELS["__proto__"] existent aussi en JavaScript
   function isLevel(level) {
@@ -109,7 +112,7 @@ var MSCore = (function () {
       if (x.a === "r") {
         if (!reveal(x.i)) return { ok: false, why: "mine" };
       } else if (x.a === "f") {
-        if (open[x.i]) return { ok: false, why: "action" };
+        if (open[x.i] || LEVELS[level].noflag) return { ok: false, why: "action" };
         flag[x.i] = !flag[x.i];
         if (flag[x.i]) flagsUsed++;
       } else {
@@ -134,12 +137,12 @@ var MSCore = (function () {
 const GAME_TTL_MS = 2 * 60 * 60 * 1000;   // une partie doit être envoyée dans les 2 h
 const CLOCK_MARGIN_MS = 1500;             // tolérance entre l'horloge du joueur et la nôtre
 const MIN_ACTION_GAP_MS = 40;             // en dessous, ce n'est plus une main humaine
-const FLOOR_MS = { easy: 1000, medium: 6000, hard: 25000 };  // temps plancher par niveau
+const FLOOR_MS = { easy: 1000, medium: 6000, hard: 25000, noflag: 6000 };  // temps plancher par niveau
 const RATE = { start: 30, submit: 10, read: 60 };             // requêtes par minute et par visiteur
 const BOARD_SIZE = 20;
 const MAX_BODY = 200000;
 const SITE_URL = "https://st3id.github.io/lucas-boles-portfolio/minesweeper.html";
-const LEVEL_NAME = { easy: "Facile", medium: "Moyen", hard: "Difficile" };
+const LEVEL_NAME = { easy: "Bac à sable", medium: "Terrain glissant", hard: "Champ de mines", noflag: "Sans drapeau" };
 
 /* --- Pseudos -------------------------------------------------------------------- */
 // alphabet latin (accents compris) et chiffres 0-9 seulement : pas de lettres
@@ -403,7 +406,8 @@ export async function handle(request, env, repo, now = Date.now(), ctx = null) {
         return { improved, best, rank };
       };
       const all = await keep(false);
-      const nf = result.noflag ? await keep(true) : null;
+      // le mode Sans drapeau a son propre classement : pas de catégorie en plus
+      const nf = result.noflag && !MSCore.LEVELS[game.level].noflag ? await keep(true) : null;
       if (changes.length) {
         const mail = topMail({ level: game.level, pseudo: body.pseudo, key, changes, timeMs: result.timeMs,
           count: result.count, noflag: result.noflag, since: player ? player.created_at : null, now });
@@ -431,11 +435,12 @@ const parisDate = (ms) => new Date(ms).toLocaleString("fr-FR", { timeZone: "Euro
 // et les commandes prêtes à coller dans la console D1
 export function topMail(info) {
   const level = LEVEL_NAME[info.level], first = info.changes[0];
-  const cat = (c) => (c.noflag ? "Sans drapeau" : "Tous");
+  // catégorie précisée sauf pour le mode Sans drapeau, qui n'en a qu'une
+  const cat = (c) => (MSCore.LEVELS[info.level].noflag ? "" : c.noflag ? " (Sans drapeau)" : " (Tous)");
   const where = first.rank === 1 ? "prend la 1re place" : "entre à la " + ord(first.rank) + " place";
-  const lines = [info.pseudo + " " + where + " en " + level + " (" + cat(first) + ") avec " + fmtTime(info.timeMs) + ".", ""];
+  const lines = [info.pseudo + " " + where + " en " + level + cat(first) + " avec " + fmtTime(info.timeMs) + ".", ""];
   for (const c of info.changes) {
-    lines.push("Nouveau top 3, " + level + ", " + cat(c) + " :");
+    lines.push("Nouveau top 3, " + level + cat(c) + " :");
     c.after.forEach((x, i) => {
       const was = c.before.findIndex((y) => y.pseudo === x.pseudo);
       const note = was < 0 ? "nouveau dans le top 3" : was > i ? "monte, était " + ord(was + 1)

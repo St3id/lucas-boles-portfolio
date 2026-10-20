@@ -84,8 +84,10 @@ envoyer de temps. Pour l'enlever : `DELETE FROM bans WHERE word = 'mot';`. Pas b
   empreinte de l'adresse IP effacée après une heure.
 - **Un seul record par pseudo** : une ligne par pseudo, niveau et catégorie, remplacée uniquement
   par un temps meilleur. Un temps moins bon ne stocke rien. La base reste donc minuscule.
-- **La catégorie Sans drapeau** : une partie gagnée sans aucun drapeau posé y figure en plus du
-  classement général.
+- **Le mode Sans drapeau** : un niveau à part (`noflag`, 16 × 16, 40 mines), débloqué dans la fenêtre
+  Nouvelle partie. Le serveur refuse toute partie de ce mode où un drapeau a été posé.
+- **La catégorie Sans drapeau** des autres niveaux (une partie gagnée sans aucun drapeau) est toujours
+  calculée par le serveur, mais le jeu ne l'affiche plus : le mode Sans drapeau la remplace.
 - **Les parties avec le code secret** ne sont jamais envoyées par le jeu.
 
 Limite connue : un robot qui lirait la grille dans le navigateur pourrait jouer vite et « proprement ».

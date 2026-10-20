@@ -161,11 +161,11 @@ const mails = [];
 env.sendMail = (m) => { mails.push(m); };
 g = await play("easy", "Alpha", null, 0, { actions: timed("easy", 5000) });
 const aTok = g.r.token;
-ok(mails.length === 1 && /^Démineur : Alpha prend la 1re place en Facile \(00:05\.0\)$/.test(mails[0].subject), "e-mail au premier temps du niveau : " + (mails[0] && mails[0].subject));
+ok(mails.length === 1 && /^Démineur : Alpha prend la 1re place en Bac à sable \(00:05\.0\)$/.test(mails[0].subject), "e-mail au premier temps du niveau : " + (mails[0] && mails[0].subject));
 ok(/nouveau pseudo, créé avec cette partie/.test(mails[0].text) && /Avant :\n  personne/.test(mails[0].text), "e-mail : nouveau pseudo, top 3 vide avant");
 ok(/DELETE FROM bests WHERE player_key = 'alpha';/.test(mails[0].text) && /DELETE FROM players WHERE key = 'alpha';/.test(mails[0].text) &&
   /INSERT OR IGNORE INTO bans \(word\) VALUES \('alpha'\);/.test(mails[0].text), "e-mail : commandes SQL de retrait et de bannissement");
-ok(/Nouveau top 3, Facile, Sans drapeau/.test(mails[0].text), "e-mail : les deux catégories dans le même e-mail (Tous et Sans drapeau)");
+ok(/Nouveau top 3, Bac à sable \(Sans drapeau\)/.test(mails[0].text), "e-mail : les deux catégories dans le même e-mail (Tous et Sans drapeau)");
 g = await play("easy", "Bravo", null, 0, { actions: timed("easy", 6000) });
 const bTok = g.r.token;
 await play("easy", "Charlie", null, 0, { actions: timed("easy", 7000) });
@@ -174,7 +174,7 @@ g = await play("easy", "Delta", null, 0, { actions: timed("easy", 9000) });
 ok(mails.length === 3, "4e place : pas d'e-mail");
 g = await play("easy", "Delta", g.r.token, 0, { actions: timed("easy", 5500) });
 let m = mails[mails.length - 1];
-ok(mails.length === 4 && /Delta entre à la 2e place en Facile \(00:05\.5\)/.test(m.subject), "Delta passe 2e : " + m.subject);
+ok(mails.length === 4 && /Delta entre à la 2e place en Bac à sable \(00:05\.5\)/.test(m.subject), "Delta passe 2e : " + m.subject);
 ok(/Sort du top 3 : Charlie \(était 3e, 00:07\.0\)/.test(m.text) && /3e  Bravo  00:06\.0  \(descend, était 2e\)/.test(m.text) &&
   /2e  Delta  00:05\.5  \(nouveau dans le top 3\)/.test(m.text), "e-mail : qui remplace qui");
 ok(/ancien record 00:09\.0/.test(m.text) && /inscrit depuis le/.test(m.text) && /4 joueurs classés/.test(m.text), "e-mail : ancien record, date d'inscription, nombre de joueurs");
@@ -199,6 +199,18 @@ ok(g.r.error === "pseudo-refused", "pseudo existant banni, même avec son jeton 
 g = await play("easy", "Bravissimo", null, 300);
 ok(g.r.status === 200, "pseudo proche mais différent (Bravissimo) : accepté");
 
+
+// --- mode Sans drapeau : niveau à part, tout drapeau refusé ---
+g = await play("noflag", "Foxtrot", null, 120, { flag: true });
+ok(g.r.error === "replay", "Sans drapeau : partie avec un drapeau refusée (" + g.r.error + ")");
+env.sendMail = (m) => { mails.push(m); };
+const nfMails = mails.length;
+g = await play("noflag", "Foxtrot", null, 120);
+ok(g.r.status === 200 && g.r.all.rank === 1 && g.r.nf === null, "Sans drapeau : partie sans drapeau classée, rang " + (g.r.all && g.r.all.rank) + ", pas de catégorie en plus");
+ok(mails.length === nfMails + 1 && /^Démineur : Foxtrot prend la 1re place en Sans drapeau \(/.test(mails[mails.length - 1].subject), "Sans drapeau : e-mail sans catégorie : " + (mails[mails.length - 1] && mails[mails.length - 1].subject));
+const nfBoard = await call("/scores?level=noflag&cat=all");
+ok(nfBoard.scores.length === 1 && nfBoard.scores[0].pseudo === "Foxtrot", "Sans drapeau : classement à part");
+ok(MSCore.makeBoard("noflag", 7, 0).mine.filter(Boolean).length === 40 && MSCore.LEVELS.noflag.size === 16, "Sans drapeau : 16 × 16, 40 mines");
 
 document.getElementById("out").textContent = log.join("\n");
 </script>

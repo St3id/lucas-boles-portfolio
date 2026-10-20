@@ -1066,9 +1066,7 @@
 }
 
 /* --- Classement ------------------------------------------------------------- */
-.ms-tabs-cat {
-  margin-top: 8px;
-}
+
 
 .ms-rank-list {
   list-style: none;
@@ -1219,9 +1217,11 @@
 
 /* le slider : un vrai curseur HTML (clavier, lecteurs d'écran) posé invisible
    par-dessus le dessin ; le curseur dessiné est une case du jeu */
+/* rail principal centré à 28px du haut, chemin parallèle à 92px (RAIL_Y et
+   BRANCH_Y dans minesweeper.js) */
 .ms-pick-slider {
   position: relative;
-  height: 56px;
+  height: 136px;
   margin-top: 18px;
 }
 
@@ -1229,9 +1229,8 @@
   position: absolute;
   left: 24px;
   right: 24px;
-  top: 50%;
+  top: 24px;
   height: 8px;
-  margin-top: -4px;
   background: var(--surface);
 }
 
@@ -1259,11 +1258,11 @@
 
 .ms-pick-thumb {
   position: absolute;
-  top: 50%;
+  top: 4px;
   left: 0;
+  z-index: 2;
   width: 48px;
   height: 48px;
-  margin-top: -24px;
   display: grid;
   place-items: center;
   background: #2b3631;
@@ -1312,11 +1311,13 @@
   transform: none;
 }
 
+/* le vrai curseur ne couvre que le rail principal */
 .ms-pick-slider input {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 56px;
   margin: 0;
   opacity: 0;
   cursor: grab;
@@ -1347,6 +1348,138 @@
   outline-offset: 3px;
 }
 
+/* chemin parallèle : il descend du cran du milieu jusqu'à la case qui le barre ;
+   la suite (vers le mode Sans drapeau) n'apparaît qu'une fois la case creusée */
+.ms-pick-branch > * {
+  position: absolute;
+  background: var(--surface);
+  transition: background-color 0.3s ease;
+}
+
+.ms-pick-down {
+  left: calc(50% - 4px);
+  top: 28px;
+  width: 8px;
+  height: 52px;
+}
+
+.ms-pick-end {
+  left: calc(50% + 12px);
+  right: 24px;
+  top: 88px;
+  height: 8px;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.ms-pick-stop {
+  left: calc(100% - 30px);
+  top: 86px;
+  width: 12px;
+  height: 12px;
+  background: var(--ground);
+  box-shadow: inset 0 0 0 3px #b9bfb4;
+  transform: scale(0);
+}
+
+.ms-pick.is-unlocked .ms-pick-end {
+  transform: none;
+}
+
+.ms-pick.is-unlocked .ms-pick-stop {
+  transform: none;
+}
+
+.ms-pick.is-branch .ms-pick-down,
+.ms-pick.is-branch .ms-pick-end {
+  background: rgb(124 58 237);
+}
+
+/* trois cases fermées, deux « 1 » dessous : la case de droite est sur le chemin */
+.ms-pick-dig {
+  position: absolute;
+  left: calc(50% - 64px);
+  top: 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 24px);
+  gap: 2px;
+}
+
+.ms-pick-cell {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: #2b3631;
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.3);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+button.ms-pick-cell {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  button.ms-pick-cell:hover {
+    background: #3a4842;
+  }
+}
+
+.ms-pick-cell:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ms-pick-cell.is-open,
+.ms-pick.is-unlocked #ms-pick-key {
+  background: #e7e9e2;
+  box-shadow: none;
+  color: #1d4ed8;
+}
+
+/* le cran du mode Sans drapeau, cliquable une fois le chemin ouvert */
+.ms-pick-nf {
+  position: absolute;
+  right: 0;
+  top: 68px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* mode Sans drapeau : curseur violet, drapeau barré */
+.ms-pick[data-level="noflag"] .ms-pick-thumb {
+  background: #5b21b6;
+}
+
+
+.ms-pick-thumb::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  background: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px #5b21b6;
+  transform: rotate(-45deg) scaleX(0);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.ms-pick[data-level="noflag"] .ms-pick-thumb::after {
+  transform: rotate(-45deg);
+}
+
 .ms-pick-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1365,6 +1498,23 @@
 
   .ms-pick-thumb.is-swap {
     animation: ms-thumb-pop 0.45s var(--ease-out);
+  }
+
+  /* la case creusée s'ouvre, puis le chemin se déroule jusqu'au nouveau cran */
+  .ms-pick.is-digging #ms-pick-key {
+    animation: ms-dig 0.45s var(--ease-out);
+  }
+
+  .ms-pick.is-digging .ms-pick-end {
+    transition: transform 0.45s var(--ease-out) 0.25s, background-color 0.3s ease;
+  }
+
+  .ms-pick.is-digging .ms-pick-stop {
+    transition: transform 0.35s var(--ease-out) 0.6s;
+  }
+
+  .ms-pick-cell.is-nope {
+    animation: ms-nope 0.35s ease;
   }
 
   .ms-pick[data-level="hard"] .ms-pick-mine {
@@ -1388,6 +1538,20 @@
 
 @keyframes ms-pick-in {
   from { opacity: 0; transform: translateY(24px) scale(0.97); }
+}
+
+@keyframes ms-dig {
+  0% { scale: 1; }
+  35% { scale: 0.7; }
+  70% { scale: 1.2; }
+  100% { scale: 1; }
+}
+
+@keyframes ms-nope {
+  20% { translate: -3px 0; }
+  40% { translate: 3px 0; }
+  60% { translate: -2px 0; }
+  80% { translate: 2px 0; }
 }
 
 /* « scale » et non « transform » : le curseur est déjà placé par un transform */

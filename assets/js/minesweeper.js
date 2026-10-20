@@ -17,7 +17,8 @@
     fr: {
       pageTitle: "Démineur - Lucas Boles", skip: "Aller au jeu", back: "Retour au portfolio",
       title: "Démineur", lead: "Trouver toutes les cases sûres sans toucher une mine.",
-      levels: "Difficulté", easy: "Bac à sable", medium: "Terrain glissant", hard: "Champ de mines",
+      levels: "Difficulté", easy: "Bac à sable", medium: "Terrain glissant", hard: "Champ de mines", noflag: "Sans drapeau",
+      closedCell: "Case fermée", hintNoflagMouse: "Clic : révéler. Pas de drapeau dans ce mode.", hintNoflagTouch: "Tap : révéler. Pas de drapeau dans ce mode.",
       minesLeft: "Mines restantes", time: "Temps", record: "Record", flagMode: "Mode drapeau", newGame: "Nouvelle partie",
       replay: "Rejouer", changeLevel: "Changer de niveau", go: "C'est parti", cancel: "Annuler",
       grid: "Grille", mines: "Mines", pickTop: "À battre : ", pickTopTime: " en {t}",
@@ -37,7 +38,7 @@
         "Clic sur un chiffre déjà révélé : si autant de drapeaux que le chiffre l'entourent, ses autres voisins s'ouvrent.",
         "Le premier clic ne tombe jamais sur une mine, ni sur une case voisine d'une mine. Les drapeaux se posent après ce premier clic.",
         "Au clavier : flèches pour se déplacer, Entrée pour révéler, la touche drapeau (F par défaut) pour marquer.",
-        "Le record de chaque niveau est gardé dans ce navigateur. Une partie gagnée sans poser un seul drapeau compte aussi dans le classement Sans drapeau.",
+        "Le record de chaque niveau est gardé dans ce navigateur.",
         "Les commandes se règlent dans la fenêtre Commandes."
       ],
       setHold: "Appui long pour poser un drapeau", setHoldMs: "Durée de l'appui long",
@@ -48,11 +49,10 @@
       testIdle: "Rester appuyé sur la case pour essayer.", testHold: "Tenu {ms} ms",
       testShort: "Relâché à {ms} ms : clic normal.", testFlag: "Drapeau posé à {ms} ms.",
       win: "Gagné", lose: "Perdu", winText: "Grille dégagée en {t}.", loseText: "Une mine, après {t}.",
-      newRecord: "Nouveau record !", noflagWin: "Sans drapeau !",
+      newRecord: "Nouveau record !",
       share: "Partager mon temps",
       shareText: "J'ai terminé le démineur du portfolio de Lucas Boles (niveau « {level} ») en {t}. À toi de battre ce temps :",
       shareCopied: "Message copié, il n'y a plus qu'à le coller.", shareManual: "Copier ce message : ",
-      category: "Catégorie", catAll: "Tous", catNoflag: "Sans drapeau",
       podiumTitle: "Meilleurs temps", seeAll: "Tout le classement",
       podiumEmpty: "Personne pour l'instant : le premier temps s'affichera ici.", podiumFree: "Place libre",
       lbLoading: "Chargement...", lbEmpty: "Personne pour l'instant. À vous de jouer !", lbError: "Classement indisponible pour le moment.",
@@ -66,7 +66,6 @@
       sending: "Inscription au nom de {p}...",
       rankNew: "{p} : nouveau record au classement, {rank} sur ce niveau.",
       rankKept: "{p} : votre record de {best} reste {rank} sur ce niveau.",
-      rankNoflag: " En Sans drapeau : {rank}.",
       ordinal: function (n) { return n === 1 ? "1er" : n + "e"; },
       unrankedPeek: "Partie avec le code secret : hors classement.",
       unrankedLate: "Partie hors classement : le serveur n'a pas répondu à temps au début de la partie.",
@@ -86,7 +85,8 @@
     en: {
       pageTitle: "Minesweeper - Lucas Boles", skip: "Skip to the game", back: "Back to the portfolio",
       title: "Minesweeper", lead: "Find every safe cell without hitting a mine.",
-      levels: "Difficulty", easy: "Sandbox", medium: "Slippery slope", hard: "Minefield",
+      levels: "Difficulty", easy: "Sandbox", medium: "Slippery slope", hard: "Minefield", noflag: "No flags",
+      closedCell: "Closed cell", hintNoflagMouse: "Click: reveal. No flags in this mode.", hintNoflagTouch: "Tap: reveal. No flags in this mode.",
       minesLeft: "Mines left", time: "Time", record: "Best", flagMode: "Flag mode", newGame: "New game",
       replay: "Play again", changeLevel: "Change level", go: "Let's go", cancel: "Cancel",
       grid: "Grid", mines: "Mines", pickTop: "To beat: ", pickTopTime: " in {t}",
@@ -106,7 +106,7 @@
         "Click a revealed number: if it is surrounded by as many flags as its value, its other neighbours open.",
         "The first click never lands on a mine, nor next to one. Flags can be placed after that first click.",
         "Keyboard: arrows to move, Enter to reveal, the flag key (F by default) to mark.",
-        "Your best time for each level is kept in this browser. A game won without placing a single flag also counts in the No-flag leaderboard.",
+        "Your best time for each level is kept in this browser.",
         "Controls can be changed in the Controls window."
       ],
       setHold: "Long press to place a flag", setHoldMs: "Long-press duration",
@@ -117,11 +117,10 @@
       testIdle: "Press and hold the cell to try it.", testHold: "Held {ms} ms",
       testShort: "Released at {ms} ms: normal click.", testFlag: "Flag placed at {ms} ms.",
       win: "You win", lose: "Game over", winText: "Board cleared in {t}.", loseText: "Hit a mine after {t}.",
-      newRecord: "New personal best!", noflagWin: "No flags!",
+      newRecord: "New personal best!",
       share: "Share my time",
       shareText: "I cleared the minesweeper on Lucas Boles's portfolio (level \"{level}\") in {t}. Can you beat it?",
       shareCopied: "Message copied, just paste it.", shareManual: "Copy this message: ",
-      category: "Category", catAll: "All", catNoflag: "No flags",
       podiumTitle: "Best times", seeAll: "Full leaderboard",
       podiumEmpty: "No one yet: the first time will show up here.", podiumFree: "Open spot",
       lbLoading: "Loading...", lbEmpty: "Nobody yet. Your turn!", lbError: "Leaderboard unavailable right now.",
@@ -135,7 +134,6 @@
       sending: "Submitting as {p}...",
       rankNew: "{p}: new leaderboard best, {rank} on this level.",
       rankKept: "{p}: your best of {best} stays {rank} on this level.",
-      rankNoflag: " No flags: {rank}.",
       ordinal: function (n) { var s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); },
       unrankedPeek: "Game played with the secret code: not ranked.",
       unrankedLate: "Not ranked: the server did not answer in time when the game started.",
@@ -249,17 +247,21 @@
     li.textContent = line;
     $("ms-help-list").appendChild(li);
   });
-  if (!coarse) flagModeBtn.hidden = true;
   $("ms-ranking-tile").hidden = !rankingOn;
 
+  function noFlags() { return !!MSCore.LEVELS[level].noflag; }
   function hint() {
+    if (noFlags()) return coarse ? TEXT.hintNoflagTouch : TEXT.hintNoflagMouse;
     if (settings.invert) return TEXT.hintInvert;
     return coarse ? TEXT.hintTouch : TEXT.hintMouse;
   }
 
   /* --- État de la partie --------------------------------------------------- */
-  var LEVEL_KEYS = ["easy", "medium", "hard"];
-  var level = LEVEL_KEYS.indexOf(load("ms-level-v1", "easy")) >= 0 ? load("ms-level-v1", "easy") : "easy";
+  // noflag : mode Sans drapeau, caché tant que sa case n'a pas été creusée (fenêtre Nouvelle partie)
+  var LEVEL_KEYS = ["easy", "medium", "hard", "noflag"];
+  var unlocked = load("ms-noflag-v1", false) === true;
+  var level = load("ms-level-v1", "easy");
+  if (LEVEL_KEYS.indexOf(level) < 0 || (level === "noflag" && !unlocked)) level = "easy";
   var size, mineTotal, cells, opened, flags, over, timer, startedAt;
   var started = false, finalMs = null, flagMode = false, peekNext = false, peek = false;
   var game = null, gameSeq = 0;
@@ -313,6 +315,7 @@
     peekNext = false;
     statusEl.textContent = hint();
     statusEl.className = "ms-status";
+    flagModeBtn.hidden = !coarse || noFlags();
     closeEnd();
 
     // la graine vient du serveur quand le classement est actif, sinon du navigateur
@@ -430,7 +433,7 @@
   // les drapeaux se posent après le premier clic (la grille n'existe pas avant)
   function toggleFlag(i) {
     var cell = cells[i];
-    if (over || cell.open || !started) return;
+    if (over || cell.open || !started || noFlags()) return;
     cell.flag = !cell.flag;
     flags += cell.flag ? 1 : -1;
     record("f", i);
@@ -440,7 +443,7 @@
   }
 
   // action principale (clic, tap, Entrée) et action secondaire (clic droit, appui long)
-  function flagsFirst() { return started && flagMode !== settings.invert; }
+  function flagsFirst() { return started && !noFlags() && flagMode !== settings.invert; }
   function primary(i) {
     if (over) { showEnd(); return; }
     var cell = cells[i];
@@ -478,7 +481,6 @@
     // le temps officiel est celui de la dernière action, comme sur le serveur
     finalMs = game.actions[game.actions.length - 1].t;
     renderTime();
-    var noflag = !game.actions.some(function (x) { return x.a === "f"; });
     cells.forEach(function (cell, idx) {
       if (cell.mine && !cell.flag) { cell.flag = true; flags++; paint(idx); }
     });
@@ -486,10 +488,8 @@
     var badges = [];
     if (!peek) {
       if (improve(level + ":all", finalMs)) badges.push(TEXT.newRecord);
-      if (noflag) improve(level + ":noflag", finalMs);
       renderBest();
     }
-    if (noflag) badges.push(TEXT.noflagWin);
     statusEl.textContent = TEXT.win + " - " + fmt(finalMs);
     statusEl.className = "ms-status is-win";
     showEnd(badges);
@@ -595,7 +595,6 @@
       // une seule ligne par pseudo : elle n'est remplacée que par un meilleur temps
       var msg = (d.all.improved ? TEXT.rankNew : TEXT.rankKept).replace("{p}", pseudo)
         .replace("{rank}", TEXT.ordinal(d.all.rank)).replace("{best}", fmt(d.all.best, true));
-      if (d.nf) msg += TEXT.rankNoflag.replace("{rank}", TEXT.ordinal(d.nf.rank));
       setRankMsg(msg, "ok");
       podiumCache = {};
       loadPodium();
@@ -614,7 +613,7 @@
   });
 
   /* --- Classement : affichage -------------------------------------------------- */
-  var rankLevel = "easy", rankCat = "all", rankReq = 0;
+  var rankLevel = "easy", rankReq = 0;
   function sameName(a, b) {
     var k = function (s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); };
     return k(a) === k(b);
@@ -624,7 +623,7 @@
     list.textContent = "";
     state.textContent = TEXT.lbLoading;
     $("ms-rank-me").textContent = identity ? TEXT.youAre.replace("{p}", identity.pseudo) : TEXT.youAreNot;
-    api("/scores?level=" + rankLevel + "&cat=" + rankCat).then(function (r) { return r.json(); }).then(function (d) {
+    api("/scores?level=" + rankLevel + "&cat=all").then(function (r) { return r.json(); }).then(function (d) {
       if (req !== rankReq) return;
       if (!d.scores) throw new Error("format");
       state.textContent = d.scores.length ? "" : TEXT.lbEmpty;
@@ -724,7 +723,7 @@
   }
   [["ms-podium-prev", -1], ["ms-podium-next", 1]].forEach(function (a) {
     $(a[0]).addEventListener("click", function () {
-      var n = (LEVEL_KEYS.indexOf(podiumLevel) + a[1] + 3) % 3;
+      var n = (LEVEL_KEYS.indexOf(podiumLevel) + a[1] + LEVEL_KEYS.length) % LEVEL_KEYS.length;
       loadPodium(LEVEL_KEYS[n], a[1]);
     });
   });
@@ -839,9 +838,6 @@
   document.querySelectorAll("[data-rank-level]").forEach(function (b) {
     b.addEventListener("click", function () { rankLevel = b.dataset.rankLevel; setTabs("data-rank-level", rankLevel); loadRanking(); });
   });
-  document.querySelectorAll("[data-rank-cat]").forEach(function (b) {
-    b.addEventListener("click", function () { rankCat = b.dataset.rankCat; setTabs("data-rank-cat", rankCat); loadRanking(); });
-  });
 
   /* --- Appui long ------------------------------------------------------------
      Partagé par la grille et la case d'essai des réglages : une barre se remplit
@@ -872,7 +868,7 @@
     if (i < 0 || e.button !== 0) return;
     press = { i: i, x: e.clientX, y: e.clientY, long: false, timer: null };
     // appui long sur une case fermée, partie commencée : action secondaire
-    if (settings.hold && started && !over && !cells[i].open) {
+    if (settings.hold && started && !over && !cells[i].open && !noFlags()) {
       press.timer = startHold(cells[i].el, function () {
         if (!press) return;
         press.long = true;
@@ -993,31 +989,91 @@
   var pick = $("ms-pick"), pickRange = $("ms-pick-range"), pickSlider = pick.querySelector(".ms-pick-slider");
   var pickThumb = pick.querySelector(".ms-pick-thumb"), pickFill = pick.querySelector(".ms-pick-fill");
   var pickHeat = pick.querySelector(".ms-pick-heat"), pickW = 0;
-  var HEAT = [[47, 158, 110], [224, 138, 30], [210, 52, 44]];
-  // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là)
-  var pickAt = 0, pickGoal = null, pickShown = -1, snapRaf = 0, rolls = {};
+  var HEAT = [[47, 158, 110], [224, 138, 30], [210, 52, 44]], NOFLAG_HEAT = "rgb(124 58 237)";
+  // hauteur du rail principal et du chemin parallèle, au centre du curseur (voir le CSS)
+  var RAIL_Y = 28, BRANCH_Y = 92;
+  // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là ;
+  // 3 = mode Sans drapeau). onBranch : curseur sur le chemin parallèle.
+  var pickAt = 0, pickGoal = null, pickShown = -1, snapRaf = 0, rolls = {}, onBranch = false;
   function heat(p) {
     var k = Math.min(1, Math.floor(p)), f = p - k, a = HEAT[k], b = HEAT[k + 1];
     return "rgb(" + a.map(function (v, n) { return Math.round(v + (b[n] - v) * f); }).join(" ") + ")";
   }
-  // p va de 0 (premier cran) à 2 (dernier), valeurs intermédiaires pendant un glissé
-  function setPick(p) {
-    pickAt = p;
-    var q = Math.max(0, Math.min(2, p)), x = q / 2, h = heat(q);
+  // centre du curseur en (x, y), en pixels dans le slider
+  function placeThumb(x, y) {
+    pickThumb.style.transform = "translate(" + (x - 24).toFixed(1) + "px, " + (y - RAIL_Y).toFixed(1) + "px)";
+  }
+  function notchX(q) { return 24 + q / 2 * (pickW - 48); }
+  // remplissage du rail et trait au-dessus du nom, pour une position q de 0 à 2
+  function paintMain(q) {
+    var x = q / 2, h = heat(q);
     if (Number(pickRange.value) !== Math.round(q * 100)) pickRange.value = Math.round(q * 100);
-    pickThumb.style.transform = "translateX(" + (x * (pickW - 48)).toFixed(1) + "px)";
     pickFill.style.transform = "scaleX(" + x.toFixed(4) + ")";
     pickFill.style.backgroundColor = h;
     pickHeat.style.transform = "scaleX(" + (0.28 + 0.72 * x).toFixed(4) + ")";
     pickHeat.style.backgroundColor = h;
+  }
+  // p va de 0 (premier cran) à 2 (dernier), valeurs intermédiaires pendant un glissé
+  function setPick(p) {
+    pickAt = p;
+    var q = Math.max(0, Math.min(2, p));
+    paintMain(q);
+    placeThumb(notchX(q), RAIL_Y);
     var n = Math.round(q);
     if (n !== pickShown) showPick(n);
+  }
+  // le curseur suit un trajet (liste de points), pour passer d'un rail à l'autre
+  function travel(pts) {
+    cancelAnimationFrame(snapRaf);
+    var segs = [], total = 0, i;
+    for (i = 1; i < pts.length; i++) {
+      segs.push(Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+      total += segs[i - 1];
+    }
+    var end = pts[pts.length - 1];
+    if (reduceMotion.matches || !total) { placeThumb(end[0], end[1]); return; }
+    var dur = Math.min(800, 300 + total * 1.3), t0 = performance.now();
+    (function step(now) {
+      var k = Math.max(0, Math.min(1, (now - t0) / dur));
+      var d = (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2) * total;
+      for (i = 0; i < segs.length - 1 && d > segs[i]; i++) d -= segs[i];
+      var f = segs[i] ? Math.min(1, d / segs[i]) : 1;
+      placeThumb(pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f);
+      if (k < 1) snapRaf = requestAnimationFrame(step);
+    })(t0);
+  }
+  // vers le mode Sans drapeau : jusqu'au cran du milieu, on descend, puis à droite
+  function goBranch() {
+    if (!unlocked || onBranch) return;
+    var x0 = notchX(Math.max(0, Math.min(2, pickAt)));
+    onBranch = true;
+    pickGoal = 3;
+    pickAt = 1;
+    pick.classList.add("is-branch");
+    paintMain(1);
+    showPick(3);
+    travel([[x0, RAIL_Y], [pickW / 2, RAIL_Y], [pickW / 2, BRANCH_Y], [pickW - 24, BRANCH_Y]]);
+  }
+  // retour sur le rail principal, au cran n, par le même chemin
+  function leaveBranch(n, instant) {
+    onBranch = false;
+    pick.classList.remove("is-branch");
+    if (instant) return;
+    pickGoal = n;
+    pickAt = n;
+    paintMain(n);
+    showPick(n);
+    travel([[pickW - 24, BRANCH_Y], [pickW / 2, BRANCH_Y], [pickW / 2, RAIL_Y], [notchX(n), RAIL_Y]]);
   }
   function showPick(n) {
     var lvl = LEVEL_KEYS[n], L = MSCore.LEVELS[lvl], first = pickShown < 0;
     pickShown = n;
     pick.dataset.level = lvl;
     pickRange.setAttribute("aria-valuetext", TEXT[lvl]);
+    if (L.noflag) {
+      pickHeat.style.transform = "scaleX(1)";
+      pickHeat.style.backgroundColor = NOFLAG_HEAT;
+    }
     $("ms-pick-name").textContent = TEXT[lvl];
     swapIn($("ms-pick-name"));
     if (!first) swapIn(pickThumb);
@@ -1120,15 +1176,57 @@
     cancelAnimationFrame(snapRaf);
     pickGoal = null;
     pickShown = -1;
+    renderUnlock();
+    leaveBranch(0, true);
     // ouverte d'abord : la largeur du slider et du canvas se mesure à l'écran
     pick.showModal();
     pickW = pickSlider.clientWidth;
-    setPick(LEVEL_KEYS.indexOf(level));
+    if (level === "noflag") {
+      onBranch = true;
+      pickGoal = 3;
+      pickAt = 1;
+      pick.classList.add("is-branch");
+      paintMain(1);
+      placeThumb(pickW - 24, BRANCH_Y);
+      showPick(3);
+    } else {
+      setPick(LEVEL_KEYS.indexOf(level));
+    }
     pickRange.focus();
   }
+
+  // la case qui barre le chemin : les chiffres prouvent qu'elle est sûre (un « 1 »
+  // touche les deux cases de gauche, l'autre « 1 » les trois : la mine est à gauche).
+  // Creusée, elle s'ouvre et le chemin vers le mode Sans drapeau apparaît.
+  function renderUnlock() {
+    var key = $("ms-pick-key");
+    pick.classList.toggle("is-unlocked", unlocked);
+    key.textContent = unlocked ? "1" : "";
+    key.setAttribute("aria-label", unlocked ? TEXT.noflag : TEXT.closedCell);
+    $("ms-pick-nf").hidden = !unlocked;
+  }
+  pick.querySelectorAll("[data-dig]").forEach(function (cell) {
+    cell.addEventListener("click", function () {
+      if (cell.dataset.dig === "no") {
+        // case incertaine : elle refuse de s'ouvrir
+        cell.classList.remove("is-nope");
+        void cell.offsetWidth;
+        cell.classList.add("is-nope");
+        return;
+      }
+      if (unlocked) { goBranch(); return; }
+      unlocked = true;
+      save("ms-noflag-v1", true);
+      keepStorage();
+      pick.classList.add("is-digging");
+      renderUnlock();
+      setTimeout(function () { pick.classList.remove("is-digging"); goBranch(); }, reduceMotion.matches ? 0 : 700);
+    });
+  });
+  $("ms-pick-nf").addEventListener("click", goBranch);
   function pickGo() {
     cancelAnimationFrame(snapRaf);
-    level = LEVEL_KEYS[pickGoal !== null ? pickGoal : Math.max(0, Math.min(2, Math.round(pickAt)))];
+    level = onBranch ? "noflag" : LEVEL_KEYS[pickGoal !== null ? pickGoal : Math.max(0, Math.min(2, Math.round(pickAt)))];
     save("ms-level-v1", level);
     pick.close();
     newGame();
@@ -1138,17 +1236,25 @@
   pickRange.addEventListener("input", function () {
     cancelAnimationFrame(snapRaf);
     pickGoal = null;
+    if (onBranch) leaveBranch(0, true);
     setPick(pickRange.value / 100);
   });
-  pickRange.addEventListener("change", function () { snapTo(Math.round(pickRange.value / 100)); });
-  // clavier : un cran par flèche, Entrée lance la partie
+  pickRange.addEventListener("change", function () { if (!onBranch) snapTo(Math.round(pickRange.value / 100)); });
+  // clavier : un cran par flèche, Entrée lance la partie ; flèche bas vers le chemin
+  // parallèle une fois débloqué, flèche haut ou gauche pour en revenir
   pickRange.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); pickGo(); return; }
+    if (onBranch) {
+      if (/^(ArrowUp|ArrowLeft|PageDown|Home)$/.test(e.key)) leaveBranch(e.key === "Home" ? 0 : 1);
+      if (/^(Arrow|Page|Home|End)/.test(e.key)) e.preventDefault();
+      return;
+    }
+    if (e.key === "ArrowDown" && unlocked) { e.preventDefault(); goBranch(); return; }
     var n = pickGoal !== null ? pickGoal : Math.round(pickAt), to = null;
     if (e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "PageUp") to = Math.min(2, n + 1);
     else if (e.key === "ArrowLeft" || e.key === "ArrowDown" || e.key === "PageDown") to = Math.max(0, n - 1);
     else if (e.key === "Home") to = 0;
     else if (e.key === "End") to = 2;
-    else if (e.key === "Enter") { e.preventDefault(); pickGo(); return; }
     if (to === null) return;
     e.preventDefault();
     snapTo(to);
@@ -1159,7 +1265,7 @@
   window.addEventListener("resize", function () {
     if (!pick.open) return;
     pickW = pickSlider.clientWidth;
-    setPick(pickAt);
+    if (onBranch) placeThumb(pickW - 24, BRANCH_Y); else setPick(pickAt);
   });
 
   var holdBox = $("set-hold"), holdMs = $("set-hold-ms"), holdOut = $("set-hold-out"), holdBlock = $("ms-hold-block");

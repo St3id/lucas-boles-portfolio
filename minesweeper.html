@@ -20,9 +20,9 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=dd1a259e">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=d48c9c8e">
-  <script src="assets/js/ms-core.js?v=eb2c10e6" defer></script>
-  <script src="assets/js/minesweeper.js?v=c286a2f1" defer></script>
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=1bf9777a">
+  <script src="assets/js/ms-core.js?v=f9da3d42" defer></script>
+  <script src="assets/js/minesweeper.js?v=4df42c71" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -117,6 +117,16 @@
     <p class="ms-pick-me" id="ms-pick-me"></p>
     <div class="ms-pick-slider">
       <div class="ms-pick-track" aria-hidden="true"><span class="ms-pick-fill"></span><i></i><i></i><i></i></div>
+      <!-- chemin parallèle vers le mode Sans drapeau, barré par une case fermée -->
+      <div class="ms-pick-branch" aria-hidden="true"><span class="ms-pick-down"></span><span class="ms-pick-end"></span><i class="ms-pick-stop"></i></div>
+      <div class="ms-pick-dig">
+        <button type="button" class="ms-pick-cell" data-dig="no" aria-label="Case fermée" data-i18n-aria="closedCell"></button>
+        <button type="button" class="ms-pick-cell" data-dig="no" aria-label="Case fermée" data-i18n-aria="closedCell"></button>
+        <button type="button" class="ms-pick-cell" data-dig="yes" id="ms-pick-key" aria-label="Case fermée" data-i18n-aria="closedCell"></button>
+        <span class="ms-pick-cell is-open n1" aria-hidden="true">1</span>
+        <span class="ms-pick-cell is-open n1" aria-hidden="true">1</span>
+      </div>
+      <button type="button" class="ms-pick-nf" id="ms-pick-nf" aria-label="Sans drapeau" data-i18n-aria="noflag" hidden></button>
       <span class="ms-pick-thumb" aria-hidden="true"><span class="ms-pick-flag">⚑</span><span class="ms-pick-mine">✹</span></span>
       <input type="range" id="ms-pick-range" min="0" max="200" step="1" value="0" aria-label="Difficulté" data-i18n-aria="levels">
     </div>
@@ -186,10 +196,7 @@
       <button type="button" class="ms-tab" data-rank-level="easy" aria-pressed="true" data-i18n="easy">Facile</button>
       <button type="button" class="ms-tab" data-rank-level="medium" aria-pressed="false" data-i18n="medium">Moyen</button>
       <button type="button" class="ms-tab" data-rank-level="hard" aria-pressed="false" data-i18n="hard">Difficile</button>
-    </div>
-    <div class="ms-tabs ms-tabs-cat" role="group" aria-label="Catégorie" data-i18n-aria="category">
-      <button type="button" class="ms-tab" data-rank-cat="all" aria-pressed="true" data-i18n="catAll">Tous</button>
-      <button type="button" class="ms-tab" data-rank-cat="noflag" aria-pressed="false" data-i18n="catNoflag">Sans drapeau</button>
+      <button type="button" class="ms-tab" data-rank-level="noflag" aria-pressed="false" data-i18n="noflag">Sans drapeau</button>
     </div>
     <ol class="ms-rank-list" id="ms-rank-list"></ol>
     <p class="ms-rank-state" id="ms-rank-state" aria-live="polite"></p>

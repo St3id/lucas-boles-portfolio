@@ -4,7 +4,9 @@
    Ne rien mettre ici qui dépende du navigateur. */
 // --- CORE START
 var MSCore = (function () {
-  var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 } };
+  // noflag : mode Sans drapeau, grille de Terrain glissant où tout drapeau est refusé
+  var LEVELS = { easy: { size: 9, mines: 10 }, medium: { size: 16, mines: 40 }, hard: { size: 22, mines: 99 },
+    noflag: { size: 16, mines: 40, noflag: true } };
 
   // vrai niveau seulement : LEVELS["constructor"] ou LEVELS["__proto__"] existent aussi en JavaScript
   function isLevel(level) {
@@ -90,7 +92,7 @@ var MSCore = (function () {
       if (x.a === "r") {
         if (!reveal(x.i)) return { ok: false, why: "mine" };
       } else if (x.a === "f") {
-        if (open[x.i]) return { ok: false, why: "action" };
+        if (open[x.i] || LEVELS[level].noflag) return { ok: false, why: "action" };
         flag[x.i] = !flag[x.i];
         if (flag[x.i]) flagsUsed++;
       } else {
