@@ -36,6 +36,7 @@
         "Un chiffre indique combien de mines touchent la case, en comptant les diagonales.",
         "Un drapeau marque une mine supposée : clic droit, appui long, ou Drapeau sous la grille sur écran tactile.",
         "Clic sur un chiffre déjà révélé : si autant de drapeaux que le chiffre l'entourent, ses autres voisins s'ouvrent.",
+        "La grille se déplace en la faisant glisser, dans tous les sens. Pour zoomer : pincer à deux doigts, ou Ctrl + molette sur ordinateur.",
         "Le premier clic ne tombe jamais sur une mine, ni sur une case voisine d'une mine. Les drapeaux se posent après ce premier clic.",
         "Au clavier : flèches pour se déplacer, Entrée pour révéler, la touche drapeau (F par défaut) pour marquer.",
         "Le record de chaque niveau est gardé dans ce navigateur.",
@@ -104,6 +105,7 @@
         "A number tells how many mines touch the cell, diagonals included.",
         "A flag marks a suspected mine: right click, long press, or Flag below the board on a touch screen.",
         "Click a revealed number: if it is surrounded by as many flags as its value, its other neighbours open.",
+        "Drag the board to move it in any direction. To zoom: pinch with two fingers, or Ctrl + mouse wheel on a computer.",
         "The first click never lands on a mine, nor next to one. Flags can be placed after that first click.",
         "Keyboard: arrows to move, Enter to reveal, the flag key (F by default) to mark.",
         "Your best time for each level is kept in this browser.",
@@ -285,8 +287,10 @@
   // taille des cases : la grille prend toute la place du panneau. Sur ordinateur, elle
   // tient aussi en hauteur dans l'écran, à tous les niveaux, sans défiler pour jouer.
   // Sur téléphone, seule la largeur compte (cases de 28 px au moins, pour le doigt).
-  var wide = window.matchMedia("(min-width: 961px)");
-  function fitCells() {
+  var wide = window.matchMedia("(min-width: 961px)"), lastCell = 0;
+  // fresh : nouvelle grille (vue remise à zéro) ; sinon la vue ne repart de zéro que si
+  // la taille des cases change (la barre d'adresse du téléphone qui se replie ne compte pas)
+  function fitCells(fresh) {
     var gaps = (size - 1) * 3;
     var cell = Math.floor((boardEl.parentNode.clientWidth - 4 - gaps) / size);
     if (wide.matches) {
@@ -302,7 +306,156 @@
       cell = Math.max(28, Math.min(56, cell));
     }
     boardEl.style.setProperty("--cell", cell + "px");
+    if (fresh === true || cell !== lastCell) resetView(); else applyView();
+    lastCell = cell;
   }
+
+  /* --- Grille : la déplacer et la zoomer comme une carte ----------------------
+     Un doigt (ou la souris) qui glisse déplace la grille dans tous les sens, deux
+     doigts pincent pour zoomer ; sur ordinateur, Ctrl + molette (ou le pincement du
+     pavé tactile) zoome et la molette déplace. Arrivée en butée en haut ou en bas,
+     la grille laisse défiler la page. Un tap sans glisser reste un clic sur la case. */
+  var wrapEl = boardEl.parentNode;
+  var view = { s: 1, x: 0, y: 0, w: 0, h: 0 }, MAX_ZOOM = 3, flingRaf = 0;
+  var touches = {}, gesture = null;
+  function minZoom() { return Math.min(1, wrapEl.clientWidth / view.w, wrapEl.clientHeight / view.h); }
+  // plus petite que le cadre : centrée ; plus grande : ses bords ne laissent pas de vide
+  function clampAxis(pos, size, frame) { return size <= frame ? (frame - size) / 2 : Math.min(0, Math.max(frame - size, pos)); }
+  function applyView() {
+    if (!view.w) return;
+    view.x = clampAxis(view.x, view.w * view.s, wrapEl.clientWidth);
+    view.y = clampAxis(view.y, view.h * view.s, wrapEl.clientHeight);
+    boardEl.style.transform = "translate(" + view.x.toFixed(1) + "px, " + view.y.toFixed(1) + "px) scale(" + view.s.toFixed(4) + ")";
+  }
+  // vue de départ : zoom 1, grille centrée ; le cadre prend la hauteur de la grille
+  function resetView() {
+    cancelAnimationFrame(flingRaf);
+    view.w = boardEl.offsetWidth;
+    view.h = boardEl.offsetHeight;
+    view.s = 1;
+    wrapEl.style.height = view.h + "px";
+    view.x = (wrapEl.clientWidth - view.w) / 2;
+    view.y = 0;
+    applyView();
+  }
+  // déplace la grille ; renvoie la part du geste vertical qu'elle n'a pas pu prendre
+  function panBy(dx, dy) {
+    var y0 = view.y;
+    view.x += dx;
+    view.y += dy;
+    applyView();
+    return dy - (view.y - y0);
+  }
+  function zoomAt(k, px, py) {
+    var s = Math.max(minZoom(), Math.min(MAX_ZOOM, view.s * k));
+    view.x = px - (px - view.x) * s / view.s;
+    view.y = py - (py - view.y) * s / view.s;
+    view.s = s;
+    applyView();
+  }
+  function scrollPage(dy) { if (Math.abs(dy) > 0.5) window.scrollBy(0, -dy); }
+  function points() { return Object.keys(touches).map(function (k) { return touches[k]; }); }
+  function pinchOf(p) {
+    return { mode: "pinch", d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) || 1, mx: (p[0].x + p[1].x) / 2, my: (p[0].y + p[1].y) / 2 };
+  }
+  // un glissé ou un pincement n'est pas un clic : l'appui en cours sur une case est annulé
+  function cancelPress() {
+    if (!press) return;
+    stopHold(cells[press.i] && cells[press.i].el, press.timer);
+    press.moved = true;
+  }
+  // élan au lâcher : la grille continue sur sa lancée et ralentit
+  function fling(samples, now) {
+    var recent = samples.filter(function (m) { return now - m.t < 100; });
+    if (!recent.length || reduceMotion.matches) return;
+    var span = Math.max(16, now - recent[0].t + 16), vx = 0, vy = 0, last = performance.now();
+    recent.forEach(function (m) { vx += m.dx; vy += m.dy; });
+    vx /= span;
+    vy /= span;
+    (function step(t) {
+      var dt = Math.min(32, Math.max(0, t - last));
+      last = t;
+      scrollPage(panBy(vx * dt, vy * dt));
+      var f = Math.pow(0.994, dt);
+      vx *= f;
+      vy *= f;
+      if (Math.hypot(vx, vy) > 0.03) flingRaf = requestAnimationFrame(step);
+    })(last);
+  }
+  wrapEl.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    cancelAnimationFrame(flingRaf);
+    touches[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var p = points();
+    if (p.length === 1) gesture = { mode: "wait", sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, v: [] };
+    else if (p.length === 2) { cancelPress(); gesture = pinchOf(p); }
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (!touches[e.pointerId] || !gesture) return;
+    touches[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var p = points();
+    if (gesture.mode === "pinch") {
+      if (p.length < 2) return;
+      var g = pinchOf(p), r = wrapEl.getBoundingClientRect();
+      zoomAt(g.d / gesture.d, g.mx - r.left, g.my - r.top);
+      panBy(g.mx - gesture.mx, g.my - gesture.my);
+      gesture = g;
+      return;
+    }
+    if (gesture.mode === "wait") {
+      if (Math.abs(e.clientX - gesture.sx) <= MOVE_TOLERANCE && Math.abs(e.clientY - gesture.sy) <= MOVE_TOLERANCE) return;
+      gesture.mode = "pan";
+      cancelPress();
+      wrapEl.classList.add("is-panning");
+    }
+    var dx = e.clientX - gesture.lx, dy = e.clientY - gesture.ly;
+    gesture.lx = e.clientX;
+    gesture.ly = e.clientY;
+    scrollPage(panBy(dx, dy));
+    gesture.v.push({ t: e.timeStamp, dx: dx, dy: dy });
+    if (gesture.v.length > 8) gesture.v.shift();
+  });
+  function endPointer(e) {
+    if (!touches[e.pointerId]) return;
+    delete touches[e.pointerId];
+    var p = points();
+    if (!gesture) return;
+    if (gesture.mode === "pinch") {
+      // un doigt reste posé après le pincement : il continue de déplacer la grille
+      gesture = p.length ? { mode: "pan", lx: p[0].x, ly: p[0].y, v: [] } : null;
+      return;
+    }
+    if (p.length) return;
+    if (gesture.mode === "pan" && e.type === "pointerup") fling(gesture.v, e.timeStamp);
+    gesture = null;
+    wrapEl.classList.remove("is-panning");
+  }
+  window.addEventListener("pointerup", endPointer);
+  window.addEventListener("pointercancel", endPointer);
+  wrapEl.addEventListener("wheel", function (e) {
+    var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? wrapEl.clientHeight : 1;
+    if (e.ctrlKey) {
+      e.preventDefault();
+      var r = wrapEl.getBoundingClientRect();
+      zoomAt(Math.exp(-e.deltaY * unit * 0.003), e.clientX - r.left, e.clientY - r.top);
+      return;
+    }
+    // la molette déplace la grille tant qu'elle peut, puis laisse défiler la page
+    var x0 = view.x, y0 = view.y;
+    panBy(-e.deltaX * unit, -e.deltaY * unit);
+    if (view.x !== x0 || view.y !== y0) e.preventDefault();
+  }, { passive: false });
+  // clavier : la case qui prend le focus est ramenée dans le cadre
+  boardEl.addEventListener("focusin", function (e) {
+    var c = e.target;
+    if (!c.classList.contains("ms-cell") || !view.w) return;
+    var fw = wrapEl.clientWidth, fh = wrapEl.clientHeight, side = c.offsetWidth * view.s;
+    var l = view.x + c.offsetLeft * view.s, t = view.y + c.offsetTop * view.s;
+    if (l < 0) view.x -= l; else if (l + side > fw) view.x -= l + side - fw;
+    if (t < 0) view.y -= t; else if (t + side > fh) view.y -= t + side - fh;
+    wrapEl.scrollLeft = wrapEl.scrollTop = 0;
+    applyView();
+  });
 
   // rappel du niveau en cours, en haut du panneau de la grille
   function renderStageLevel() { $("ms-stage-level").textContent = TEXT[level]; }
@@ -367,7 +520,7 @@
     updateMines();
     renderTime();
     renderBest();
-    fitCells();
+    fitCells(true);
   }
 
   function placeMines(first) {
@@ -952,7 +1105,7 @@
     });
   });
   $("ms-new").addEventListener("click", openPick);
-  window.addEventListener("resize", fitCells);
+  window.addEventListener("resize", function () { fitCells(false); });
 
   // partage : menu natif sur téléphone, sinon copie du message ; ?ref=partage
   // permet de compter dans GoatCounter les visites venues d'un partage

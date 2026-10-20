@@ -697,6 +697,7 @@
 
 /* --- Scène : la grille sur fond foncé ------------------------------------- */
 .ms-stage {
+  grid-template-columns: minmax(0, 1fr);
   background: var(--field);
   padding: clamp(16px, 3vw, 40px);
   align-content: center;
@@ -787,28 +788,34 @@
   outline-offset: -3px;
 }
 
-/* la grille défile si elle dépasse (niveau Difficile sur téléphone) */
+/* cadre de la grille : elle s'y déplace et s'y zoome par transformation (minesweeper.js),
+   les gestes ne sont pas laissés au navigateur ; sa hauteur est celle de la grille */
 .ms-board-wrap {
-  overflow-x: auto;
-  overflow-y: hidden;
+  position: relative;
+  overflow: hidden;
+  overflow: clip;
   max-width: 100%;
   width: 100%;
-  -webkit-overflow-scrolling: touch;
-  /* barre de défilement fine et sombre, dans le ton du panneau */
-  scrollbar-width: thin;
-  scrollbar-color: #4a5a53 transparent;
+  /* sans cela, le cadre s'élargirait à la taille de la grille */
+  min-width: 0;
+  touch-action: none;
+}
+
+.ms-board-wrap.is-panning {
+  cursor: grabbing;
 }
 
 .ms-board {
   --cell: 34px;
   display: grid;
   gap: 3px;
+  position: relative;
   width: max-content;
-  margin-inline: auto;
+  transform-origin: 0 0;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
-  touch-action: pan-x pan-y;
+  touch-action: none;
 }
 
 .ms-cell {
