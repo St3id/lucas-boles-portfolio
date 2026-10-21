@@ -36,8 +36,8 @@
     padding-top: clamp(16px, 2.6vh, 40px);
   }
 
-  /* la grille commence en haut du panneau : elle est dimensionnée pour tenir dans
-     l'écran à partir de là */
+  /* la grille commence en haut du panneau, dimensionnée pour tenir dans l'écran ;
+     --shift (minesweeper.js) la descend pour la centrer quand le panneau est plus haut */
   .ms .ms-stage {
     align-self: stretch;
     place-items: start center;
@@ -46,6 +46,10 @@
     padding-top: 12px;
     row-gap: 8px;
     min-height: 0;
+  }
+
+  .ms .ms-stage-level {
+    margin-top: var(--shift, 0px);
   }
 
   .ms .ms-board-wrap {

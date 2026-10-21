@@ -310,6 +310,22 @@
     boardEl.style.setProperty("--cell", cell + "px");
     if (fresh === true || cell !== lastCell) resetView(); else applyView();
     lastCell = cell;
+    centerStage();
+  }
+
+  // ordinateur : la colonne de gauche (podium compris) rend souvent le panneau sombre plus
+  // haut que la grille ; on descend la grille pour la centrer en hauteur, sans qu'elle
+  // sorte du bas de l'écran
+  function centerStage() {
+    var stage = boardEl.closest(".ms-stage"), side = document.querySelector(".ms-side");
+    if (!wide.matches || !side) { stage.style.removeProperty("--shift"); return; }
+    var cs = getComputedStyle(stage), gap = parseFloat(cs.rowGap) || 0;
+    var pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var content = $("ms-stage-level").offsetHeight + gap + wrapEl.offsetHeight + (toolEl.hidden ? 0 : toolEl.offsetHeight + gap);
+    var panel = side.offsetHeight - pad;
+    var free = window.innerHeight - (stage.getBoundingClientRect().top + window.scrollY) - pad - 16;
+    var shift = Math.max(0, Math.min((panel - content) / 2, free - content));
+    stage.style.setProperty("--shift", Math.round(shift) + "px");
   }
 
   /* --- Grille : la déplacer et la zoomer comme une carte ----------------------
@@ -1124,6 +1140,10 @@
   });
   $("ms-new").addEventListener("click", openPick);
   window.addEventListener("resize", function () { fitCells(false); });
+  // le podium arrive après le chargement et allonge la colonne de gauche : on recalcule
+  if (window.ResizeObserver && document.querySelector(".ms-side")) {
+    new ResizeObserver(function () { fitCells(false); }).observe(document.querySelector(".ms-side"));
+  }
 
   // partage : menu natif sur téléphone, sinon copie du message ; ?ref=partage
   // permet de compter dans GoatCounter les visites venues d'un partage
