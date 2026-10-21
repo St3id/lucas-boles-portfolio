@@ -64,7 +64,7 @@
         if (!link) return;
         if (entry.isIntersecting) {
           navLinks.forEach(function (a) { a.removeAttribute("aria-current"); });
-          link.setAttribute("aria-current", "true");
+          link.setAttribute("aria-current", "location");
         }
       });
     }, { rootMargin: "-45% 0px -50% 0px" });
@@ -525,11 +525,9 @@
   gsap.registerPlugin(window.ScrollTrigger);
   var ease = "expo.out";
 
-  // Accueil : le nom monte depuis un masque, puis le texte, puis la photo
+  // Accueil : l'entrée du nom, du texte et de la photo est en CSS (main.css), jouée dès le
+  // premier affichage ; ici seulement la photo qui glisse avec le défilement
   if (document.querySelector(".hero-name")) {
-    gsap.from(".hero-name .line > span", { yPercent: 105, duration: 1.15, ease: ease, stagger: 0.09 });
-    gsap.from(".hero-body > *", { y: 24, opacity: 0, duration: 0.9, ease: ease, stagger: 0.08, delay: 0.35 });
-    gsap.fromTo(".hero-photo img", { scale: 1.3, opacity: 0 }, { scale: 1.08, opacity: 1, duration: 1.5, ease: ease, delay: 0.15 });
     gsap.fromTo(".hero-photo img", { yPercent: -3 }, {
       yPercent: 4, ease: "none",
       scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
@@ -671,8 +669,7 @@
   // Filet de sécurité : si une animation n'a pas pu se jouer (onglet en arrière-plan,
   // navigateur lent), tout ce qui est déjà à l'écran ou au-dessus est rendu visible.
   window.setTimeout(function () {
-    var hero = gsap.utils.toArray(".hero-name .line > span, .hero-body > *, .hero-photo img");
-    parts.concat(hero).forEach(function (n) {
+    parts.forEach(function (n) {
       if (n.getBoundingClientRect().top < window.innerHeight && parseFloat(getComputedStyle(n).opacity) < 1) {
         gsap.killTweensOf(n);
         gsap.set(n, { opacity: 1, y: 0, yPercent: 0, clearProps: "transform" });

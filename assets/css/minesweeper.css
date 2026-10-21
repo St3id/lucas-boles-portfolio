@@ -228,6 +228,24 @@
   gap: 6px;
 }
 
+/* pendant que le classement arrive, la liste vide garde la hauteur du podium : sur
+   téléphone il est au-dessus de la grille, qui sauterait sinon de 250 px vers le bas */
+.ms-podium-list:empty {
+  min-height: 260px;
+}
+
+@media (max-width: 360px) {
+  .ms-podium-list:empty {
+    min-height: 247px;
+  }
+}
+
+@media (min-width: 961px) {
+  .ms-podium-list:empty {
+    min-height: 219px;
+  }
+}
+
 .ms-step {
   /* couleurs du laurier : feuilles extérieures, intérieures, tige */
   --lr-o: #e6b820;
@@ -732,6 +750,14 @@
   display: none;
 }
 
+/* le commutateur n'existe que sur écran tactile : la règle CSS lui garde sa place dès
+   le premier affichage, au lieu d'attendre le script (la grille ne saute plus) */
+@media not all and (pointer: coarse) {
+  .ms-tool {
+    display: none;
+  }
+}
+
 .ms-tool-knob {
   position: absolute;
   top: 4px;
@@ -764,7 +790,7 @@
   transition: color 0.25s ease;
 }
 
-.ms-tool button[aria-checked="true"] {
+.ms-tool button[aria-pressed="true"] {
   color: var(--field);
 }
 

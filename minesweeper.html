@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; connect-src 'self' https://*.goatcounter.com https://*.workers.dev; style-src 'self'; font-src 'self'; img-src 'self' data: https://*.goatcounter.com; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; connect-src 'self' https://*.goatcounter.com https://demineur-classement.lucasboles.workers.dev; style-src 'self'; font-src 'self'; img-src 'self' data: https://*.goatcounter.com; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
   <title>Démineur - Lucas Boles</title>
   <meta name="description" content="Un démineur codé en JavaScript pour le portfolio de Lucas Boles, avec records et classement.">
   <link rel="canonical" href="https://st3id.github.io/lucas-boles-portfolio/minesweeper.html">
@@ -19,10 +19,10 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/main.css?v=f6a742ee">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=69122234">
+  <link rel="stylesheet" href="assets/css/main.css?v=2b93ed5e">
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=05cc2c02">
   <script src="assets/js/ms-core.js?v=f9da3d42" defer></script>
-  <script src="assets/js/minesweeper.js?v=8b746cdb" defer></script>
+  <script src="assets/js/minesweeper.js?v=2a07c69a" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -76,13 +76,13 @@
       <div class="ms-stage">
         <p class="ms-stage-level" id="ms-stage-level"></p>
         <div class="ms-board-wrap">
-          <div class="ms-board" id="ms-board" role="grid" aria-label="Grille du démineur" data-i18n-aria="board"></div>
+          <div class="ms-board" id="ms-board" role="group" aria-label="Grille du démineur" data-i18n-aria="board"></div>
         </div>
         <!-- écran tactile : ce que fait un tap, sous la grille, à portée de pouce -->
-        <div class="ms-tool" id="ms-tool" role="radiogroup" aria-label="Action d'un tap" data-i18n-aria="tapAction" hidden>
+        <div class="ms-tool" id="ms-tool" role="group" aria-label="Action d'un tap" data-i18n-aria="tapAction">
           <span class="ms-tool-knob" aria-hidden="true"></span>
-          <button type="button" role="radio" aria-checked="true" data-tool="dig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 11.5L19 5M17 3l4 4"/><path d="M10 9l5 5-5.5 5.5C7 22 3 21 3 21s-1-4 1.5-6.5z"/></svg><span data-i18n="shovel">Pelle</span></button>
-          <button type="button" role="radio" aria-checked="false" data-tool="flag"><span class="ms-tool-flag" aria-hidden="true">⚑</span><span data-i18n="flag">Drapeau</span></button>
+          <button type="button" aria-pressed="true" data-tool="dig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 11.5L19 5M17 3l4 4"/><path d="M10 9l5 5-5.5 5.5C7 22 3 21 3 21s-1-4 1.5-6.5z"/></svg><span data-i18n="shovel">Pelle</span></button>
+          <button type="button" aria-pressed="false" data-tool="flag"><span class="ms-tool-flag" aria-hidden="true">⚑</span><span data-i18n="flag">Drapeau</span></button>
         </div>
       </div>
     </div>

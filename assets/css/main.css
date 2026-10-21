@@ -27,9 +27,9 @@
 
   --font: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --step-display: clamp(4rem, 14.5vw, 13.5rem);
-  --step-h2: clamp(2.5rem, 7vw, 6rem);
-  --step-h3: clamp(1.5rem, 2.4vw, 2.125rem);
-  --step-lead: clamp(1.25rem, 1.9vw, 1.75rem);
+  --step-h2: clamp(2.25rem, 4.5vw, 4rem);
+  --step-h3: clamp(1.25rem, 1.6vw, 1.5rem);
+  --step-lead: clamp(1.25rem, 1.6vw, 1.5rem);
   --step-body: 1.125rem;
   --step-small: 0.9375rem;
 
@@ -98,6 +98,13 @@ a {
 :focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
+}
+
+/* sur les fonds sombres, le vert foncé n'a pas assez de contraste : on prend le vert clair */
+.project-radar :focus-visible,
+.contact :focus-visible,
+.site-footer :focus-visible {
+  outline-color: var(--accent-on-field);
 }
 
 ::selection {
@@ -332,20 +339,20 @@ figure figcaption {
 }
 
 .nav-links a {
-  text-decoration: none;
   font-weight: 550;
-  background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
-  transition: background-size 0.35s var(--ease-out), color 0.2s ease;
+  text-decoration: underline 2px transparent;
+  text-underline-offset: 6px;
+  transition: text-decoration-color 0.25s ease, color 0.2s ease;
   padding-block: 4px;
 }
 
-.nav-links a[aria-current="true"] {
-  background-size: 100% 2px;
+.nav-links a[aria-current="location"] {
+  text-decoration-color: currentColor;
 }
 
 @media (hover: hover) {
   .nav-links a:hover {
-    background-size: 100% 2px;
+    text-decoration-color: currentColor;
   }
 }
 
@@ -396,16 +403,41 @@ figure figcaption {
 
   .site-header.is-open .nav-links a {
     display: block;
-    font-size: 1.75rem;
+    font-size: var(--step-lead);
     font-weight: 750;
     font-stretch: 112%;
     padding-block: 8px;
   }
 }
 
+/* téléphone : le bouton de contact reste dans le bandeau, en plus compact ;
+   sous 400 px il n'y a plus la place : le lien passe dans le menu */
 @media (max-width: 520px) {
+  .site-header .wrap {
+    column-gap: 10px;
+  }
+
+  .site-header .button {
+    min-height: 40px;
+    padding: 6px 10px;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 400px) {
   .site-header .button {
     display: none;
+  }
+}
+
+/* le lien « Me contacter » du menu ne sert que quand le bouton n'a plus la place */
+.nav-contact {
+  display: none;
+}
+
+@media (max-width: 400px) {
+  .nav-contact {
+    display: list-item;
   }
 }
 
@@ -416,7 +448,8 @@ figure figcaption {
 }
 
 .hero-name {
-  font-size: min(var(--step-display), 23vw);
+  /* le nom reste le plus grand, sans prendre la moitié du premier écran */
+  font-size: min(clamp(4rem, 10.5vw, 9.75rem), 23vw);
   font-weight: 850;
   font-stretch: 125%;
   line-height: 0.84;
@@ -442,6 +475,15 @@ figure figcaption {
 
 .hero-body .lead {
   margin-top: 0;
+}
+
+/* ligne de rôle : ce que fait la personne, juste sous le nom */
+.hero-role {
+  font-size: clamp(1.25rem, 1.9vw, 1.625rem);
+  font-weight: 700;
+  font-stretch: 112%;
+  line-height: 1.2;
+  margin-bottom: 14px;
 }
 
 .hero-actions {
@@ -509,11 +551,66 @@ figure figcaption {
   }
 }
 
+@media (min-width: 861px) {
+  .hero-body {
+    align-self: start;
+    margin-top: clamp(32px, 4vw, 56px);
+  }
+
+  .hero-photo {
+    margin-top: 0;
+  }
+}
+
+/* A3 : entrée de l'accueil en CSS, jouée dès le premier affichage (le texte ne
+   disparaît jamais, il glisse seulement ; la photo apparaît en fondu) */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-name .line > span {
+    animation: hero-rise 1.1s var(--ease-out) both;
+  }
+
+  .hero-name .line:nth-child(2) > span {
+    animation-delay: 0.09s;
+  }
+
+  .hero-body > *,
+  .hero-actions,
+  .hero-facts,
+  .hero-role,
+  .hero-body .lead {
+    animation: hero-slide 0.9s var(--ease-out) both;
+  }
+
+  .hero-role { animation-delay: 0.3s; }
+  .hero-body .lead { animation-delay: 0.38s; }
+  .hero-actions { animation-delay: 0.46s; }
+  .hero-facts { animation-delay: 0.54s; }
+
+  .hero-photo {
+    animation: hero-fade 1.2s ease 0.15s both;
+  }
+}
+
+@keyframes hero-rise {
+  from { transform: translateY(105%); }
+}
+
+@keyframes hero-slide {
+  from { transform: translateY(24px); }
+}
+
+@keyframes hero-fade {
+  from { opacity: 0; }
+}
+
 /* --- Waga Energy -------------------------------------------------------------- */
 
 .now-figure {
-  aspect-ratio: 1920 / 900;
   margin-bottom: clamp(32px, 4vw, 56px);
+}
+
+.now-figure .media {
+  aspect-ratio: 1920 / 900;
 }
 
 .now-intro {
@@ -526,7 +623,7 @@ figure figcaption {
 .now-roles {
   grid-column: 7 / -1;
   display: grid;
-  gap: clamp(32px, 4vw, 48px);
+  gap: clamp(80px, 7vw, 96px);
 }
 
 .role h3 {
@@ -828,14 +925,12 @@ figure figcaption {
 .tsr-figure {
   grid-column: 1 / span 6;
   align-self: center;
-  background: var(--surface);
-  padding: clamp(24px, 4vw, 56px);
 }
 
 .tsr-figure .media {
+  /* photo d'origine très large et peu définie : on garde ses proportions plutôt
+     que de la recadrer (elle serait agrandie et floue) */
   aspect-ratio: 695 / 243;
-  max-width: 560px;
-  margin-inline: auto;
 }
 
 .tsr-text {
@@ -950,6 +1045,11 @@ figure figcaption {
   font-size: var(--step-small);
 }
 
+/* jobs d'été : présents, mais un cran plus discrets que les postes liés au métier */
+.path-list li.is-job .what {
+  font-weight: 500;
+}
+
 .path-list li.is-next .what {
   color: var(--accent);
 }
@@ -964,6 +1064,11 @@ figure figcaption {
 
 .path-photos .media {
   aspect-ratio: 4 / 3;
+}
+
+/* un peu d'air entre les légendes des photos et le titre de la section suivante */
+.path-photos {
+  margin-bottom: 32px;
 }
 
 /* colonne deux fois plus étroite : ratio 2/3 pour garder la même hauteur que les 4/3 */
@@ -983,24 +1088,7 @@ figure figcaption {
 
 @media (max-width: 640px) {
   .path-list li {
-    grid-template-columns: 1fr;
     padding: 16px;
-  }
-
-  .path-list .detail {
-    grid-column: 1;
-  }
-
-  .path-photos {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .path-photos figure:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .path-photos figure:nth-child(2) .media {
-    aspect-ratio: 4 / 3;
   }
 }
 
@@ -1016,7 +1104,7 @@ figure figcaption {
 .skills dt {
   font-weight: 750;
   font-stretch: 112%;
-  font-size: 1.25rem;
+  font-size: var(--step-lead);
   margin-bottom: 8px;
 }
 
@@ -1031,11 +1119,6 @@ figure figcaption {
   }
 }
 
-@media (max-width: 520px) {
-  .skills {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* --- En dehors du travail ---------------------------------------------------- */
 
@@ -1043,8 +1126,8 @@ figure figcaption {
 .outside-hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 7;
-  min-height: 320px;
+  aspect-ratio: 21 / 9;
+  min-height: 280px;
 }
 
 .outside-text {
@@ -1086,21 +1169,6 @@ figure figcaption {
   }
 }
 
-@media (max-width: 520px) {
-  .outside-gallery {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .outside-gallery figure:first-child {
-    grid-column: 1 / -1;
-    grid-row: auto;
-  }
-
-  .outside-gallery figure:first-child .media {
-    aspect-ratio: 4 / 3;
-    height: auto;
-  }
-}
 
 /* --- Contact (champ foncé) ---------------------------------------------------- */
 
@@ -1128,7 +1196,7 @@ figure figcaption {
 
 .contact-mail {
   grid-column: 1 / -1;
-  font-size: min(clamp(1.6rem, 5.2vw, 4.5rem), 8vw);
+  font-size: min(var(--step-h2), 8vw);
   overflow-wrap: anywhere;
   font-weight: 800;
   font-stretch: 112%;
@@ -1229,7 +1297,7 @@ figure figcaption {
   line-height: 0.8;
   white-space: nowrap;
   color: var(--surface);
-  padding-top: 24px;
+  margin-top: clamp(150px, 12vw, 200px);
 }
 
 .footer-bottom {
@@ -1336,6 +1404,432 @@ figure figcaption {
   margin-top: 1.5em;
 }
 
+
+/* --- Téléphone et tablette : une composition propre ---------------------------
+   Sur ordinateur, la hiérarchie vient de la mise en page (texte à gauche, visuel à
+   droite, dates en colonne). En une colonne, ces relations disparaîtraient : ici on
+   les remplace par des visuels intercalés dans le texte, des blocs et des images
+   d'un bord à l'autre de l'écran. Rien n'est caché ni replié. */
+
+@media (max-width: 860px) {
+  /* Waga : présentation, photo, puis les deux postes en encarts */
+  #waga {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #waga > .grid {
+    display: contents;
+  }
+
+  .now-intro {
+    order: 1;
+    margin-bottom: 32px;
+  }
+
+  .now-figure {
+    order: 2;
+  }
+
+  .now-figure .media {
+    aspect-ratio: 3 / 2;
+  }
+
+  .now-roles {
+    order: 3;
+    margin-top: 0;
+    gap: 16px;
+  }
+
+  .role {
+    background: var(--surface);
+    padding: 20px 18px 22px;
+  }
+
+  .role .tool-list li {
+    background: var(--ground);
+  }
+
+  /* Radar : la carte 3D vivante juste sous le titre, les chiffres en grand,
+     la carte réelle avant les liens */
+  .project-radar > .grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .radar-text,
+  .radar-visuals {
+    display: contents;
+  }
+
+  .project-radar .prose {
+    display: contents;
+  }
+
+  .project-radar .project-head { order: 1; }
+  .radar-lead { order: 2; margin-bottom: 24px; }
+  .radar-visuals > figure:not(.radar-live) { order: 3; margin-bottom: 28px; }
+  .project-radar .prose > p:not(.radar-lead) { order: 4; }
+  .project-radar ul.points { order: 5; }
+  .radar-live { order: 6; margin-top: 32px; }
+  .radar-links { order: 7; }
+
+  /* Ferroviaire : la démonstration juste sous le titre, l'explication ensuite */
+  .project-rail > .grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rail-text {
+    display: contents;
+  }
+
+  .project-rail .project-head { order: 1; }
+  .rail-demo { order: 2; margin-bottom: 28px; }
+  .project-rail .prose { order: 3; }
+  .project-rail .tool-list { order: 4; }
+  .rail-boards { order: 5; }
+}
+
+@media (max-width: 640px) {
+  /* images et bloc foncé d'un bord à l'autre de l'écran : ils cassent la colonne de texte */
+  .now-figure,
+  .outside-hero,
+  .project-radar {
+    width: calc(100% + 2 * var(--margin));
+    margin-inline: calc(-1 * var(--margin));
+  }
+
+  .project-radar {
+    padding: 40px var(--margin);
+  }
+
+  /* la photo Waga va d'un bord à l'autre, sa légende reste dans la marge */
+  .now-figure figcaption {
+    padding-inline: var(--margin);
+  }
+
+  /* parcours : la date reste en colonne à gauche, comme sur ordinateur */
+  .path-list li {
+    grid-template-columns: 5.5rem 1fr;
+    gap: 4px 14px;
+  }
+
+  .path-list .detail {
+    grid-column: 2;
+  }
+
+  /* compétences sur deux colonnes, texte un cran plus petit */
+  .skills {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 18px;
+  }
+
+  .skills dt {
+    font-size: 1.0625rem;
+  }
+
+  .skills dd {
+    font-size: var(--step-body);
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 360px) {
+  .skills {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* --- Téléphone : des blocs à gauche et à droite --------------------------------
+   Le texte courant garde toute la largeur (deux colonnes de texte à 360 px feraient
+   des lignes de 18 caractères) ; ce sont les images et les éléments courts qui se
+   rangent côte à côte, pour que l'œil ne fasse pas que descendre. */
+@media (max-width: 600px) {
+  /* accueil : le nom au-dessus, puis le texte à gauche et la photo à droite */
+  .hero > .grid {
+    grid-template-columns: minmax(0, 1fr) 36%;
+    column-gap: 16px;
+  }
+
+  .hero-name {
+    grid-column: 1 / -1;
+  }
+
+  .hero-body {
+    display: contents;
+  }
+
+  .hero-role {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+
+  .hero-body .lead {
+    grid-column: 1;
+    grid-row: 3;
+    font-size: 1.125rem;
+    line-height: 1.45;
+  }
+
+  .hero-photo {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+    margin-top: 6px;
+    aspect-ratio: 4 / 5;
+  }
+
+  .hero-actions,
+  .hero-facts {
+    grid-column: 1 / -1;
+  }
+
+  .hero-actions {
+    margin-top: 32px;
+  }
+
+  .hero-facts {
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Ferroviaire : la photo des cartes à gauche, sa légende à droite */
+  .rail-boards figure:last-child {
+    display: grid;
+    grid-template-columns: 46% minmax(0, 1fr);
+    gap: 16px;
+    align-items: end;
+  }
+
+  .rail-boards figure:last-child .media {
+    max-width: none;
+  }
+
+  .rail-boards figure:last-child figcaption {
+    margin-top: 0;
+  }
+
+
+  /* Robot : les deux petites photos à gauche, la grande à droite */
+  .project-robot .robot-side {
+    grid-column: 1 / span 5;
+    grid-row: 2;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .project-robot .robot-side .media {
+    aspect-ratio: auto;
+  }
+
+  .project-robot .robot-main {
+    grid-column: 6 / -1;
+    grid-row: 2;
+    aspect-ratio: 4 / 5;
+  }
+
+  /* parcours : une grande photo à gauche, deux petites empilées à droite */
+  .path-photos {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    column-gap: 14px;
+  }
+
+  .path-photos figure:first-child {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .path-photos figure:first-child .media {
+    aspect-ratio: 3 / 4;
+  }
+
+  .path-photos figure:nth-child(2) .media,
+  .path-photos figure:nth-child(3) .media {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* contact : les liens courts sur deux colonnes */
+  .contact-list {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 24px;
+  }
+
+  /* téléphone et CV côte à côte, LinkedIn et l'adresse (longs) sur toute la largeur */
+  .contact-list li:nth-child(3) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .contact-list li:nth-child(2),
+  .contact-list li:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* loisirs : l'escalade en grand à gauche, plongée et volley empilées à droite */
+@media (max-width: 520px) {
+  .outside-gallery {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    column-gap: 14px;
+  }
+
+  .outside-gallery figure:first-child {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .outside-gallery figure:first-child .media {
+    aspect-ratio: auto;
+    height: calc(100% - 34px);
+  }
+
+  .outside-gallery figure:not(:first-child) .media {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+/* --- Ordinateur : pas de grand vide à côté d'une colonne plus courte ------------ */
+
+/* contact : les coordonnées à droite du paragraphe, plus sous l'adresse */
+@media (min-width: 861px) {
+  .contact-list {
+    grid-column: 8 / -1;
+    grid-row: 2;
+    align-self: start;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 28px;
+    margin-top: 6px;
+  }
+
+  .contact-list li:nth-child(3) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .contact-list li:nth-child(2),
+  .contact-list li:last-child {
+    grid-column: 1 / -1;
+  }
+
+  /* loisirs : le texte puis plongée et volley à gauche, l'escalade sur toute la hauteur à droite */
+  #dehors > .grid {
+    grid-template-rows: auto auto;
+  }
+
+  .outside-text {
+    grid-column: 1 / span 6;
+    grid-row: 1;
+  }
+
+  .outside-gallery {
+    display: contents;
+  }
+
+  .outside-gallery figure {
+    margin-top: 32px;
+  }
+
+  .outside-gallery figure:first-child {
+    grid-column: 8 / -1;
+    grid-row: 1 / span 2;
+    margin-top: clamp(32px, 4vw, 56px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .outside-gallery figure:first-child .media {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+
+  .outside-gallery figure:nth-child(2) {
+    grid-column: 1 / span 3;
+    grid-row: 2;
+  }
+
+  .outside-gallery figure:nth-child(3) {
+    grid-column: 4 / span 3;
+    grid-row: 2;
+  }
+}
+
+/* parcours : les photos sous la formation, à côté de la fin des expériences */
+@media (min-width: 961px) {
+  .path-col:first-child {
+    grid-row: 1 / span 2;
+  }
+
+  .path-photos {
+    grid-column: 7 / -1;
+    grid-row: 2;
+    align-self: start;
+    margin-top: 40px;
+  }
+}
+
+/* sous 375 px : texte d'accueil à 17 px pour garder des lignes lisibles à côté de la photo */
+@media (max-width: 374px) {
+  .hero > .grid {
+    column-gap: 14px;
+  }
+
+  .hero-body .lead {
+    font-size: 1.0625rem;
+  }
+}
+
+/* transport sur rail, une colonne : le titre, la photo, puis le texte (la photo n'est
+   plus collée au projet précédent) */
+@media (max-width: 860px) {
+  .project-tsr > .grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tsr-text {
+    display: contents;
+  }
+
+  .project-tsr .project-head { order: 1; }
+  .tsr-figure { order: 2; margin-bottom: 24px; align-self: stretch; }
+  .project-tsr .prose { order: 3; }
+}
+
+/* téléphone : liens de contact et du pied de page assez hauts pour le doigt (44 px) */
+@media (max-width: 600px) {
+  .contact-list a,
+  .footer-bottom a {
+    display: inline-block;
+    max-width: 100%;
+    padding-block: 10px;
+  }
+
+  .footer-bottom ul {
+    row-gap: 0;
+  }
+}
+
+/* très petit téléphone : la date du parcours passe au-dessus de l'intitulé, et les
+   noms des gares du schéma restent lisibles */
+@media (max-width: 400px) {
+  .path-list li {
+    grid-template-columns: 1fr;
+  }
+
+  .path-list .detail {
+    grid-column: 1;
+  }
+
+  .rail-svg .station text {
+    font-size: 38px;
+  }
+}
 
 /* très petits écrans (320 px) : « Compétences » doit tenir sur une ligne, et l'en-tête aussi */
 @media (max-width: 360px) {

@@ -33,6 +33,7 @@
       hintInvert: "Clics inversés : clic pour un drapeau, clic droit pour révéler.",
       rulesList: [
         "Le but : révéler toutes les cases qui ne cachent pas de mine.",
+        "Trois niveaux : Bac à sable (grille de 9 × 9, 10 mines), Terrain glissant (16 × 16, 40 mines) et Champ de mines (22 × 22, 99 mines).",
         "Un chiffre indique combien de mines touchent la case, en comptant les diagonales.",
         "Un drapeau marque une mine supposée : clic droit, appui long, ou Drapeau sous la grille sur écran tactile.",
         "Clic sur un chiffre déjà révélé : si autant de drapeaux que le chiffre l'entourent, ses autres voisins s'ouvrent.",
@@ -102,6 +103,7 @@
       hintInvert: "Swapped clicks: click to flag, right click to reveal.",
       rulesList: [
         "The goal: reveal every cell that does not hide a mine.",
+        "Three levels: Sandbox (9 × 9 grid, 10 mines), Slippery slope (16 × 16, 40 mines) and Minefield (22 × 22, 99 mines).",
         "A number tells how many mines touch the cell, diagonals included.",
         "A flag marks a suspected mine: right click, long press, or Flag below the board on a touch screen.",
         "Click a revealed number: if it is surrounded by as many flags as its value, its other neighbours open.",
@@ -475,7 +477,7 @@
     var flagTap = flagMode !== settings.invert;
     toolEl.classList.toggle("is-flag", flagTap);
     toolEl.querySelectorAll("[data-tool]").forEach(function (b) {
-      b.setAttribute("aria-checked", String((b.dataset.tool === "flag") === flagTap));
+      b.setAttribute("aria-pressed", String((b.dataset.tool === "flag") === flagTap));
     });
   }
 
@@ -686,6 +688,11 @@
 
   /* --- Fenêtre de fin -------------------------------------------------------- */
   var lastFocus = null;
+  // pendant une fenêtre posée sur la page (fin de partie, code), le reste devient inerte :
+  // Tab reste dans la fenêtre et les lecteurs d'écran ne lisent qu'elle
+  function pageInert(on) {
+    document.querySelectorAll("body > header, body > main, body > footer").forEach(function (el) { el.inert = on; });
+  }
   var rankBlock = $("ms-rank-block"), rankForm = $("ms-rank-form"), rankMsg = $("ms-rank-msg"), pseudoInput = $("ms-pseudo");
 
   function showEnd(badges) {
@@ -698,12 +705,14 @@
     $("ms-share-note").textContent = "";
     lastFocus = document.activeElement;
     endEl.hidden = false;
+    pageInert(true);
     if (won && badges) rankingOnWin(); else if (!won) rankBlock.hidden = true;
     $("ms-end-new").focus();
   }
   function closeEnd() {
     if (endEl.hidden) return;
     endEl.hidden = true;
+    pageInert(false);
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   // une seule colonne (téléphone) : après « Nouvelle partie » ou un changement de niveau,
@@ -1568,10 +1577,12 @@
     codeFocus = document.activeElement;
     codeOpenedAt = Date.now();
     codeEl.hidden = false;
+    pageInert(true);
     $("ms-code-close").focus();
   }
   function closeCode() {
     codeEl.hidden = true;
+    pageInert(false);
     if (codeFocus && codeFocus.focus) codeFocus.focus();
   }
   function flash(key) {

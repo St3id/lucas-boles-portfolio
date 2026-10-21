@@ -83,7 +83,7 @@ def og_image(src_dir: Path) -> None:
     d.text((64, 150), "Lucas", font=font("ArchivoExpanded-ExtraBold.ttf", 96), fill=GROUND)
     d.text((64, 255), "Boles", font=font("ArchivoExpanded-ExtraBold.ttf", 96), fill=GROUND)
     body = font("Archivo-Regular.ttf", 34)
-    d.text((64, 400), "Automatisme et supervision", font=body, fill=GROUND)
+    d.text((64, 400), "Systèmes embarqués et automatisme", font=body, fill=GROUND)
     d.text((64, 446), "Alternance ingénieur dès septembre 2027", font=body, fill=ACCENT)
     card.save(ROOT / "assets" / "og-image.jpg", "JPEG", quality=85, optimize=True)
 
