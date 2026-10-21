@@ -36,20 +36,17 @@
     padding-top: clamp(16px, 2.6vh, 40px);
   }
 
-  /* la grille commence en haut du panneau, dimensionnée pour tenir dans l'écran ;
-     --shift (minesweeper.js) la descend pour la centrer quand le panneau est plus haut */
+  /* le panneau sombre s'arrête sous la grille (mêmes marges en haut et en bas) : s'il
+     suivait la colonne de gauche, plus longue avec le podium, la grille paraîtrait collée
+     en haut d'un panneau qui continue sous l'écran */
   .ms .ms-stage {
-    align-self: stretch;
+    align-self: start;
     place-items: start center;
     align-content: start;
     /* le rappel du niveau occupe le haut du panneau, à la place de la marge */
     padding-top: 12px;
     row-gap: 8px;
     min-height: 0;
-  }
-
-  .ms .ms-stage-level {
-    margin-top: var(--shift, 0px);
   }
 
   .ms .ms-board-wrap {
