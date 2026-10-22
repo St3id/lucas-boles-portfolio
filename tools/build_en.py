@@ -48,8 +48,6 @@ R = [
  ('alt="Portrait de Lucas Boles, bras croisés, en chemise bleu marine"', 'alt="Portrait of Lucas Boles, arms crossed, wearing a navy shirt"'),
  ('<figcaption>Une unité WAGABOX sur un site de stockage de déchets. Photo : Waga Energy</figcaption>',
   '<figcaption>A WAGABOX unit on a landfill site. Photo: Waga Energy</figcaption>'),
- ('Chez Waga Energy</h2>',
-  'At Waga Energy</h2>'),
  ('alt="Unité WAGABOX de Waga Energy sur un site de stockage de déchets"', 'alt="Waga Energy WAGABOX unit on a landfill site"'),
  ('<p class="lead">Je travaille depuis avril 2026 au pôle EIA (Électricité, Instrumentation, Automatisme) de Waga Energy, d\'abord en stage, maintenant en alternance jusqu\'en juillet 2027.</p>',
   "<p class=\"lead\">I have been with Waga Energy's EIA team (Electrical, Instrumentation, Automation) since April 2026, first as an intern, now as an apprentice until July 2027.</p>"),
