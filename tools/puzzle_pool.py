@@ -2,11 +2,13 @@
 
 L'énigme est un petit démineur : creuser toutes les cases sûres, sans deviner. Dans la grille se
 cache un chemin : un serpent de cases à chiffres qui part d'une case de la ligne du haut, passe
-partout, et finit sur le bord droit. Les mines sont dans les creux entre ses virages. Une fois
+partout, et finit sur le bord droit. Les mines sont dans les creux entre ses virages et le
+guident : aucun raccourci par d'autres cases sûres, le serpent est le plus court trajet. Une fois
 l'énigme résolue, les cases du serpent perdent leur chiffre et le chemin se dessine.
 
-La grille commence fermée, le joueur creuse où il veut : pour chaque grille, on note les bons
-départs, les cases d'où l'on finit sans deviner (le jeu choisit la grille au premier clic).
+La grille commence fermée, le joueur creuse où il veut ; son premier coup ouvre la case et ses
+voisines sûres. Pour chaque grille, on note les bons départs, les cases d'où l'on finit alors sans
+deviner (le jeu choisit la grille au premier clic).
 
 Usage : python tools/puzzle_pool.py <graine> <essais> <nombre>
 (plusieurs graines en parallèle pour aller plus vite)
@@ -16,6 +18,7 @@ chemin) et starts (les bons départs, numéros de case ligne × 10 + colonne).
 import json
 import random
 import sys
+from collections import deque
 
 W, H = 10, 5
 CELLS = [(r, c) for r in range(H) for c in range(W)]
@@ -154,6 +157,28 @@ def deduce(mines, revealed, known):
     return safe, found_m, False
 
 
+def no_shortcut(path, mines):
+    """Vrai si, par des cases sûres (côte à côte), aucun trajet ne relie deux cases du serpent
+    plus vite que lui, ni aussi vite par d'autres cases : le chemin violet est le seul plus court,
+    sans raccourci ni détour de même longueur."""
+    safe = {x for x in CELLS if x not in mines}
+    for i, a in enumerate(path):
+        dist, ways = {a: 0}, {a: 1}
+        q = deque([a])
+        while q:
+            x = q.popleft()
+            for y in side(*x):
+                if y in safe:
+                    if y not in dist:
+                        dist[y], ways[y] = dist[x] + 1, ways[x]
+                        q.append(y)
+                    elif dist[y] == dist[x] + 1:
+                        ways[y] += ways[x]
+        if any(dist.get(path[j], j - i) < j - i or ways.get(path[j], 1) > 1 for j in range(i + 1, len(path))):
+            return False
+    return True
+
+
 def cascade(mines, revealed):
     """Comme au démineur : une case creusée sans mine autour ouvre ses voisines, de proche en proche."""
     revealed = set(revealed)
@@ -192,19 +217,24 @@ def main(seed, tries, want):
     for _ in range(tries):
         path = rnd.choice(all_snakes)
         pset = set(path)
-        # les mines dans les creux, les autres cases hors du chemin sont sûres. Presque toutes les
-        # cases du chemin ont un chiffre (2 vides au plus)
+        # des mines partout autour du serpent, puis on en retire au hasard tant que ça ne crée
+        # aucun raccourci : les mines guident le chemin. Presque toutes les cases du chemin ont
+        # un chiffre (2 vides au plus)
         others = [x for x in CELLS if x not in pset]
-        p = rnd.uniform(0.35, 0.8)
-        mines = {x for x in others if rnd.random() < p}
+        rnd.shuffle(others)
+        mines, q = set(others), rnd.uniform(0.5, 1)
+        for x in others:
+            if rnd.random() < q and no_shortcut(path, mines - {x}):
+                mines.discard(x)
         if sum(number(mines, x) == 0 for x in path) > 2:
             continue
-        # la grille commence fermée : les bons départs sont les cases d'où l'on finit sans
-        # deviner, en croisant des chiffres au moins deux fois
+        # la grille commence fermée ; le premier coup ouvre la case et ses voisines sûres. Les
+        # bons départs : les cases d'où l'on finit alors sans deviner, en croisant des chiffres
+        # au moins deux fois
         starts = []
         for x in CELLS:
             if x not in mines:
-                res = play(mines, {x})
+                res = play(mines, {x} | {n for n in nbrs(*x) if n not in mines})
                 if res and res[1] >= 2:
                     starts.append(x[0] * W + x[1])
         if not starts:
