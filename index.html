@@ -120,7 +120,7 @@
           <article class="role">
             <h3>Alternant automaticien</h3>
             <p class="meta">Septembre 2026 - juillet 2027</p>
-            <p>Déploiement de la supervision Ignition sur les PC installés sur chaque site, avec pour cible une supervision globale de toutes les unités depuis un seul endroit. Les données circulent par un broker MQTT et les services tournent dans des conteneurs Docker.</p>
+            <p>Déploiement d'une supervision Ignition pour des rapports hebdomadaires, avec pour cible une supervision globale de toutes les unités. Les données circulent par un broker MQTT et les services tournent dans des conteneurs Docker.</p>
             <p>En parallèle, construction d'un démonstrateur pour l'équipe d'exploitation, à partir de l'historian Canary Labs, la base qui conserve l'historique des mesures de chaque site.</p>
             <ul class="tool-list" aria-label="Outils">
               <li>Ignition</li><li>Canary Labs</li><li>MQTT</li><li>Docker</li>
@@ -129,8 +129,8 @@
           <article class="role">
             <h3>Stage en automatisme</h3>
             <p class="meta">Avril - juin 2026</p>
-            <p>Intégration d'un système AMS Emerson, qui surveille les vibrations des machines, dans un automate Siemens S7-1500 via Modbus TCP. Le matériel est certifié ATEX, pour les zones à atmosphère explosive.</p>
-            <p>Programme en SCL sous TIA Portal, écrans de supervision sous PcVue, historisation des mesures en base SQL. Participation aux FAT (tests de réception en usine) et rédaction de la documentation technique en français et en anglais.</p>
+            <p>Intégration d'un système AMS Emerson, qui surveille les vibrations des machines, avec des automates Siemens S7-1500 via Modbus TCP. Le matériel est certifié ATEX, pour les zones à atmosphère explosive.</p>
+            <p>Programme SCL et FBD sous TIA Portal, écrans de supervision sous PcVue, historisation des mesures en base SQL. Participation aux FAT (tests de conformité en usine) et rédaction de documentations techniques français/anglais.</p>
             <ul class="tool-list" aria-label="Outils">
               <li>TIA Portal</li><li>SCL</li><li>Modbus TCP</li><li>PcVue</li><li>SQL</li>
             </ul>
@@ -151,12 +151,12 @@
               <p class="meta">Projet personnel, en cours</p>
             </div>
             <div class="prose">
-              <p class="radar-lead">Objectif : un capteur posé dans une pièce, qui en fait une carte 3D et suit les personnes qui s'y déplacent.</p>
+              <p class="radar-lead">Objectif : une tourelle posée dans une pièce, qui en fait une carte 3D et suit les personnes qui s'y déplacent.</p>
               <p>Chaque cible suivie garde un numéro, une position et une vitesse, y compris quand deux trajectoires se croisent.</p>
-              <p>Le code est en Ada, un langage utilisé dans l'aéronautique, le spatial et le ferroviaire. La partie détection est vérifiée formellement avec SPARK.</p>
+              <p>Ce projet me permet d'approfondir ma pratique de l'Ada, un langage utilisé dans l'aéronautique, le spatial et le ferroviaire. La partie détection est vérifiée avec SPARK.</p>
             </div>
             <ul class="points">
-              <li>Fonctionne de bout en bout sur capteur simulé : détection, suivi, carte 3D dans le navigateur</li>
+              <li>Fonctionne sur capteur simulé : détection, suivi, carte 3D dans le navigateur</li>
               <li>Tâches temps réel (Ravenscar), tests automatiques et compilation pour microcontrôleur à chaque modification</li>
               <li>Étape suivante : le matériel (capteurs radar, carte STM32, tourelle motorisée)</li>
             </ul>

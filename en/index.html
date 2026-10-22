@@ -120,7 +120,7 @@
           <article class="role">
             <h3>Automation apprentice</h3>
             <p class="meta">September 2026 - July 2027</p>
-            <p>Rolling out Ignition SCADA on the PCs installed at each site, with the goal of supervising every unit from a single place. Data flows through an MQTT broker and the services run in Docker containers.</p>
+            <p>Rolling out Ignition SCADA for weekly reports, with fleet-wide supervision of every unit as the end goal. Data flows through an MQTT broker and the services run in Docker containers.</p>
             <p>Alongside that, building a demonstrator for the operations team on top of the Canary Labs historian, the database that keeps the measurement history of each site.</p>
             <ul class="tool-list" aria-label="Tools">
               <li>Ignition</li><li>Canary Labs</li><li>MQTT</li><li>Docker</li>
@@ -129,8 +129,8 @@
           <article class="role">
             <h3>Automation internship</h3>
             <p class="meta">April - June 2026</p>
-            <p>Integrated an Emerson AMS, which monitors machine vibration, into a Siemens S7-1500 PLC over Modbus TCP. The equipment is ATEX certified, for explosive atmospheres.</p>
-            <p>SCL code in TIA Portal, PcVue supervision screens, measurements logged to an SQL database. Took part in the FATs (factory acceptance tests) and wrote the technical documentation in French and English.</p>
+            <p>Integrated an Emerson AMS, which monitors machine vibration, with Siemens S7-1500 PLCs over Modbus TCP. The equipment is ATEX certified, for explosive atmospheres.</p>
+            <p>SCL and FBD code in TIA Portal, PcVue supervision screens, measurements logged to an SQL database. Took part in the FATs (factory acceptance tests) and wrote technical documentation in French and English.</p>
             <ul class="tool-list" aria-label="Tools">
               <li>TIA Portal</li><li>SCL</li><li>Modbus TCP</li><li>PcVue</li><li>SQL</li>
             </ul>
@@ -151,12 +151,12 @@
               <p class="meta">Personal project, ongoing</p>
             </div>
             <div class="prose">
-              <p class="radar-lead">The goal: a sensor placed in a room that builds a 3D map of it and tracks the people moving through it.</p>
+              <p class="radar-lead">The goal: a turret placed in a room that builds a 3D map of it and tracks the people moving through it.</p>
               <p>Each tracked target keeps a number, a position and a speed, including when two paths cross.</p>
-              <p>The code is written in Ada, a language used in aerospace, space and rail. The detection part is formally verified with SPARK.</p>
+              <p>This project lets me deepen my Ada skills, a language used in aerospace, space and rail. The detection part is verified with SPARK.</p>
             </div>
             <ul class="points">
-              <li>Works end to end on a simulated sensor: detection, tracking, 3D map in the browser</li>
+              <li>Works on a simulated sensor: detection, tracking, 3D map in the browser</li>
               <li>Real-time tasks (Ravenscar), automated tests and a microcontroller build on every change</li>
               <li>Next step: the hardware (radar sensors, STM32 board, motorised turret)</li>
             </ul>
