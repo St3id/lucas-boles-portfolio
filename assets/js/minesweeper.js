@@ -1289,8 +1289,7 @@
   }
   // mini-grille, dessinée dans un canvas (484 cases en Champ de mines : en éléments
   // HTML, le glissé ramait) : les cases apparaissent en vague depuis un coin, puis les
-  // mines tombent une à une (positions au hasard, juste pour l'aperçu) ; au plus
-  // difficile, la grille tremble à la fin
+  // mines tombent une à une (positions au hasard, juste pour l'aperçu)
   var miniCanvas = $("ms-pick-grid"), miniCtx = miniCanvas.getContext("2d"), miniRaf = 0;
   function miniGrid(n, mines) {
     var total = n * n, spots = [], taken = {};
@@ -1302,17 +1301,13 @@
     if (!side) return;
     if (miniCanvas.width !== Math.round(side * dpr)) miniCanvas.width = miniCanvas.height = Math.round(side * dpr);
     var gap = 18 / n, cell = (side - gap * (n - 1)) / n, wave = 260 / (2 * n - 2), drop = 420 / mines;
-    var shake = n === MSCore.LEVELS.hard.size, t0 = performance.now();
+    var t0 = performance.now();
     var easeOut = function (k) { return 1 - Math.pow(1 - k, 3); };
     cancelAnimationFrame(miniRaf);
     (function draw(now) {
       var t = reduceMotion.matches ? 1e6 : Math.max(0, now - t0), k, i;
       miniCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       miniCtx.clearRect(0, 0, side, side);
-      if (shake && t > 720 && t < 1170) {
-        var f = (t - 720) / 450;
-        miniCtx.translate(Math.sin(f * 28) * 3 * (1 - f), Math.cos(f * 23) * 1.2 * (1 - f));
-      }
       miniCtx.fillStyle = "#2b3631";
       for (i = 0; i < total; i++) {
         k = Math.min(1, (t - (Math.floor(i / n) + i % n) * wave) / 300);
@@ -1416,7 +1411,35 @@
       setTimeout(function () { pick.classList.remove("is-digging"); goBranch(); }, reduceMotion.matches ? 0 : 700);
     });
   });
-  $("ms-pick-nf").addEventListener("click", goBranch);
+  $("ms-pick-nf").addEventListener("click", function () { if (!branchDragged) goBranch(); });
+  // sur le chemin parallèle, le curseur est dessiné sous le rail principal, hors de la
+  // zone du vrai curseur : on l'attrape ici, et un glissé le ramène sur le rail principal
+  var branchDrag = null, branchDragged = false;
+  $("ms-pick-nf").addEventListener("pointerdown", function (e) {
+    if (!onBranch) return;
+    branchDrag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    branchDragged = false;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  });
+  $("ms-pick-nf").addEventListener("pointermove", function (e) {
+    if (!branchDrag || e.pointerId !== branchDrag.id) return;
+    if (!branchDragged && Math.hypot(e.clientX - branchDrag.x, e.clientY - branchDrag.y) < 8) return;
+    branchDragged = true;
+    cancelAnimationFrame(snapRaf);
+    pickGoal = null;
+    if (onBranch) leaveBranch(0, true);
+    var r = pickSlider.getBoundingClientRect();
+    setPick(Math.max(0, Math.min(2, (e.clientX - r.left - 24) / (pickW - 48) * 2)));
+  });
+  function endBranchDrag(e) {
+    if (!branchDrag || e.pointerId !== branchDrag.id) return;
+    branchDrag = null;
+    if (branchDragged) snapTo(Math.round(pickAt));
+    // le clic qui suit un glissé ne doit pas renvoyer sur le chemin parallèle
+    setTimeout(function () { branchDragged = false; }, 0);
+  }
+  $("ms-pick-nf").addEventListener("pointerup", endBranchDrag);
+  $("ms-pick-nf").addEventListener("pointercancel", endBranchDrag);
   function pickGo() {
     cancelAnimationFrame(snapRaf);
     level = onBranch ? "noflag" : LEVEL_KEYS[pickGoal !== null ? pickGoal : Math.max(0, Math.min(2, Math.round(pickAt)))];
@@ -1455,11 +1478,13 @@
   $("ms-pick-go").addEventListener("click", pickGo);
   $("ms-pick-cancel").addEventListener("click", function () { pick.close(); });
   pick.addEventListener("close", function () { cancelAnimationFrame(snapRaf); cancelAnimationFrame(miniRaf); });
-  window.addEventListener("resize", function () {
-    if (!pick.open) return;
+  function refitPick() {
+    if (!pick.open || pickSlider.clientWidth === pickW) return;
     pickW = pickSlider.clientWidth;
     if (onBranch) placeThumb(pickW - 24, BRANCH_Y); else setPick(pickAt);
-  });
+  }
+  window.addEventListener("resize", refitPick);
+  if (window.ResizeObserver) new ResizeObserver(refitPick).observe(pickSlider);
 
   var holdBox = $("set-hold"), holdMs = $("set-hold-ms"), holdOut = $("set-hold-out"), holdBlock = $("ms-hold-block");
   var chordBox = $("set-chord"), invertBox = $("set-invert"), vibrateBox = $("set-vibrate"), keyBtn = $("set-key");

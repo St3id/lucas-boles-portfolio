@@ -1259,6 +1259,7 @@
 .ms-pick {
   width: min(520px, calc(100% - 32px));
   max-width: none;
+  overflow-x: hidden;
 }
 
 .ms-pick-show {
@@ -1416,7 +1417,7 @@
   transform: scale(0);
 }
 
-/* moyen : le drapeau penche ; difficile : il laisse place à une mine qui tremble */
+/* moyen : le drapeau penche ; difficile : il laisse place à une mine */
 .ms-pick[data-level="medium"] .ms-pick-flag {
   color: #ffb648;
   transform: rotate(-24deg);
@@ -1481,11 +1482,14 @@
   transition: background-color 0.3s ease;
 }
 
+/* le trait qui descend n'apparaît qu'une fois l'énigme résolue */
 .ms-pick-down {
   left: calc(50% - 4px);
   top: 28px;
   width: 8px;
   height: 52px;
+  transform: scaleY(0);
+  transform-origin: top;
 }
 
 .ms-pick-end {
@@ -1507,6 +1511,7 @@
   transform: scale(0);
 }
 
+.ms-pick.is-unlocked .ms-pick-down,
 .ms-pick.is-unlocked .ms-pick-end {
   transform: none;
 }
@@ -1630,6 +1635,10 @@ button.ms-pick-cell {
     animation: ms-dig 0.45s var(--ease-out);
   }
 
+  .ms-pick.is-digging .ms-pick-down {
+    transition: transform 0.3s var(--ease-out), background-color 0.3s ease;
+  }
+
   .ms-pick.is-digging .ms-pick-end {
     transition: transform 0.45s var(--ease-out) 0.25s, background-color 0.3s ease;
   }
@@ -1640,10 +1649,6 @@ button.ms-pick-cell {
 
   .ms-pick-cell.is-nope {
     animation: ms-nope 0.35s ease;
-  }
-
-  .ms-pick[data-level="hard"] .ms-pick-mine {
-    animation: ms-tremble 0.2s linear 0.35s infinite;
   }
 
   .ms-pick-name.is-swap,
@@ -1682,13 +1687,6 @@ button.ms-pick-cell {
 /* « scale » et non « transform » : le curseur est déjà placé par un transform */
 @keyframes ms-thumb-pop {
   40% { scale: 1.22; }
-}
-
-@keyframes ms-tremble {
-  0%, 100% { transform: none; }
-  25% { transform: translate(-1px, 1px) rotate(-7deg); }
-  50% { transform: translate(1px, -1px) rotate(6deg); }
-  75% { transform: translate(-1px, -1px) rotate(-3deg); }
 }
 
 @keyframes ms-swap {
