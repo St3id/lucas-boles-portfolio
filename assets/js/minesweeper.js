@@ -1184,7 +1184,7 @@
   var pickHeat = pick.querySelector(".ms-pick-heat"), pickW = 0;
   var HEAT = [[47, 158, 110], [224, 138, 30], [210, 52, 44]], NOFLAG_HEAT = "rgb(124 58 237)";
   // hauteur du rail principal et du chemin parallèle, au centre du curseur (voir le CSS)
-  var RAIL_Y = 28, BRANCH_Y = 92;
+  var RAIL_Y = 28, BRANCH_Y = 72;
   // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là ;
   // 3 = mode Sans drapeau). onBranch : curseur sur le chemin parallèle.
   var pickAt = 0, pickGoal = null, pickShown = -1, snapRaf = 0, rolls = {}, onBranch = false;
@@ -1449,13 +1449,29 @@
     loadPodium();
     showBoard();
   }
+  // branchLock : le glissé en cours a déjà emmené le curseur sur le chemin parallèle ; la
+  // suite de ce glissé ne doit plus le ramener sur le rail principal
+  var branchLock = false;
   pickRange.addEventListener("input", function () {
+    if (branchLock) { pickRange.value = 100; return; }
     cancelAnimationFrame(snapRaf);
     pickGoal = null;
     if (onBranch) leaveBranch(0, true);
     setPick(pickRange.value / 100);
   });
-  pickRange.addEventListener("change", function () { if (!onBranch) snapTo(Math.round(pickRange.value / 100)); });
+  pickRange.addEventListener("change", function () { if (!onBranch && !branchLock) snapTo(Math.round(pickRange.value / 100)); });
+  // le glissé commence sur le curseur mais le pointeur peut descendre sous lui :
+  // on le suit sur toute la fenêtre jusqu'au relâchement
+  var rangeDown = false;
+  pickRange.addEventListener("pointerdown", function () { rangeDown = true; });
+  window.addEventListener("pointermove", function (e) {
+    if (!rangeDown || !unlocked || onBranch || branchLock || !pick.open) return;
+    var r = pickSlider.getBoundingClientRect();
+    if (e.clientY - r.top > BRANCH_Y - 12) { branchLock = true; goBranch(); }
+  });
+  function releaseBranchLock() { rangeDown = false; branchLock = false; }
+  window.addEventListener("pointerup", releaseBranchLock);
+  window.addEventListener("pointercancel", releaseBranchLock);
   // clavier : un cran par flèche, Entrée lance la partie ; flèche bas vers le chemin
   // parallèle une fois débloqué, flèche haut ou gauche pour en revenir
   pickRange.addEventListener("keydown", function (e) {

@@ -1343,11 +1343,11 @@
 
 /* le slider : un vrai curseur HTML (clavier, lecteurs d'écran) posé invisible
    par-dessus le dessin ; le curseur dessiné est une case du jeu */
-/* rail principal centré à 28px du haut, chemin parallèle à 92px (RAIL_Y et
-   BRANCH_Y dans minesweeper.js) */
+/* rail principal centré à 28px du haut, chemin parallèle à 72px (RAIL_Y et
+   BRANCH_Y dans minesweeper.js) : l'énigme est juste sous le rail */
 .ms-pick-slider {
   position: relative;
-  height: 136px;
+  height: 112px;
   margin-top: 18px;
 }
 
@@ -1443,10 +1443,12 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 56px;
+  height: 48px;
   margin: 0;
   opacity: 0;
   cursor: grab;
+  /* au doigt, glisser vers le bas mène au chemin parallèle au lieu de faire défiler */
+  touch-action: none;
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -1487,7 +1489,7 @@
   left: calc(50% - 4px);
   top: 28px;
   width: 8px;
-  height: 52px;
+  height: 32px;
   transform: scaleY(0);
   transform-origin: top;
 }
@@ -1495,7 +1497,7 @@
 .ms-pick-end {
   left: calc(50% + 12px);
   right: 24px;
-  top: 88px;
+  top: 68px;
   height: 8px;
   transform: scaleX(0);
   transform-origin: left;
@@ -1503,7 +1505,7 @@
 
 .ms-pick-stop {
   left: calc(100% - 30px);
-  top: 86px;
+  top: 66px;
   width: 12px;
   height: 12px;
   background: var(--ground);
@@ -1529,7 +1531,7 @@
 .ms-pick-dig {
   position: absolute;
   left: calc(50% - 64px);
-  top: 80px;
+  top: 60px;
   display: grid;
   grid-template-columns: repeat(3, 24px);
   gap: 2px;
@@ -1576,7 +1578,7 @@ button.ms-pick-cell {
 .ms-pick-nf {
   position: absolute;
   right: 0;
-  top: 68px;
+  top: 48px;
   width: 48px;
   height: 48px;
   padding: 0;
