@@ -914,8 +914,10 @@
   }
   [["ms-podium-prev", -1], ["ms-podium-next", 1]].forEach(function (a) {
     $(a[0]).addEventListener("click", function () {
-      var n = (LEVEL_KEYS.indexOf(podiumLevel) + a[1] + LEVEL_KEYS.length) % LEVEL_KEYS.length;
-      loadPodium(LEVEL_KEYS[n], a[1]);
+      // Sans drapeau reste secret tant que l'énigme n'est pas résolue
+      var keys = LEVEL_KEYS.filter(function (k) { return unlocked || k !== "noflag"; });
+      var n = (keys.indexOf(podiumLevel) + a[1] + keys.length) % keys.length;
+      loadPodium(keys[n], a[1]);
     });
   });
   // trois marches toujours présentes : une place vide donne envie de la prendre.
@@ -1184,12 +1186,14 @@
   var pickHeat = pick.querySelector(".ms-pick-heat"), pickW = 0;
   var HEAT = [[47, 158, 110], [224, 138, 30], [210, 52, 44]], NOFLAG_HEAT = "rgb(124 58 237)";
   // hauteur du rail principal et du chemin parallèle, au centre du curseur (voir le CSS)
-  var RAIL_Y = 28, BRANCH_Y = 114;
-  // énigme : 5 colonnes × 4 lignes sous le cran du milieu (cases de 24 px, pas de 26 px).
-  // M : mine ; P : case du chemin, sûre, à creuser ; o : déjà creusée. Tout se déduit des
-  // chiffres, sans deviner. Le chemin part sous le rail et ressort à droite (ligne 3).
-  var PUZZLE = ["oMPoo", "oPPMo", "oPMPP", "MPPPo"], PZ_TOP = 50, PZ_STEP = 26;
-  var PZ_PATH = [[0, 2], [1, 2], [1, 1], [2, 1], [3, 1], [3, 2], [3, 3], [2, 3], [2, 4]];
+  var RAIL_Y = 28, BRANCH_Y = 82;
+  // énigme : 10 colonnes × 4 lignes (cases de 20 px, pas de 22 px) ; la 6e colonne est sous
+  // le cran du milieu. M : mine ; P : case du chemin, sûre, à creuser ; h : sûre, hors du
+  // chemin ; o : déjà creusée. Tout se déduit des chiffres, sans deviner, mais il faut
+  // souvent croiser plusieurs chiffres (grille cherchée par un petit générateur). Le chemin
+  // part sous le rail, serpente, et ressort à droite sur la 2e ligne.
+  var PUZZLE = ["MMhohPhMMo", "MoMPPPoPPP", "MoMPMhPPMh", "ohMPPPPMMh"], PZ_TOP = 50, PZ_STEP = 22;
+  var PZ_PATH = [[0, 5], [1, 5], [1, 4], [1, 3], [2, 3], [3, 3], [3, 4], [3, 5], [3, 6], [2, 6], [2, 7], [1, 7], [1, 8], [1, 9]];
   var pzDug = {}, pzBusy = false;
   // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là ;
   // 3 = mode Sans drapeau). onBranch : curseur sur le chemin parallèle.
@@ -1243,7 +1247,7 @@
   }
   // centres des cases du chemin, dans l'ordre, en pixels dans le slider
   function pathPoints() {
-    return PZ_PATH.map(function (p) { return [pickW / 2 - 64 + p[1] * PZ_STEP + 12, PZ_TOP + p[0] * PZ_STEP + 12]; });
+    return PZ_PATH.map(function (p) { return [pickW / 2 - 120 + p[1] * PZ_STEP + 10, PZ_TOP + p[0] * PZ_STEP + 10]; });
   }
   // vers le mode Sans drapeau : jusqu'au cran du milieu, puis le long du chemin de l'énigme
   function goBranch() {
@@ -1374,6 +1378,8 @@
     cancelAnimationFrame(snapRaf);
     pickGoal = null;
     pickShown = -1;
+    // une énigme commencée puis abandonnée repart de zéro à chaque ouverture
+    if (!unlocked) pzDug = {};
     renderUnlock();
     leaveBranch(0, true);
     // ouverte d'abord : la largeur du slider et du canvas se mesure à l'écran
@@ -1408,7 +1414,7 @@
     box.textContent = "";
     PUZZLE.forEach(function (row, r) {
       row.split("").forEach(function (kind, c) {
-        var open = kind === "o" || (kind === "P" && (unlocked || pzDug[r + "," + c]));
+        var open = kind === "o" || (kind !== "M" && pzDug[r + "," + c]) || (kind === "P" && unlocked);
         var el;
         if (open) {
           el = document.createElement("span");
@@ -1436,6 +1442,7 @@
   function renderUnlock() {
     pick.classList.toggle("is-unlocked", unlocked);
     $("ms-pick-nf").hidden = !unlocked;
+    document.querySelector('[data-rank-level="noflag"]').hidden = !unlocked;
     buildPuzzle();
   }
   pick.querySelector(".ms-pick-dig").addEventListener("click", function (e) {
@@ -1473,6 +1480,7 @@
     pickRange.focus();
     setTimeout(function () { pick.classList.remove("is-digging"); goBranch(); }, reduceMotion.matches ? 0 : 700);
   });
+  renderUnlock();
   $("ms-pick-nf").addEventListener("click", function () { if (!branchDragged) goBranch(); });
   // sur le chemin parallèle, le curseur est dessiné sous le rail principal, hors de la
   // zone du vrai curseur : on l'attrape ici, et un glissé le ramène sur le rail principal
@@ -1555,7 +1563,12 @@
   });
   $("ms-pick-go").addEventListener("click", pickGo);
   $("ms-pick-cancel").addEventListener("click", function () { pick.close(); });
-  pick.addEventListener("close", function () { cancelAnimationFrame(snapRaf); cancelAnimationFrame(miniRaf); });
+  pick.addEventListener("close", function () {
+    cancelAnimationFrame(snapRaf);
+    cancelAnimationFrame(miniRaf);
+    // énigme commencée mais pas finie : elle repart de zéro à la prochaine ouverture
+    if (!unlocked) pzDug = {};
+  });
   function refitPick() {
     if (!pick.open || pickSlider.clientWidth === pickW) return;
     pickW = pickSlider.clientWidth;
