@@ -1345,9 +1345,9 @@
 
 /* le slider : un vrai curseur HTML (clavier, lecteurs d'écran) posé invisible
    par-dessus le dessin ; le curseur dessiné est une case du jeu */
-/* rail principal centré à 28px du haut ; l'énigme (10 × 4 cases de 20px) commence à 50px,
-   le chemin parallèle sort de sa 2e ligne, à 82px (RAIL_Y, PZ_TOP et BRANCH_Y dans
-   minesweeper.js) */
+/* rail principal centré à 28px du haut ; l'énigme (10 × 4 cases de 20px) commence à 50px.
+   Le chemin parallèle sort à la hauteur de la sortie de la grille tirée : sa position est
+   posée par minesweeper.js (BRANCH_Y) */
 .ms-pick-slider {
   position: relative;
   height: 140px;
@@ -1487,16 +1487,6 @@
   transition: background-color 0.3s ease;
 }
 
-/* le petit trait du rail à la grille n'apparaît qu'une fois l'énigme résolue */
-.ms-pick-down {
-  left: calc(50% - 4px);
-  top: 32px;
-  width: 8px;
-  height: 18px;
-  transform: scaleY(0);
-  transform-origin: top;
-}
-
 .ms-pick-end {
   left: calc(50% + 98px);
   right: 24px;
@@ -1516,7 +1506,6 @@
   transform: scale(0);
 }
 
-.ms-pick.is-unlocked .ms-pick-down,
 .ms-pick.is-unlocked .ms-pick-end {
   transform: none;
 }
@@ -1525,7 +1514,6 @@
   transform: none;
 }
 
-.ms-pick.is-branch .ms-pick-down,
 .ms-pick.is-branch .ms-pick-end {
   background: rgb(124 58 237);
 }
@@ -1667,10 +1655,6 @@ button.ms-pick-cell {
 
   .ms-pick-dig.is-nope {
     animation: ms-nope 0.35s ease;
-  }
-
-  .ms-pick.is-digging .ms-pick-down {
-    transition: transform 0.3s var(--ease-out), background-color 0.3s ease;
   }
 
   .ms-pick.is-digging .ms-pick-end {

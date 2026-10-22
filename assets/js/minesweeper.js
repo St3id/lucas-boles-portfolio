@@ -1188,12 +1188,52 @@
   // hauteur du rail principal et du chemin parallèle, au centre du curseur (voir le CSS)
   var RAIL_Y = 28, BRANCH_Y = 82;
   // énigme : 10 colonnes × 4 lignes (cases de 20 px, pas de 22 px) ; la 6e colonne est sous
-  // le cran du milieu. M : mine ; P : case du chemin, sûre, à creuser ; h : sûre, hors du
-  // chemin ; o : déjà creusée. Tout se déduit des chiffres, sans deviner, mais il faut
-  // souvent croiser plusieurs chiffres (grille cherchée par un petit générateur). Le chemin
-  // part sous le rail, serpente, et ressort à droite sur la 2e ligne.
-  var PUZZLE = ["MMhohPhMMo", "MoMPPPoPPP", "MoMPMhPPMh", "ohMPPPPMMh"], PZ_TOP = 50, PZ_STEP = 22;
-  var PZ_PATH = [[0, 5], [1, 5], [1, 4], [1, 3], [2, 3], [3, 3], [3, 4], [3, 5], [3, 6], [2, 6], [2, 7], [1, 7], [1, 8], [1, 9]];
+  // le cran du milieu. Une grille tirée au hasard à chaque ouverture, dans une réserve
+  // cherchée par tools/puzzle_pool.py (python tools/puzzle_pool.py <graine> <essais> <nombre>) : chacune
+  // se résout sans deviner, en croisant des chiffres, et son chemin serpente (3 virages au
+  // moins). M : mine ; o : creusée au départ ; . : fermée et sûre. Le chemin, ce sont les 0
+  // reliés côte à côte depuis la case sous le cran jusqu'au bord droit : il est calculé ici.
+  var PZ_POOL = [
+    ["ooMMo...MM", ".M.Mo..o.M", ".M...o...o", "..MMM....."],
+    [".MoM......", "..Mo...oMM", "oMM.......", "o..MM....."],
+    [".Mo.o..oM.", "M..Mo...Mo", "M..oo.....", "...MM....."],
+    ["..MMo...oo", "M.Moo...M.", "M..M...o..", "M.M.M....."],
+    [".o.Mo..oo.", ".MMM....Mo", "M...o...o.", "oM..M....."],
+    ["M.oMo.....", ".M..o...M.", "..M.o..o..", "MM..Mo...."],
+    ["MM.Mo...oM", "MMoMo....M", "M.........", "o..MM....."],
+    [".oMMo...MM", ".o.oo..o.M", ".M...o....", "..MoM....."],
+    ["oM.oo....o", "M..Mo....M", "o.Mo.o....", "M..MM....."],
+    ["MMo.o.....", ".o.Mo....M", ".M...o..o.", ".MoMMM...."],
+    ["M........o", "MMM.....Mo", "..M..o..o.", "..oMM....."],
+    ["..M....ooo", "..MMo...M.", "..M....o..", "MMoMMo...."],
+    [".M.Mo...M.", "MoM.o..o.M", "o.........", "..M.Mo...."],
+    ["MM......oM", "...M.....M", "oM..o...o.", "o..MMo...."],
+    [".o..o....M", "oMoMo...Mo", "MM.oo.....", ".MM.M....."],
+    ["M..Mo....M", "M.o.o....M", "M..o......", "o..MMo...."],
+    ["MMooo...oo", "MM.M...oM.", "...M......", ".MoMM....."],
+    [".o.o.....M", "M.MM....MM", "oMo......o", "oo..M....."],
+    ["M........M", "o.......oM", "MMoM.....o", ".Mo.MM...."],
+    [".M.o......", "..MM.....M", ".MMoM...o.", "...o.M...."],
+    ["MM.o....M.", "..Mo....Mo", "M..oo...o.", "M...M....."],
+    ["...M.....M", "...Mo....M", "oM.Moo....", "o...MMo..."],
+    ["M.MMo....M", "...o....oM", ".o.M......", ".M.ooM...."],
+    ["Mo..o...oM", ".MMMo....M", "..M.......", "M..o.M...."],
+    ["M..o...o.M", "MoM.o...Mo", "..MM....o.", ".o..Mo...."],
+    ["oM.oo....o", ".MMM....Mo", "M.M..o..o.", "o..MM....."],
+    ["oMMM......", "M.o.....M.", "Mo..o.....", "oMoMM....."],
+    [".MMo.....o", "..oo....MM", "MM.o....o.", ".Mo.M....."],
+    ["Mo..o....M", "o..Mo....M", "MMMM.o....", "..o..M...."],
+    ["..oM....o.", "M.M.o....M", ".Mo.M.o...", "o.MooM...."],
+    [".Mo.o.....", "oM.Mo....M", "M..o....o.", "M.MMMo...."],
+    ["M.MMo...Mo", "oM.o....M.", "...o...o..", ".M.oM....."],
+    [".ooM.....M", "..MMoo...M", "..M.Mo....", "M.oo.M...."],
+    ["M.MMo....M", ".M..o...M.", "M...o.....", "...oM....."],
+    ["MMMo......", "o..o.....M", "M.oM.o....", "M.ooMM...."],
+    ["M.MM....M.", "....o..o.M", ".M.Mo.....", "oo.MMo...."],
+    ["MM.M.....o", "oooMoo...M", "..o.M.....", "MM.o.M...."]
+  ];
+  var PZ_TOP = 50, PZ_STEP = 22, PZ_ENTRY = [0, 5];
+  var PUZZLE = PZ_POOL[0], PZ_PATH = [], pzZero = {}, pzIndex = 0;
   var pzDug = {}, pzBusy = false;
   // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là ;
   // 3 = mode Sans drapeau). onBranch : curseur sur le chemin parallèle.
@@ -1378,8 +1418,11 @@
     cancelAnimationFrame(snapRaf);
     pickGoal = null;
     pickShown = -1;
-    // une énigme commencée puis abandonnée repart de zéro à chaque ouverture
-    if (!unlocked) pzDug = {};
+    // une énigme commencée puis abandonnée repart de zéro, sur une nouvelle grille
+    if (!unlocked) {
+      pzDug = {};
+      choosePuzzle(Math.floor(Math.random() * PZ_POOL.length));
+    }
     renderUnlock();
     leaveBranch(0, true);
     // ouverte d'abord : la largeur du slider et du canvas se mesure à l'écran
@@ -1401,6 +1444,33 @@
 
   // l'énigme : une mini-grille de démineur sous le rail. Toutes les cases sûres creusées,
   // elles dessinent le chemin vers le mode Sans drapeau ; une mine, et tout recommence.
+  // choisit la grille n : calcule ses 0 reliés depuis l'entrée (le chemin), le plus court
+  // trajet jusqu'au bord droit (que le curseur suivra) et la hauteur de la sortie
+  function choosePuzzle(n) {
+    pzIndex = n;
+    PUZZLE = PZ_POOL[n];
+    pzZero = {};
+    var start = PZ_ENTRY[0] + "," + PZ_ENTRY[1], prev = {}, queue = [PZ_ENTRY], exit = null;
+    pzZero[start] = true;
+    prev[start] = null;
+    while (queue.length) {
+      var x = queue.shift();
+      if (x[1] === 9 && !exit) exit = x;
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+        var r = x[0] + d[0], c = x[1] + d[1], k = r + "," + c;
+        if (r < 0 || r > 3 || c < 0 || c > 9 || pzZero[k] || PUZZLE[r][c] === "M" || pzMines(r, c)) return;
+        pzZero[k] = true;
+        prev[k] = x;
+        queue.push([r, c]);
+      });
+    }
+    PZ_PATH = [];
+    for (var p = exit; p; p = prev[p[0] + "," + p[1]]) PZ_PATH.unshift(p);
+    BRANCH_Y = PZ_TOP + exit[0] * PZ_STEP + 10;
+    pick.querySelector(".ms-pick-end").style.top = (BRANCH_Y - 4) + "px";
+    pick.querySelector(".ms-pick-stop").style.top = (BRANCH_Y - 6) + "px";
+    $("ms-pick-nf").style.top = (BRANCH_Y - 24) + "px";
+  }
   function pzMines(r, c) {
     var n = 0;
     for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) {
@@ -1414,12 +1484,13 @@
     box.textContent = "";
     PUZZLE.forEach(function (row, r) {
       row.split("").forEach(function (kind, c) {
-        var open = kind === "o" || (kind !== "M" && pzDug[r + "," + c]) || (kind === "P" && unlocked);
+        var onPath = pzZero[r + "," + c];
+        var open = kind === "o" || (kind !== "M" && pzDug[r + "," + c]) || (onPath && unlocked);
         var el;
         if (open) {
           el = document.createElement("span");
           var n = pzMines(r, c);
-          el.className = "ms-pick-cell is-open" + (n ? " n" + n : "") + (kind === "P" ? " is-path" : "");
+          el.className = "ms-pick-cell is-open" + (n ? " n" + n : "") + (onPath ? " is-path" : "");
           el.textContent = n || "";
           el.setAttribute("aria-label", String(n));
         } else if (unlocked) {
@@ -1464,7 +1535,7 @@
       return;
     }
     pzDug[r + "," + c] = true;
-    var done = PZ_PATH.every(function (p) { return pzDug[p[0] + "," + p[1]]; });
+    var done = Object.keys(pzZero).every(function (k) { return pzDug[k]; });
     if (!done) {
       buildPuzzle();
       var next = box.querySelector("button.ms-pick-cell");
@@ -1474,12 +1545,16 @@
     // tout le chemin est creusé : il s'éclaire, puis le curseur le parcourt
     unlocked = true;
     save("ms-noflag-v1", true);
+    // la grille résolue est gardée : c'est elle qu'on retrouve, chemin éclairé
+    save("ms-noflag-pz", pzIndex);
     keepStorage();
     pick.classList.add("is-digging");
     renderUnlock();
     pickRange.focus();
     setTimeout(function () { pick.classList.remove("is-digging"); goBranch(); }, reduceMotion.matches ? 0 : 700);
   });
+  var savedPz = load("ms-noflag-pz", 0);
+  choosePuzzle(unlocked && savedPz >= 0 && savedPz < PZ_POOL.length ? savedPz : Math.floor(Math.random() * PZ_POOL.length));
   renderUnlock();
   $("ms-pick-nf").addEventListener("click", function () { if (!branchDragged) goBranch(); });
   // sur le chemin parallèle, le curseur est dessiné sous le rail principal, hors de la
@@ -1757,5 +1832,6 @@
   loadPodium();
 
   // mode développeur uniquement : lecture de la partie en cours pour les tests
-  if (devMock) window.__ms = { game: function () { return game; }, level: function () { return level; }, api: api, podium: function () { podiumCache = {}; loadPodium(); } };
+  if (devMock) window.__ms = { game: function () { return game; }, level: function () { return level; }, api: api, podium: function () { podiumCache = {}; loadPodium(); },
+    puzzle: function () { return { rows: PUZZLE, path: Object.keys(pzZero) }; } };
 })();
