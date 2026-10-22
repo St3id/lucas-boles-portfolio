@@ -1345,12 +1345,13 @@
 
 /* le slider : un vrai curseur HTML (clavier, lecteurs d'écran) posé invisible
    par-dessus le dessin ; le curseur dessiné est une case du jeu */
-/* rail principal centré à 28px du haut ; l'énigme (10 × 5 cases de 20px) commence à 50px.
+/* rail principal centré à 28px du haut ; l'énigme (10 × 5 cases de 20px) commence à 40px,
+   juste sous le rail.
    Le chemin parallèle sort à la hauteur de la sortie de la grille tirée : sa position est
    posée par minesweeper.js (BRANCH_Y) */
 .ms-pick-slider {
   position: relative;
-  height: 162px;
+  height: 152px;
   margin-top: 18px;
 }
 
@@ -1487,6 +1488,25 @@
   transition: background-color 0.3s ease;
 }
 
+/* énigme résolue : un trait relie le rail à l'entrée du serpent (sa colonne est posée par
+   minesweeper.js) */
+.ms-pick-link {
+  left: 50%;
+  top: 32px;
+  width: 8px;
+  height: 8px;
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.ms-pick.is-unlocked .ms-pick-link {
+  transform: none;
+}
+
+.ms-pick.is-branch .ms-pick-link {
+  background: rgb(124 58 237);
+}
+
 .ms-pick-end {
   left: calc(50% + 98px);
   right: 24px;
@@ -1522,10 +1542,16 @@
 .ms-pick-dig {
   position: absolute;
   left: calc(50% - 120px);
-  top: 50px;
+  top: 40px;
   display: grid;
   grid-template-columns: repeat(10, 20px);
   gap: 2px;
+}
+
+/* la grille touche presque le rail : tant que l'énigme n'est pas résolue, elle passe devant le
+   curseur posé sur le cran du milieu, pour que ses cases restent lisibles */
+.ms-pick:not(.is-unlocked) .ms-pick-dig {
+  z-index: 3;
 }
 
 .ms-pick-cell {

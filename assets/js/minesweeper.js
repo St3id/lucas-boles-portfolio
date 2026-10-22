@@ -1188,112 +1188,218 @@
   // hauteur du rail principal et du chemin parallèle, au centre du curseur (voir le CSS)
   var RAIL_Y = 28, BRANCH_Y = 82;
   // énigme : un petit démineur de 10 colonnes × 5 lignes (cases de 20 px, pas de 22 px), la
-  // 6e colonne sous le cran du milieu. Une grille tirée au hasard à chaque ouverture, dans une
-  // réserve cherchée par tools/puzzle_pool.py : chacune se résout sans deviner, en croisant
-  // des chiffres. Les cases sûres à creuser forment un serpent, d'une case du haut jusqu'au
-  // bord droit, qui passe partout ; les mines sont dans ses creux. Résolue, le serpent perd
-  // ses chiffres et devient le chemin. M : mine ; P : chemin, fermé ; p : chemin, creusé au
-  // départ ; o : creusée au départ ; . : sûre, fermée.
+  // 6e colonne sous le cran du milieu. Il commence fermé : au premier clic, la grille est tirée
+  // dans une réserve cherchée par tools/puzzle_pool.py, parmi celles où cette case est un bon
+  // départ (on finit sans deviner, en croisant des chiffres). Dans chaque grille se cache un
+  // serpent, d'une case du haut jusqu'au bord droit, qui passe partout ; les mines sont dans
+  // ses creux. Résolue, le serpent perd ses chiffres et devient le chemin. Chaque grille :
+  // ses lignes (M : mine ; P : chemin ; . : sûre, hors du chemin) et ses bons départs (numéro
+  // de case : ligne × 10 + colonne).
   var PZ_POOL = [
-    ["PMMPPPPooM", "PoPPoMPoPP", "PoPMMPPoPo", "PMPooPMPPM", "PPPMMPPPoM"],
-    ["MPPMPPPPoM", "ooPoPoMPPM", "PPPoPPoMPo", "PMooMPooPP", "PPPPPPoMoM"],
-    ["PPMPPpMopP", "PoMPMPMMPo", "PMMPMPMoPo", "PPPPoPPPPM", "oMMMoooMMM"],
-    ["PPPPPPPPPM", "PooMMooMMo", "PMoMPPPooM", "PPMPPMPppP", "oPPPooooMo"],
-    ["PPPMPMPPPP", "PMPPPMPooM", "PMoMooPPPM", "PMPPPPMMPo", "PPPMMPPPPo"],
-    ["opPPoMMooo", "PPMMPPPMPP", "PooPPMPoPM", "PPMPMoPMPo", "MPPPooPPPM"],
-    ["MooPPPooPP", "PPPPMMoMPM", "PoMoMMoMPo", "PPMMoMPPPo", "oPPPPPPMoM"],
-    ["ooMPPPMoPo", "MPPPMPPPPM", "oPMMoMoMMo", "MpPoPPPPoM", "oMpPPoMPPP"],
-    ["PPPPMoPPPo", "MMoPMoPoPM", "PPPPMMpMpo", "PMMoPPPMPP", "PPPPPMMooM"],
-    ["PMPPPooMMM", "PoPMPPPMPP", "PMPPooPoPo", "PPoPMoPMPo", "MPPPMoPPPM"],
-    ["PPPoPPPPPM", "PMoPPMMMPM", "PooPoPPPPo", "PPMPMPMoMM", "MPPPoPPPPP"],
-    ["MPPPPPPPPM", "PPoMooMooM", "PMPPPoMoMo", "PPPMPoMPPP", "MoMoPPPPoM"],
-    ["PMMPPPMMPP", "PMPPMPooPo", "PMPooPoMPM", "PPPoMPPMPM", "ooMooMPppM"],
-    ["oMoPMPPPPP", "PPPPoPMMoo", "PoMMopPPPM", "PPPMMooMPM", "MoPPPPPPPM"],
-    ["MPPPMoPoPP", "MPMPpPPMPM", "MPooMMoMPo", "MPpPPMoMPo", "MMMMPPPPPM"],
-    ["PooMoMoMPP", "PoMPPPooPM", "PMMPoPPoPM", "PPoPMMPMPo", "MPpPMMPPPM"],
-    ["oMMPPPPMMo", "MPPPoMoMPP", "oPMoMoMMPM", "MPPPPMPPPM", "oMMMPPPooo"],
-    ["oMMooMPPPM", "MPPPPPPMMM", "MPMMooooPP", "MPPMPPPPPM", "ooPPPMoooo"],
-    ["PPPPMPPPoM", "MoMPoPoPPM", "PPpPMPMMPM", "PMMoPPoMPP", "PPPPPMooMo"],
-    ["PPMPPPMMPP", "oPMPMPPMPM", "MPoPoMPoPM", "oPPPoMPPPo", "MMMoMoMoMM"],
-    ["MPpPPoPPPP", "PPMoMMPMoo", "PMMMooPPPM", "PPPPPoMoPM", "MooMPPPPPM"],
-    ["MoPPPPPMPP", "oPPoMoooPo", "MPMPPPMMpM", "opPPMPMPPM", "ooMMMPPPoo"],
-    ["PPMPPPMPPP", "PMoPMPMPoo", "PoPpoPoPPM", "PMPMoPPMPM", "PPPMoMPPPo"],
-    ["oPMMPPPoPP", "PPMPPMPMPM", "PMoPMPPoPo", "PoPPoPMpPo", "PPPMMPPPoM"],
-    ["oPPPPMoPPM", "MPoMPPPPMM", "oPooMMooPp", "MPPMMoPPpM", "MMPPPPPoMM"],
-    ["oPPPoPPPpM", "oPMoMPMMPo", "PPoMoPoMPo", "PMPPPPooPM", "PPPMoMoMPP"],
-    ["ooMoPPPPPo", "MPPPPoMMMM", "PPMMoPPPPo", "PMoPPPMMPP", "PpPPMMMooo"],
-    ["oPPPPoPPPM", "PPMMoPPMPM", "PooMPPMPPo", "PPPMPooPMM", "MoPPPMoPPP"],
-    ["PMPPPooPPP", "PMPopPMPMo", "PMPPMPMPPM", "PMMPoPPMpM", "PPPPooPPPM"],
-    ["MMPpPPoooo", "PPPMoMMoPP", "PMoMPPPMPM", "PPPMPMPMPo", "MopPPMPPPo"],
-    ["PPPPMMMMMo", "PMMoMPPPPM", "PMoMoPooPM", "PMPPPPoMPM", "PPPMoMoMPP"],
-    ["PPPPoMPPPM", "ooMPMpPoPM", "PPPPoPMoPo", "PMMMMPMMPM", "PPPPpPMoPP"],
-    ["PPPPPMMMoo", "oMMMPoPPPM", "PPPPPMPoPM", "PMoMoPPMPo", "PPPPpPMMPp"],
-    ["PPPPPPMPPP", "PoMoooopoM", "PMPpPPoPPo", "PMPoMPPMPM", "PPPMMoPPPM"],
-    ["MMMPPPPPPo", "oPPPoMMoMo", "oPMoMoPPPM", "oPPPMMPoPM", "oMMPPPPMPP"],
-    ["PPPPMooMoo", "ooMPMMPPPo", "oPPPMoPMPo", "MPoMPPPMPP", "MPPPPMMMoM"],
-    ["PPMPPPPpPM", "oPMPMMooPM", "MPoPPPooPM", "MPPMMpoMPP", "MoPPPPoMMo"],
-    ["MPPPMoPoPP", "PPMPoMPMPM", "PoMpPPPMPo", "PPMMooMpPM", "oPPPPPPPoo"],
-    ["oooMPPPMPo", "PPPPPMPPPo", "PMMoooMMoM", "PPooMMMPPP", "oPPPPPPPoM"],
-    ["MPPPoPPPPP", "MoMPMPoMoo", "MPPPoPPPpM", "oPMoMMMoPo", "MPPPPPPPPM"],
-    ["MoMPMoPPPo", "MPPPoMPMPo", "MPoMMMPMPo", "oPoMoMPoPP", "oPPPPPPoMM"],
-    ["oMPMoMPPPo", "MPPMMPPMPM", "MPoooPoMPo", "MPMPPPMMPM", "MPPPMMMoPP"],
-    ["oMPPPPPMPP", "oPPoMooMPo", "MPMPPPoMPo", "oPPPoPMoPM", "MMoMMPpPPo"],
-    ["PPMpPPPMoM", "MPMPooPPPo", "oPoPPPMMPo", "MPPMMPMoPM", "MoPPPPoMPP"],
-    ["MPooPPPoPP", "oPoMPMPMPM", "PPMoPMPMPM", "pMPPPoPPpo", "PPPMoMoooo"],
-    ["oPPPPoPPMo", "MPMoPopMPP", "MPMMPPPMPM", "MPooMoMPPM", "MPPPPPPPMo"],
-    ["oMMooPPMPP", "PPPooMPoPo", "PMPPPPPMPM", "PPoMooMPPo", "MPPPPPPPoM"],
-    ["MPPPPPMPPM", "MPooMPPPoM", "oPMooMooPP", "oPMPpPPPPM", "MPPPMoMMMo"],
-    ["oPPpMMPPPo", "ooMPMoPoPo", "MPPPoPPoPM", "MPMMMPMMPM", "MPpPPPMoPP"],
-    ["MMPMMoooMM", "PPPMMPPPPo", "PoMooPoMPM", "PPPopPMMPP", "MMPPPMMMMM"],
-    ["oPPPPPPPPo", "oPooMoMoMo", "oPMMoPPPoo", "oPPPPPoPPP", "ooMMoMMooM"],
-    ["oMPPpMPPPM", "oPPMoPPMPo", "oPooMPMopo", "oPMPPPMMPP", "MPPPMMMMoo"],
-    ["MPPPoPMooM", "PPMPPPMMPP", "pMooMoMoPM", "PPPPMMMPPM", "oMoPPPPPoM"],
-    ["MoPoPPPPPP", "PPPMPMooMM", "PMooPPPPPM", "PPooMoMMPo", "MPPPPPPPPo"],
-    ["PPoMPPPPMo", "oPooPoMPPM", "oPMMPPMoPM", "MPPPMPMMPP", "oooPPpMooM"],
-    ["PPPPPMMMoM", "PoMoMPPPPM", "PPoooPMMPM", "MPMMPPooPP", "MPPPPoMoMo"],
-    ["PPPoMPPPPM", "PMPPooMoPo", "PooPPPPPPo", "PMMoMMMoMM", "pPPPPPPPPP"],
-    ["PMMMPPPoMM", "PPooPMPoPP", "MPoMPoPMPM", "opPMPMPoPM", "oMPPPMPPPM"],
-    ["MMPPPPMMMM", "PPPooMooPP", "PMoPPPMoPM", "PPPPMPMPPo", "ooMMMPPPMM"],
-    ["MMPMPPPMMo", "PPPoPoPMPP", "PMoMPoPMPM", "PPoMPMPPPo", "MPPPPMMoMM"],
-    ["PPPPoPPPPo", "PMooMPMMPM", "PooMPPMPPo", "PPoPPMoPMo", "MPPPMooPPP"],
-    ["oPPMPPPMoM", "MPooPoPMPP", "MPMPPoPMPM", "MPPPMMPoPM", "oMMMMMPPPM"],
-    ["PPoMooMMoM", "PoPPPMPPPM", "PMPMPoPMPM", "PMPoPPPoPM", "PPPoooMMPP"],
-    ["PPPoPPPoMo", "PMMoPMPMPP", "PPoPPMPMPM", "MPPPoMPPPo", "oooMMoMooM"],
-    ["oMoPpPpPPM", "MPPPMooMMM", "MPooooPPPo", "oPMMPPPMPM", "MPPPPMMoPP"],
-    ["MPPPMMPMPP", "oPMPoMPoPo", "oPMPPPPMPM", "oPMMoooMPM", "oPPPPPPPPM"],
-    ["oPPPPPooPP", "PPMMooMMPM", "poPPPoMMPo", "PPPoPPPMPM", "MooMMoPPpM"],
-    ["oPoPPPPMMo", "MPMPMoPMPP", "pPoPMPPoPo", "PMPPoPMPPM", "PPPooPPPMM"],
-    ["PPMPPPpooo", "MPMPMoPMPP", "MPoPPMPMPM", "MPPMPMPPPM", "oopPPooooM"],
-    ["MoPPPPMMoM", "PPPMooPPPM", "PooMoPpoPM", "PpPPMPMoPM", "oMMPPPooPP"],
-    ["oPPPPMoooM", "PPMoooPPPM", "PoPPPMPoPo", "PMPMPPPoPP", "PPPoMoooMo"],
-    ["MoPPPPoMPP", "oPPMoMMoPM", "oPMoMoMMpo", "oPPpPoPPPM", "oooMPPPMoo"],
-    ["PpPPPPPoMo", "PoMoMooMPP", "pooPPPoMPo", "PMMPoPoMPM", "PPPPMPPPPM"],
-    ["oPoPPPMMPP", "MPMPoPPoPo", "MPMPMMPoPM", "oPPPooPMPM", "oooMMoPPPo"],
-    ["MoPMMoPPPM", "PPPooPPMPM", "PoMoMPoMPo", "pPPoPPMoPP", "oMPPPMMMMo"],
-    ["PPPPPPMooM", "PMMMoMPPPM", "PoooooPMPM", "PMMPPPPoPM", "PPPPMoMopP"],
-    ["oPPPooPPMM", "MPMPPPPMPP", "PPoMooMoPo", "PoMMMPPPPo", "PPPPPPoooM"],
-    ["PPPoPPPMoo", "PMPoMMPoPP", "PMPPPPPMPM", "PoMoMMoMPM", "PPPPPPPPPM"],
-    ["PPPoooMMMo", "PMMMPPPoPP", "PMoPPMPMPM", "PoMPooPoPM", "pPPPMMPPPM"],
-    ["MPPpoMPPPM", "oPMPPPPMoM", "MPMoMoooMo", "MPPoMPPPPP", "MoPPPPMooM"],
-    ["MMPPpPMoMM", "oPPooMPPPM", "oPMMoMPopM", "MPPMPPPMPM", "MoPPPoMMPP"],
-    ["MMPMMPPPPP", "oPPMoPoMMo", "MPoMMPPPPo", "oPPPPMMMPM", "MMMoPPPPPo"],
-    ["oooopPPpoo", "oPPPPoMoPP", "MPooMMooPM", "MPPPPPPPPM", "MMMoMMoMoM"],
-    ["oMPoooPPPo", "oPPoMPPMPM", "oPMoMPMPPo", "oPMMPPoPoM", "oPPPPooPPP"],
-    ["oPPMPPPooM", "MoPMPopoPP", "oPPMPMPoPM", "MPMPPMPPPM", "oPPPoMMMoM"],
-    ["PPPPMoMoPo", "PMoPPPPPPM", "PPoMMooooo", "oPoMPPPPoM", "MPPPPMoPPP"],
-    ["MMPPPMoPPo", "oPPMPooMPo", "MPooPPPPPM", "oPpooMooMo", "oMPPPPPPPP"],
-    ["MoPPMMooPP", "oPPMPPPoPM", "oPoopMPoPo", "MPPMPoPMPM", "MoPPpoPPPM"],
-    ["PopPpPMoPP", "PoPMoPoMPo", "PMPPMPMMPo", "PMoPMPPPPM", "PPPPooMMoM"],
-    ["PooPPPoMoo", "PoPPMPMoPP", "PMPMPPMoPM", "PPPMPoMoPM", "oooMPPPPPM"],
-    ["oMooPPooMM", "PPPMPoMMPp", "PoPPPMooPM", "PPMooMMPPM", "MPPPPPPPMo"],
-    ["PPoMooMoMo", "oPMPPPPoPP", "PPoPooPoPM", "PMMPoMPMpo", "PPPPMoPPPM"],
-    ["oPoPPPPPPo", "MPMPoMMMPM", "MPoPPPoPPo", "oPPMoPMPoM", "MMPPPPMPPP"],
-    ["PPMMMooMPP", "oPMPPPMoPM", "MPMPoPoMPM", "oPpPMpPMPo", "MMooMMPPPM"],
-    ["PPPoMooMPP", "oMPoPPPMPo", "MPPoPMPMPM", "MPoMPoPPPM", "MPPPPooooo"],
-    ["MoMoMPPoPP", "oPpPpoPMPo", "MPoMPPPoPM", "MPPPoMMoPM", "ooMPPPPPPo"]
+    [[".PPMMPPPPM", "MMPMPPM.P.", ".PPMP..PPM", "MP.MPMMP..", ".PPPP..PPP"], [48,  49]],
+    [[".M.PPPP..M", "PPPPM..MPP", "PM..PPP.P.", "P.M.PMPMP.", "PPPPP.PPPM"], [29]],
+    [[".PPPPPP..M", "MPM.M.M.PP", "PP.PPP.MP.", "PMPPMPPPP.", "PPP......M"], [46,  47]],
+    [["MMPPPP.MMM", "PPPMM.PPPM", "P...M.P.PM", "PPPPPPP.PM", "MM...MMMPP"], [26,  27]],
+    [[".PPPPPPPM.", "MPM..M.MPP", "PP....MMP.", "P.MPPPM.P.", "PPPPMPPPPM"], [30,  40]],
+    [["PPMMMPPPPM", "PMMMPP.MPM", "PP.MP.PPP.", "MPPPP.PMMM", "M...MMPPPP"], [42]],
+    [[".PPMM...PP", "MPMPPPM.PM", ".P.PMP.MP.", ".PMP.P.MPM", ".PPPMPPPP."], [30,  40]],
+    [["MMPPPP.PPM", "PPPM.PPPM.", "P..M..M...", "PPM.PPPMPP", "MPPPPMPPPM"], [20]],
+    [[".MM.MPPPPM", "PPPPMPM..M", "PMMPPP..PP", "PPP.M..PPM", "..PPPPPPMM"], [36,  46]],
+    [["PPPPMPPPP.", "P..MPP.MPM", "PM.MP..PP.", "PM.PP..P.M", "PPPPM.MPPP"], [25]],
+    [[".PPPPMPPPM", "PPM.MMPMP.", "P....PP.PM", "PMMMPPMMPP", "PPPPP.M.M."], [0,  10]],
+    [["PPPPMMPP.M", "PM.PPPP.PP", "PM..M...P.", "PMPPPP.MPM", "PPP.MPPPPM"], [7,  17]],
+    [["...PPPM.P.", "PPPP.PPPPM", "PM.M...M.M", "PMMMMM.M.M", "PPPPPPPPPP"], [0,  1,  2,  3,  4]],
+    [["MPPPPPMPPM", "PPMM.PP.P.", "P.PPP.PPP.", "PMP.PM.MM.", "PPP.PPPPPP"], [33,  43]],
+    [["MPPPPPPPM.", ".P.M.M..PP", "PP.PPP.MP.", "PM.P.P.PP.", "PPPPMPPPMM"], [46]],
+    [[".PMM.PPPP.", "PPMMPPM.P.", "P...P..PPM", "PMPPP.MP.M", "PPP.M.MPPP"], [0,  10]],
+    [["PPP...MPPM", "PMPPPPPP.M", "PP.M..M.M.", ".PMMPPPPPM", ".PPPP...PP"], [45,  46,  47]],
+    [["PMPPP..PPP", "P.P.P.MP.M", "PMPMPP.PP.", "PPP.MPMMPM", ".M.M.PPPPM"], [3,  4]],
+    [["PPP..P....", "PMPPPPMMPP", "PP.M.M.MPM", ".PPPPPPPP.", "..M......."], [3,  4,  44,  45,  46,  47,  48,  49]],
+    [["M.PM..PPPM", "PPP..PPMP.", "PMMM.PMMP.", "PPP.PPMMP.", ".MPPPMMMPP"], [29,  39,  49]],
+    [[".MPPP..MM.", "MPP.MMPPP.", ".P....P.P.", "MPPMPPP.PP", "..PPP.M.M."], [27,  28,  29]],
+    [["..MM...MP.", "MPPPPPPPP.", ".P..M...M.", ".PPPPPPPPM", "..MM.MM.PP"], [5]],
+    [[".PPPPPP..M", "PPMMMM..PP", "P..PPP..PM", "PMMPMPMPP.", "PPPP.PPP.M"], [7,  17]],
+    [["PP.MPPPMPP", "PMM.PMP.PM", "PM..P.P.P.", "PMMPPMP.PM", "PPPPM.PPP."], [27,  37,  47]],
+    [[".PPPPPPMP.", ".PM.M.PPP.", ".PM....MM.", "MPPPPPM.PP", ".....PPPPM"], [34,  42,  43,  44]],
+    [["PPPPM...PM", "PMMPPPPPPM", "P..M...MM.", "PM.MPPPM..", "PPPPP.PPPP"], [6,  7,  25,  35,  45]],
+    [[".PPP.PPPPM", "..MPMP.MPM", ".PPP.PP.P.", ".P.MM.PMPP", "MPPPPPP.M."], [0,  10,  20]],
+    [["M..M.PPPPM", ".PPPPPMMMM", "PP.M....PP", "PMPPPPPMP.", "PPPMMMPPP."], [39,  49]],
+    [["..PPPM..P.", ".PPMPPPPP.", ".PM.....M.", ".PPPPPPPPP", ".M...MM..M"], [7,  8,  9]],
+    [[".MPPPMMPP.", "PPPMPPPMP.", "PMMM..PPPM", "PP.PPP.M.M", "MPPPMPPPPP"], [25]],
+    [["PPPPPM.PPM", "PM.MP.M.PM", "PP..PPPPP.", "MP..M.MM..", "MPPPPPPPPP"], [32,  42]],
+    [[".MPPPPP.PP", "PPP.MM.MPM", "P..PPP..P.", "PPMPMPMPPM", "MPPP.PPP.."], [20]],
+    [["MPPPPPPPP.", "PP.MM.MMM.", "P.MPPPP...", "PPMP.MPMPP", ".PPP..PPPM"], [20,  30,  40]],
+    [[".MMP.MPPP.", ".PPPMPPMPM", "MP...PMPP.", "MPPPMPMP.M", "MMMPPP.PPP"], [22]],
+    [[".MPPPM.MMM", ".PPMMPPPPM", "MPMM.P..PM", "MPP.MP..P.", "M.PPPPMMPP"], [49]],
+    [["PPPP.PM...", "PM.PPPM.PP", "PP.M...MP.", ".PMPPPMPP.", ".PPP.PPP.."], [3,  4,  44]],
+    [[".PPPPPP..M", "PPM...M.PP", "PMM.PPPMP.", "PPP.PMPPP.", "MMPPPM...."], [29,  39,  47,  48,  49]],
+    [["PM.PPPPM.M", "PP.PM.P.PP", ".P.PPMPMPM", "MPPMPMP.P.", "..PPP.PPPM"], [47]],
+    [["M.MPPPM...", ".PPP.MPPPM", "MP...MP.P.", ".PPPPPPMP.", "MM......PP"], [22,  23,  33,  39,  43,  44,  45,  49]],
+    [["MMPPP.PPP.", "MPP.M.PMP.", ".P...MP.P.", ".PPP.MPMP.", "M.MPPPP.PP"], [9,  19,  22,  29,  39,  49]],
+    [["PPP..MMPP.", "PMPPPPPPMM", "PP...M..PP", ".PMPPPPPPM", ".PPP..M..M"], [3,  13]],
+    [["MM.PPPPMPM", "MPPPM.PPP.", "MP.MM....M", ".PPPP.MPPP", ".M..PPPP.M"], [43,  44]],
+    [[".MPPPP.M..", "MPPM..PPPM", "MP....P.P.", ".PPMMPPMPP", "..PPPPMM.."], [5,  15]],
+    [[".PP..M..PP", "PPMPPP..PM", "PM.P.PM.P.", "PPMP.PMMP.", ".PPPMPPPP."], [24]],
+    [[".PPMPPP.PP", ".MP.PMP.PM", "PPP.PMP.PM", "PMMPPMP.PM", "PPPP.MPPPM"], [7,  17,  27,  37,  47]],
+    [["MPMM.MMMMM", "PP.MPPP.PP", "PM.MP.P.PM", "PPPPP.PPPM", ".....M.M.M"], [40,  41,  42,  43]],
+    [[".MPPPPMMMM", ".PPM.MPPP.", ".P...MP.PM", ".PPPPMP.PP", ".MM.PPPM.M"], [20,  21]],
+    [["MPP.PPPMMM", "PP..PMPPPM", "P.M.PPM.PM", "PPPPMPMMPM", "M.MPPP.MPP"], [2,  3,  20]],
+    [["M..PPP.M.M", ".PPPMMPPPM", ".P.M..P.PM", ".PM..MP.PP", ".PPPPPP..."], [2,  20,  30,  40]],
+    [[".M.PPM..M.", "PPPPMPPPP.", "PM.MMP.MP.", "PPP.MP.MPP", "..PPPPM..."], [29,  39,  49]],
+    [["PPPPP.MMPM", "PM.MPPPPP.", "PP....M.M.", ".PPMPPPPPP", "..PPPMM.MM"], [30,  31,  40,  41]],
+    [["MMM.PPPPPM", "MPPPPM....", "MP....M.PP", "MPPPM.PPPM", ".M.PPPP..M"], [7,  46,  47]],
+    [["MPPMPPPM.M", ".P.PP.P.PP", "PP.P.PPMPM", "PMPPMPM.P.", "PPPMMPPPP."], [48,  49]],
+    [["MPPPM...MM", "PPMM.MPPP.", "P...MMP.PM", "PPMPPPPMPP", ".PPP......"], [20,  30,  40]],
+    [["PP.MPPP.MM", ".PMPPMP.PP", "PP.P.PPMP.", "PMMPMP.PP.", "PPPP.PPPM."], [46]],
+    [["M.M.PPP.M.", "PPPP.MP.PP", "PMMPPPP.PM", "PPP..M.MP.", "..PPPPPPPM"], [40,  41,  42,  43]],
+    [["MPPP..PPP.", "PPMPPM.MP.", "P.M.PPPPPM", "PPP.M.M.MM", "M.PPPPPPPP"], [20]],
+    [["PPP.P.M...", "PMPPPMPPPM", "PP..MPP.PM", ".PM.PP..P.", "MPPPP.MMPP"], [27,  49]],
+    [["MPPPP.PPPM", "PP.MMPPMP.", "P...PP.PP.", "PPPMP.MPM.", "MMPPP..PPP"], [20,  21]],
+    [[".PPPMMM...", "PPMMM.PPP.", "P..M.PPMP.", "PMPPPP.MPP", "PPP...M.MM"], [8,  9,  19,  29,  43,  44]],
+    [[".MM..MMPPM", "PPPPPPPP.M", "PM..M.M.PP", "PPPP.PPPPM", "..MPPP.MM."], [44,  45]],
+    [["..M.PP...M", "MPPPPMMMPP", "MP.M...MP.", ".PPPPP.PP.", ".M..MPPPM."], [46]],
+    [["M.MPPPPMMM", "PPPP.M..PP", "P.M.MM..P.", "PPPPM.PPP.", "MMMPPPPM.."], [20]],
+    [["PPP.M.MPP.", "PMPPPPPPM.", "P..M....M.", "PMPPPPPPPP", "PPPM.M.M.."], [25,  26]],
+    [["..MMPPP.P.", "PPPPPMPPP.", "PM.M...MMM", "PPPP.MMMPP", "...PPPPPP."], [7,  8,  9]],
+    [["PPMPPPM...", "P.PPMPM.PP", "P.P.PPM.PM", "PMP.PMPPPM", "PPP.PPP..."], [0,  10]],
+    [["PPP.PPPPPM", "PMPPPMMMM.", "P..MMPPPP.", "PPMM.P.MP.", "MPPPPP..PP"], [39,  45,  49]],
+    [["PM.PPPPPPM", "PMPPM.M.PM", "P.PMPPPPPM", "PMP.P.M.MM", "PPP.PPPPPP"], [43,  44]],
+    [["..PPPP.M..", "PPPM..PPP.", "PMM..MP.PM", "PPMMPPP.PM", "MPPPPM.MPP"], [9,  27]],
+    [["..PPPPPP..", "PPPM...MPP", "PM....M.P.", "PPMPPPPPP.", "MPPP.MM..M"], [5,  9,  19,  29]],
+    [[".PPPPPM...", "PPM.....PP", "PM..M.M.PM", "PM.PPPPPPM", "PPPP.M...M"], [8,  9]],
+    [["MPPPPPPPPM", "PP.MM.....", "PM.PPPM.PP", "PPMP.PPPPM", "MPPP..M..M"], [34,  44]],
+    [["MPPP..M..M", "MP...PPPP.", "PP.MMPM.PM", "PMMMPP.MPP", "PPPPP.M..."], [2,  3,  4]],
+    [["MPP.PPPPP.", "MMPMPM.MP.", "PPP.PPP.P.", "PMMMM.PMPP", "PPPPPPPM.."], [9,  19,  29,  39,  49]],
+    [["MMPPP.PP.M", "PPPMPMPMPP", "P...PPP.PM", "PPP.MMMPP.", "MMPPPPPPMM"], [20,  21]],
+    [[".MMP..PPPM", ".PPP..P.P.", "MP.MMMPMPM", "MPPPPPP.PP", ".M....MM.M"], [4,  5,  6,  7,  43,  44]],
+    [["M...MPPMMM", "PPPMM.PMPP", "PMPPPPP.P.", "PP..M.MPP.", ".PPPPPPPMM"], [29,  40,  41,  42]],
+    [["M..M.M.PPM", "MPPPPPPPM.", "PP.M....PP", "PMPPPPPMP.", "PPPMMMPPPM"], [25]],
+    [["PPPPMPPM..", "P.MPPPMMPP", "PM......P.", "PPPPPPMPP.", "M...MPPPMM"], [42]],
+    [["PPP.MM.MPM", "PMPMPPPPPM", "P.PPP.M.M.", "PM....MPPP", "PPPPPPPP.M"], [33,  34,  43,  44]],
+    [[".PP..PPPP.", ".P.MPPM.P.", ".PMMP..PPM", ".PMMPMMPM.", "MPPPPM.PPP"], [8,  9]],
+    [["MMPPPMPPMM", ".PPMPMPMPP", "MPM.PPP.P.", ".P...MM.P.", "MPPPPPPPPM"], [29]],
+    [["PPPP..M.PM", "PMMPPP..P.", "PP...PPPP.", ".PPM.M.MM.", "..PPPPPPPP"], [30,  31,  40,  41]],
+    [["P..MMPPPP.", "PM.PPP.MPM", "PP.PM.PPPM", "MP.P.MPM..", "MPPPMMPPPP"], [32,  42]],
+    [["PPPM.MMMPP", "PM.PPPP.PM", "PP.P..PMPM", ".PPPMMP.PM", "M...MMPPP."], [32,  42,  47]],
+    [["M.....M.PM", "MPPPMPPPP.", ".PMPPP.M.M", ".P.M..PPP.", "MPPPPPPMPP"], [35,  45]],
+    [["P..PPPPPPP", "PM.PM.M...", "PP.PPPPPP.", "MPM..MM.PM", ".PPPPPPPP."], [8,  9,  18,  19]],
+    [["M..MPPMMMM", "PPPPP..MPP", "P..M..MMPM", "PPMPPPPPP.", "MPPP.M...."], [20]],
+    [["MP.MM...M.", "PPMMPPP.PP", "P.M.P.PMPM", "PPP.P.PMPM", ".MPPPMPPPM"], [43]],
+    [["PPPMMPPMPP", "P.PPPPM.PM", "PM....M.P.", "PPPPPPPPPM", "M...MM.M.M"], [0,  1,  23,  24,  42]],
+    [["PPPMP.PPPP", "PMPMPMP.MM", "P.PPP.PPP.", "PM...MM.PM", "PPPPPPPPP."], [33,  43]],
+    [["MMMPPPPPM.", "MPPP.M.MPP", "MP..MM..P.", ".PPPPPPMP.", "M..M..PPP."], [22]],
+    [["P.MPPPPMPP", "P..PMMPMPM", "PP.PPMP.PM", "MPPMPMPMPM", "M.PPP.PPPM"], [0,  10]],
+    [["PP.MPPP...", "MP.PPMP.PP", ".P.P.MPMPM", "MPPP.MP.P.", ".M.M.MPPPM"], [7,  8,  9,  22,  23,  47]],
+    [["..PPPPPMPP", "PPPM..MMP.", "PMMPPP..P.", "PPPP.PP.PM", "M....MPPP."], [37,  42,  43,  47]],
+    [[".MM..M..P.", "MPPPPPP.P.", ".P....PPPM", "MPPM...MM.", ".MPPPPPPPP"], [7,  8,  9,  17]],
+    [["MMPPPPPP..", "PPPMM.M.PP", "P.MPPP.MPM", "PPMPMPPPPM", ".PPP.M.M.M"], [20,  30,  40]],
+    [["M.MPPPP.P.", "PPPPMMPPP.", "PM.M..M.MM", "PPPPP.PPPP", "MM.MPPPMM."], [7,  8,  9]],
+    [["MPPPPM.MP.", "PP..PPM.PM", "PM.M.PPPPM", "PPMM..M..M", "MPPPPPPPPP"], [2,  3]],
+    [["PPP.PMPPPM", "PMPMP.P.PM", "P.PPPMP.P.", "PP.MMPP.PM", "MPPPPP.MPP"], [7,  17,  27]],
+    [["M.MPPPP.PP", "MPPP.M..PM", ".PM.MM..PM", ".PP.PPPPP.", ".MPPP.MM.."], [49]],
+    [[".PPPP.PPP.", "MP..PMPM..", ".P..PPPMM.", "MPPPM.MPPP", "MM.PPPPPM."], [2,  3,  12,  13,  22]],
+    [["..MMMMPPP.", "PPPPPPP.MM", "PM.....MPP", "PPPPPPM.P.", "...MMPPPP."], [39,  48,  49]],
+    [["PPPPP.PPP.", ".MMMP.PMP.", "MPPPPMPMP.", ".P.M..P.PM", "MPPPPPP.PP"], [45,  46,  47]],
+    [["PPP.PPMMM.", "PMP.PMM.PP", "PMPPP.M.PM", "PMM.M.MPPM", "PPPPPPPPM."], [3,  13]],
+    [["..M..PPMPP", "PPPPMMP.PM", "PM.PPPPMP.", "PPP...MPPM", ".MPPPPPP.M"], [33,  34,  43,  44]],
+    [[".M.PP.PPPM", "PPPP.PPMP.", "PM.MMP..P.", "PPPPPP..PP", ".MMM.....M"], [29]],
+    [["PM..PPPMM.", "PP.PPMP.PP", "MP.PM.P.PM", "MPPPMMPPP.", ".M....M..."], [48,  49]],
+    [[".PPP.PPPP.", ".PM..PMMPM", ".P...PMMP.", "MPM.PP..PM", "MPPPP...PP"], [0,  4,  10,  14,  24,  34,  44,  45,  46,  47]],
+    [["PPMM.M....", "MP.MPPP.PP", "MP.MP.PMP.", "MP.PP.PPP.", "MPPPMMMMM."], [25]],
+    [["MPPP..MPPM", ".PMPPPPP.M", "PP.M...MPP", "PMPPP.PPP.", "PPP.PPPM.."], [4,  25,  35,  39,  43,  44,  45,  49]],
+    [[".PPPMPP.M.", ".P.PPPMMPP", ".PM.M...P.", ".PPPPPPMP.", "MM.M..PPP."], [0,  1,  2,  10,  20]],
+    [["..MMPPPMP.", ".PPPPMPPP.", "MP..M...M.", ".PPPP.PPPP", ".M..PPPMM."], [43,  44,  45]],
+    [[".MPPPM.MP.", "PPPMPPPPPM", "PMM..M...M", "PPM.PPPP..", ".PPPPMMPPP"], [27,  48,  49]],
+    [["MPPP.PPPPM", "PP.MPPM.PM", "P...P.PPPM", "PPPMP.P.MM", ".MPPPMPPPP"], [20,  21]],
+    [[".PPPMMPM.M", "MP.P.MP.PP", ".P.PPPP.P.", "MPM...MPPM", ".PPPPPPP.M"], [2,  12]],
+    [["PPP.P..M.M", "PMPPPMPPPM", "PP...MPMP.", ".PPMPPP.PM", "..PPP...PP"], [3,  13,  30,  31,  40,  41,  45,  46,  47]],
+    [["MPPPM.PPPM", ".PMPPPP.MM", ".PM....MPP", ".PPM.MMMPM", "MMPPPPPPPM"], [6]],
+    [["M.PPPPPMP.", "PPPMM.PPP.", "P...MM.MM.", "PMPPPPPPMM", "PPP....PPP"], [43,  44,  45,  46]],
+    [["PP.MPPPPP.", "PM.MP.MMPM", "PM..P.PPP.", "PPPPPMP..M", "....M.PPPP"], [40,  41,  42]],
+    [["PPMM.M.MPP", "P..MPPPMP.", "PM.MPMPMP.", "PPPPPMPPPM", ".M...M...M"], [9,  19]],
+    [["MMPPMMMMPP", "PPP.PPP.P.", "PMMMP.PMP.", "PP.PP.PPPM", "MPPPMMM..M"], [42]],
+    [["..MPPP.PP.", ".PPPMP.P..", "MPMM.PPPMM", ".P.MMMMMPP", "MPPPPPPPP."], [6,  7,  8,  9,  16]],
+    [["MPPPPPM.P.", "PPMMMPPPP.", "P...M.....", "PMM.PPPPM.", "PPPPPM.PPP"], [8,  9,  18,  19]],
+    [[".PPPPPPPP.", "MPMM....MM", "PP....PPPM", "PMMPPPPMPP", "PPPP.MM..."], [5,  6,  15,  16,  25]],
+    [["MP..PPPPP.", "PP..PMMMP.", "PMM.PPPMPM", "PPPM.MP.P.", ".MPPPPP.PP"], [47,  48,  49]],
+    [["PPPM..PPP.", "PMPP.MPM..", "P..PPPPMPP", "PPM...MMP.", "MPPPPPPPPM"], [9,  19,  29]],
+    [[".MPPPM.MMM", "PPP...PPP.", "P.M.M.PMPM", "PPPPPPP.PP", "MMMM..MM.M"], [3]],
+    [["PPP..PPPPM", "PMPPPPMM.M", "PP.M.M....", ".PPPPM.MPP", "....PPPPPM"], [30,  31,  40,  41,  42,  43]],
+    [["MPPP..P.PP", "MPMPMPPMP.", ".PMPPP..P.", ".P.M.M.PPM", "MPPPPPPPM."], [9,  19]],
+    [["PMMMPPP.M.", "P..PP.PMPP", "PM.P.PP.P.", "PPPPMPMPP.", ".M.M.PPPM."], [29]],
+    [[".MM..P..MM", "PPPP.PMMPP", "P.MPPP.MP.", "PPPM.MPPP.", "M.PPPPP..M"], [29]],
+    [[".PPPPPPPP.", ".PMM..MM..", "PP........", "PM.MPPPPPP", "PPPPP...MM"], [9,  19,  29,  35,  36,  45,  46]],
+    [["M.MM.PPM..", "PPPPPMP.PP", "PM.MPPP.PM", "PPP.M...P.", "MMPPPPPPPM"], [9,  27,  36,  37,  46,  47]],
+    [["MPPP.PP.MM", "PPMPMMPMPP", "P.MPPPPMP.", "PPM.M.MMPM", "MPPPPPPPPM"], [20]],
+    [["PPP.PP....", "PMPPP.PPP.", "PP.M..PMPM", ".PMM.PP.PP", "MPPPPPMM.."], [3,  4,  5,  6,  7,  8,  9,  15,  25]],
+    [["PPPMMPPPP.", "PMPPPP...M", "P.....MMPP", "PMPPPPMMPM", "PPPMMPPPP."], [6,  7,  23,  24]],
+    [[".P.MMPPPPM", "MP.PPPM.P.", "MPMP..PPP.", "MPMP..PM..", ".PPP.MPPPP"], [29,  39,  49]],
+    [["M....MMPPM", ".PPPPPPMPM", "MPM.M.PPP.", ".P.PPP..MM", "MPPPMPPPPP"], [36,  46]],
+    [["MPPMPPPPM.", ".PMMPM.PPM", ".P..PPP.P.", ".PPMM.PMPP", ".MPPPPP..."], [39,  49]],
+    [["PPPMPPP.PP", ".MPMPMPMPM", "MPP.PMP.PM", ".P.PPMP.PM", "MPPPMMPPPM"], [32,  42]],
+    [["MMPPPPPMP.", "PPPM.MPPP.", "P...M....M", "PPPPMPPPP.", ".MMPPPMMPP"], [9,  49]],
+    [["M...PPPPP.", "PPPPPMM..M", "PM.M...MPP", "PPPM.MPPP.", "MMPPPPP..."], [39,  47,  48,  49]],
+    [["MPPP.M...M", "PPM.MMPPPM", "P....MP.P.", "PPPPMPP.PP", "MM.PPPM.M."], [20]],
+    [["MMMMMMPMPP", "MPPPP.PMPM", "MP.MPPP.P.", "MPPP..MPPM", ".MMPPPPPM."], [44]],
+    [[".P..M.M.M.", "PPMPPPM.PP", "P.PP.PMMP.", "PPPM.P.MP.", "MM.MMPPPP."], [29,  39,  49]],
+    [["MMM..PPPP.", ".PPPPPMMM.", "MP...MPPPM", ".P.MMMP.PM", "MPPPPPP.PP"], [4]],
+    [["PPPP..PPP.", "P.MM..PMP.", "PM....P.P.", "PPPPPPPMPP", ".M...MM.MM"], [5,  9,  15,  19,  25,  29,  33,  43]],
+    [["M.P..MMM.M", "PPP.PPP.PP", "PMMPP.PMPM", "PPPP..PPP.", "....M.MM.M"], [2,  3,  24,  25,  40,  41,  42]],
+    [["P.M..M...M", "PMPPPMPPPM", "P.P.P.PMP.", "PPPMP.P.PM", "M.M.PPP.PP"], [35,  45,  46,  47]],
+    [["MMPPP.PPPM", ".PP.MPPMPM", ".P...PMPP.", "MPP.MPMP.M", "M.PPPP.PPP"], [22,  32,  42]],
+    [["..PPP..MPM", ".PPMPPPPP.", "MPM..M.M..", "MPMMM.PPP.", "MPPPPPPMPP"], [29,  39,  49]],
+    [[".PP.MMPPP.", ".PM.MPPMP.", ".P..PP.PPM", "MPP.PM.PM.", ".MPPPM.PPP"], [0,  10,  33,  43]],
+    [["PPPPPPPP..", "PM...MM.PP", "PP.MM...PM", "MPPPPPMPPM", "M....PPPM."], [42,  43,  44]],
+    [["PPP...PPM.", "PMPM.PP.PP", "P.PPPPM.PM", "PM..M.PPPM", "PPPPPPP..."], [5,  6]],
+    [["MPPPP.PPPP", ".M.MP.PM..", "MPPPPMPPP.", ".PMM...MPM", "MPPPPPPPPM"], [9,  19]],
+    [["MPPP.PPPPP", "..MPMPM.MM", "MPPPMPPPP.", ".PM.M.M.P.", ".PPPPPPPP."], [38,  39,  48,  49]],
+    [["PPP.MPP.M.", "PMPPPP.MPP", "PP..M...P.", ".PPPPPPMP.", "..MM.MPPPM"], [29]],
+    [[".....PPPP.", "PPPPPP..MM", "PMM..M.MPP", "PPPM.PPPPM", "MMPPPPMM.M"], [0,  1,  2,  3,  4,  5,  6]],
+    [["MP.PPPPMM.", "PP.PMMP.PP", "P..P.PP.P.", "PPPP.PMPPM", ".MM..PPPMM"], [2,  12,  20,  21,  22]],
+    [["PPP..PP...", "PMPP.PM.PP", "PP.PPPM.PM", ".PPM.MPPP.", "..PPPPP..."], [3,  4,  13,  14,  30,  31,  40,  41]],
+    [["MPPP...MP.", "PPMPPPPPP.", "P...M.M..M", "PPPMPPPPP.", "MMPPPM.MPP"], [4,  5,  20]],
+    [["PPPMPP..M.", "PMPPPMPPP.", "PP.M.PP.P.", ".PMPPP..PP", "MPPP...MMM"], [27,  28,  29,  35,  44,  45]],
+    [["PPMPPPPMPP", "PMPPM.P.P.", "P.P.PPP.PM", "PMP.PM.PP.", "PPP.PPPPM."], [9]],
+    [[".MPPPPM..M", "MPP.MM..PP", ".P.PPP.MPM", "MP.PMP.MPM", ".PPP.PPPPM"], [22,  32,  42]],
+    [["PPP..MMPP.", "PMPPPPPMPM", "PP..M.PPP.", ".PPPPP...M", "M..MMPPPPP"], [3]],
+    [["P..PPP...M", "PM.PMP..PP", "P.PP.PM.P.", "PMP.MPP.PM", "PPPMM.PPPM"], [6,  7]],
+    [["..MMMPP.MM", ".PPPPMP.PP", ".P.MPPP.P.", "MPPP...MP.", ".MMPPPPPPM"], [0,  10,  35,  44,  45]],
+    [["MP..M..MPP", "MP.PPPM.P.", "MP.PMP..PM", "MPPP.PM.PM", "...M.PPPP."], [2,  12,  22]],
+    [[".PP.PPP.MM", ".PMPPMPMPP", ".PMP..PMP.", ".PMP.MPPP.", ".PPPM.M..M"], [0,  10,  20,  30,  40]],
+    [["MPPPPPMPPP", "PPMM.M.P..", "PM.PPP.PPM", "PM.PMP.MPM", "PPPP.PPPP."], [8,  9]],
+    [["..PPPM.PP.", ".PPMPPPP.M", "PP.M.MM..M", "PMPPPPPPPP", "PPP...M..."], [0,  1,  10,  11,  48,  49]],
+    [["PMM..MMMPP", "PP..PPP.P.", ".P.MP.P.PM", "MPPPP.PPPM", ".MMMM..MMM"], [9]],
+    [[".M....MPP.", "PPP.PPPP.M", "PMPPP...PP", "P.M.MMPPP.", "PPPPPPP.M."], [3,  4,  13,  14,  27]],
+    [["MPP.PPPMPP", "MP.PPMP.PM", ".P.PMPP.P.", "MPPP.PM.PM", ".M...PPPP."], [2,  3,  12,  22,  43,  44]],
+    [["..PPPPPPMM", "PPP.M...PP", "PM.....MPM", "PPPM.PPPP.", "..PPPPMM.."], [6]],
+    [["M.PMPPPPP.", "PPPMP.MMPM", "P..MP..PP.", "PPMPP..PM.", ".PPPM..PPP"], [20,  30,  40]],
+    [["PPPPPPPPP.", "PM..MM...M", "PMPPP...PP", "PMP.PMPPP.", "PPPMPPP.M."], [7,  17,  27]],
+    [["..PPPMM..M", "MPP...PPPM", ".PMMM.PMP.", "MPPPPPPMPM", ".....M..PP"], [2,  3,  42,  43]],
+    [["MPMPPPPP..", "MP.PMM.PP.", "MP.PPPP.PM", "MPPM.MP.PP", "M.PPPPP..."], [7,  8,  9,  17,  27,  37,  47,  48,  49]],
+    [["MMM.PPP.PM", "MPPPPMP.P.", ".P..M.PPP.", "MPPPPPMMM.", ".M..MPPPPP"], [7,  17]],
+    [[".MM...P.PP", "PPPPPPPMPM", "P.MM...MP.", "PPPMMPPPPM", "MMPPPP...."], [4,  5,  15,  46,  47]],
+    [[".PMM...PPP", "PP.PPPMPMM", "PMPPMP.PP.", "PMP.MP..PM", "PPP.MPPPP."], [36,  37,  46,  47]],
+    [["PPPMMMPP.M", "PMPPMMPMPP", "PM.PPPPMP.", "PP...MMMP.", "MPPPPPPPPM"], [29]],
+    [["MM.MPP.MM.", "PPPP.P..PP", "PM.PPP..PM", "PPM.M.M.PM", ".PPPPPPPPM"], [5,  15]],
+    [[".PPPPMMMM.", "MP..MPPPP.", "PP.MMP..P.", "PM.MPP..PM", "PPPPP..MPP"], [2,  26,  27,  45]],
+    [["MPPPPPPMMM", "PPMM..M.PP", "P..MPPP.P.", "PPPPPMP.PM", ".M...MPPPM"], [37,  47]],
+    [["MP..MPPPP.", "PP..PP.MPM", "PMMPP.PPP.", "P.MP..PMMM", "PPPPMMPPPP"], [2,  24,  25]],
+    [["MMMPPPPPMM", "PPPPMM..PP", "PM.....MPM", "PP.M.PPPPM", "MPPPPP...M"], [35,  45,  46,  47]],
+    [[".PPMM....M", "PP.PPPP.PP", "PM.P.MP.PM", "PPPP..PPP.", "...M.M.M.M"], [0,  1,  23,  40,  41]],
+    [["PM..PPPPPP", "PP..P.M.MM", "MP..PPPPPM", ".PMMMMM.PM", "MPPPPPPPPM"], [3,  4,  13,  14]],
+    [["PPPMMPPPPM", "PMPPPP.MM.", "P....M..PP", "PPMPPPMMP.", "MPPP.PPPP."], [44]],
+    [["PPP.MMPPP.", "PMPP.MP...", "PP.PPPP.M.", "MPPM.MMMPP", "..PPPPPPPM"], [7,  8,  9]],
+    [["PPPPPPPPP.", "PMMM..M...", "P...PPPP..", "PPM.P.MPP.", "MPPPPM.MPP"], [8,  9,  18,  19,  28,  29,  39,  49]],
+    [["MPPPPP..PP", "PP..M..MPM", "PMPPPP.MP.", "PPP.MPPMP.", "......PPP."], [39,  49]],
+    [["MPPP.M.M..", "PPM.PPPMPP", "PM.MPMP.PM", "PPP.P.PPPM", "M.PPPMM.M."], [9,  42,  43]],
+    [["PPPP...MPM", "PMMPPPM.PM", "PM.M.PPPP.", "PPPPM.M..M", "...PPPPPPP"], [4]],
+    [["..MMMPM.MM", "MPPPPPMMPP", "MPM.M.MMP.", "MP.PPP.PP.", ".PPPMPPPMM"], [29]],
+    [["M.P.M.MMPP", "PPPMPPPMPM", "P...P.P.P.", "PPMPPMPPPM", "MPPP..MM.."], [20]],
+    [[".P.PPPPPP.", "PPMPMMMMP.", "P.MPPPM.P.", "PPMM.PMMPP", "MPPPPP..MM"], [9,  19,  29]]
   ];
-  var PZ_TOP = 50, PZ_STEP = 22;
-  var PUZZLE = PZ_POOL[0], PZ_PATH = [], pzPath = {}, pzIndex = 0;
+  var PZ_TOP = 40, PZ_STEP = 22, PZ_ROWS = 5;
+  // PUZZLE : null tant que le joueur n'a pas creusé sa première case
+  var PUZZLE = null, PZ_PATH = [], pzPath = {}, pzIndex = 0;
   var pzDug = {}, pzBusy = false;
   // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là ;
   // 3 = mode Sans drapeau). onBranch : curseur sur le chemin parallèle.
@@ -1481,10 +1587,10 @@
     cancelAnimationFrame(snapRaf);
     pickGoal = null;
     pickShown = -1;
-    // une énigme commencée puis abandonnée repart de zéro, sur une nouvelle grille
+    // une énigme commencée puis abandonnée repart de zéro, toute fermée
     if (!unlocked) {
       pzDug = {};
-      choosePuzzle(Math.floor(Math.random() * PZ_POOL.length));
+      PUZZLE = null;
     }
     renderUnlock();
     leaveBranch(0, true);
@@ -1511,7 +1617,7 @@
   // sur la ligne du haut, à la sortie, sur le bord droit, et place la sortie
   function choosePuzzle(n) {
     pzIndex = n;
-    PUZZLE = PZ_POOL[n];
+    PUZZLE = PZ_POOL[n][0];
     pzPath = {};
     var cells = [], ends = [];
     PUZZLE.forEach(function (row, r) {
@@ -1536,6 +1642,26 @@
     pick.querySelector(".ms-pick-end").style.top = (BRANCH_Y - 4) + "px";
     pick.querySelector(".ms-pick-stop").style.top = (BRANCH_Y - 6) + "px";
     $("ms-pick-nf").style.top = (BRANCH_Y - 24) + "px";
+    // le petit trait qui relie le rail à l'entrée du serpent
+    pick.querySelector(".ms-pick-link").style.left = "calc(50% + " + (PZ_PATH[0][1] * PZ_STEP - 114) + "px)";
+  }
+  // premier clic en (r, c) : une grille où cette case est un bon départ (à défaut, où elle est sûre)
+  function startPuzzle(r, c) {
+    var good = [], safe = [];
+    PZ_POOL.forEach(function (g, i) {
+      if (g[1].indexOf(r * 10 + c) >= 0) good.push(i);
+      if (g[0][r][c] !== "M") safe.push(i);
+    });
+    var from = good.length ? good : safe;
+    choosePuzzle(from[Math.floor(Math.random() * from.length)]);
+  }
+  // creuse (r, c) ; une case sans mine autour ouvre ses voisines, comme au démineur
+  function pzDig(r, c) {
+    var k = r + "," + c;
+    if (pzDug[k] || !PUZZLE[r] || PUZZLE[r][c] === undefined || PUZZLE[r][c] === "M") return;
+    pzDug[k] = true;
+    if (pzMines(r, c)) return;
+    for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) if (dr || dc) pzDig(r + dr, c + dc);
   }
   function pzMines(r, c) {
     var n = 0;
@@ -1548,10 +1674,12 @@
   function buildPuzzle() {
     var box = pick.querySelector(".ms-pick-dig");
     box.textContent = "";
-    PUZZLE.forEach(function (row, r) {
+    // pas encore de grille : toutes les cases fermées
+    var rows = PUZZLE || Array(PZ_ROWS + 1).join("..........,").split(",").slice(0, PZ_ROWS);
+    rows.forEach(function (row, r) {
       row.split("").forEach(function (kind, c) {
-        var onPath = pzPath[r + "," + c];
-        var open = kind === "o" || kind === "p" || (kind !== "M" && (pzDug[r + "," + c] || unlocked));
+        var onPath = PUZZLE && pzPath[r + "," + c];
+        var open = PUZZLE && kind !== "M" && (pzDug[r + "," + c] || unlocked);
         var el;
         if (open) {
           el = document.createElement("span");
@@ -1589,6 +1717,7 @@
     if (unlocked) { if (cell.classList.contains("is-path")) goBranch(); return; }
     if (pzBusy || cell.tagName !== "BUTTON") return;
     var r = Number(cell.dataset.r), c = Number(cell.dataset.c), box = cell.parentNode;
+    if (!PUZZLE) startPuzzle(r, c);
     if (PUZZLE[r][c] === "M") {
       // une mine : elle s'affiche, la grille tremble, puis tout revient au départ
       pzBusy = true;
@@ -1598,16 +1727,17 @@
       box.classList.remove("is-nope");
       void box.offsetWidth;
       box.classList.add("is-nope");
-      setTimeout(function () { pzDug = {}; pzBusy = false; box.classList.remove("is-nope"); buildPuzzle(); }, reduceMotion.matches ? 200 : 900);
+      setTimeout(function () { pzDug = {}; PUZZLE = null; pzBusy = false; box.classList.remove("is-nope"); buildPuzzle(); }, reduceMotion.matches ? 200 : 900);
       return;
     }
-    pzDug[r + "," + c] = true;
+    pzDig(r, c);
     var done = PUZZLE.every(function (row, r) {
-      return row.split("").every(function (kind, c) { return kind !== "P" && kind !== "." || pzDug[r + "," + c]; });
+      return row.split("").every(function (kind, c) { return kind === "M" || pzDug[r + "," + c]; });
     });
     if (!done) {
       buildPuzzle();
-      var next = box.querySelector("button.ms-pick-cell");
+      // le focus reste au même endroit : la case à droite, ou la première encore fermée
+      var next = box.querySelector('button[data-r="' + r + '"][data-c="' + (c + 1) + '"]') || box.querySelector("button.ms-pick-cell");
       if (next) next.focus();
       return;
     }
@@ -1622,8 +1752,9 @@
     pickRange.focus();
     setTimeout(function () { pick.classList.remove("is-digging"); goBranch(); }, reduceMotion.matches ? 0 : 700);
   });
+  // énigme déjà résolue : on retrouve sa grille, chemin éclairé
   var savedPz = load("ms-noflag-pz", 0);
-  choosePuzzle(unlocked && savedPz >= 0 && savedPz < PZ_POOL.length ? savedPz : Math.floor(Math.random() * PZ_POOL.length));
+  if (unlocked) choosePuzzle(savedPz >= 0 && savedPz < PZ_POOL.length ? savedPz : 0);
   renderUnlock();
   $("ms-pick-nf").addEventListener("click", function () { if (!branchDragged) goBranch(); });
   // sur le chemin parallèle, le curseur est dessiné sous le rail principal, hors de la
@@ -1711,7 +1842,7 @@
     cancelAnimationFrame(snapRaf);
     cancelAnimationFrame(miniRaf);
     // énigme commencée mais pas finie : elle repart de zéro à la prochaine ouverture
-    if (!unlocked) pzDug = {};
+    if (!unlocked) { pzDug = {}; PUZZLE = null; }
   });
   function refitPick() {
     if (!pick.open || pickSlider.clientWidth === pickW) return;
@@ -1903,8 +2034,11 @@
   // mode développeur uniquement : lecture de la partie en cours pour les tests
   if (devMock) window.__ms = { game: function () { return game; }, level: function () { return level; }, api: api, podium: function () { podiumCache = {}; loadPodium(); },
     puzzle: function () {
+      if (!PUZZLE) return null;
       var safe = [];
-      PUZZLE.forEach(function (row, r) { row.split("").forEach(function (k, c) { if (k === "P" || k === ".") safe.push(r + "," + c); }); });
+      PUZZLE.forEach(function (row, r) { row.split("").forEach(function (k, c) { if (k !== "M") safe.push(r + "," + c); }); });
       return { rows: PUZZLE, path: PZ_PATH.map(function (p) { return p.join(","); }), safe: safe };
-    } };
+    },
+    // un bon départ de la 1re grille de la réserve, pour les tests
+    puzzleStart: function () { var k = PZ_POOL[0][1][0]; return Math.floor(k / 10) + "," + k % 10; } };
 })();

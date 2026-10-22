@@ -1,15 +1,17 @@
 """Réserve d'énigmes pour le démineur (10 colonnes × 5 lignes).
 
-L'énigme est un petit démineur : creuser toutes les cases sûres, sans deviner. Les cases sûres
-cachées forment un chemin : un serpent de cases à chiffres qui part d'une case de la ligne du
-haut, passe partout, et finit sur le bord droit. Les mines sont dans les creux entre ses virages,
-avec quelques chiffres montrés au départ.
-Une fois l'énigme résolue, les cases du serpent perdent leur chiffre et le chemin se dessine.
+L'énigme est un petit démineur : creuser toutes les cases sûres, sans deviner. Dans la grille se
+cache un chemin : un serpent de cases à chiffres qui part d'une case de la ligne du haut, passe
+partout, et finit sur le bord droit. Les mines sont dans les creux entre ses virages. Une fois
+l'énigme résolue, les cases du serpent perdent leur chiffre et le chemin se dessine.
+
+La grille commence fermée, le joueur creuse où il veut : pour chaque grille, on note les bons
+départs, les cases d'où l'on finit sans deviner (le jeu choisit la grille au premier clic).
 
 Usage : python tools/puzzle_pool.py <graine> <essais> <nombre>
 (plusieurs graines en parallèle pour aller plus vite)
-Sortie : une ligne JSON par grille (5 chaînes) :
-  M mine ; P chemin, fermé ; p chemin, creusé au départ ; . sûre, fermée ; o sûre, creusée au départ.
+Sortie : une ligne JSON par grille : rows (5 chaînes : M mine ; P chemin ; . sûre, hors du
+chemin) et starts (les bons départs, numéros de case ligne × 10 + colonne).
 """
 import json
 import random
@@ -152,11 +154,24 @@ def deduce(mines, revealed, known):
     return safe, found_m, False
 
 
+def cascade(mines, revealed):
+    """Comme au démineur : une case creusée sans mine autour ouvre ses voisines, de proche en proche."""
+    revealed = set(revealed)
+    todo = [x for x in revealed if number(mines, x) == 0]
+    while todo:
+        for n in nbrs(*todo.pop()):
+            if n not in revealed and n not in mines:
+                revealed.add(n)
+                if number(mines, n) == 0:
+                    todo.append(n)
+    return revealed
+
+
 def play(mines, revealed):
     """Joue l'énigme comme un joueur qui ne devine jamais : (tours, tours où il faut croiser
     des chiffres), ou None s'il faut deviner."""
     safe_all = {x for x in CELLS if x not in mines}
-    revealed, known = set(revealed), set()
+    revealed, known = cascade(mines, revealed), set()
     rounds = hard = 0
     while not safe_all <= revealed:
         safe, new_m, simple = deduce(mines, revealed, known)
@@ -165,7 +180,7 @@ def play(mines, revealed):
             return None
         if not simple:
             hard += 1
-        revealed |= safe
+        revealed = cascade(mines, revealed | safe)
         rounds += 1
     return rounds, hard
 
@@ -177,26 +192,30 @@ def main(seed, tries, want):
     for _ in range(tries):
         path = rnd.choice(all_snakes)
         pset = set(path)
-        # les mines dans les creux ; les autres cases hors du chemin sont des chiffres montrés au
-        # départ (aucune case sûre cachée hors du chemin : on ne creuse que le serpent). Presque
-        # toutes les cases du chemin ont un chiffre (2 vides au plus)
+        # les mines dans les creux, les autres cases hors du chemin sont sûres. Presque toutes les
+        # cases du chemin ont un chiffre (2 vides au plus)
         others = [x for x in CELLS if x not in pset]
         p = rnd.uniform(0.35, 0.8)
         mines = {x for x in others if rnd.random() < p}
         if sum(number(mines, x) == 0 for x in path) > 2:
             continue
-        revealed = {x for x in others if x not in mines} | set(rnd.sample(path, rnd.randint(0, 2)))
-        res = play(mines, revealed)
-        # sans deviner, en croisant des chiffres au moins deux fois
-        if not res or res[1] < 2:
+        # la grille commence fermée : les bons départs sont les cases d'où l'on finit sans
+        # deviner, en croisant des chiffres au moins deux fois
+        starts = []
+        for x in CELLS:
+            if x not in mines:
+                res = play(mines, {x})
+                if res and res[1] >= 2:
+                    starts.append(x[0] * W + x[1])
+        if not starts:
             continue
-        rows = tuple("".join("M" if x in mines else ("p" if x in revealed else "P") if x in pset
-                             else "o" if x in revealed else "." for x in ((r, c) for c in range(W))) for r in range(H))
+        rows = tuple("".join("M" if x in mines else "P" if x in pset else "." for x in ((r, c) for c in range(W)))
+                     for r in range(H))
         if rows in seen:
             continue
         seen.add(rows)
-        found.append({"rows": list(rows), "rounds": res[0], "hard": res[1], "path": len(path),
-                      "turns": turns(path), "mines": len(mines), "entry": path[0][1], "exit": path[-1][0]})
+        found.append({"rows": list(rows), "starts": starts, "path": len(path), "turns": turns(path),
+                      "mines": len(mines), "entry": path[0][1], "exit": path[-1][0]})
         print(json.dumps(found[-1]), flush=True)
         if len(found) >= want:
             break
