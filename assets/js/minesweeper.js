@@ -18,7 +18,7 @@
       pageTitle: "Démineur - Lucas Boles", skip: "Aller au jeu", back: "Retour au portfolio",
       title: "Démineur", lead: "Trouver toutes les cases sûres sans toucher une mine.",
       levels: "Difficulté", easy: "Bac à sable", medium: "Terrain glissant", hard: "Champ de mines", noflag: "Sans drapeau",
-      closedCell: "Case fermée", hintNoflagMouse: "Clic : révéler. Pas de drapeau dans ce mode.", hintNoflagTouch: "Tap : révéler. Pas de drapeau dans ce mode.",
+      closedCell: "Case fermée", puzzle: "Énigme : creuser toutes les cases sûres", puzzleMine: "Mine", hintNoflagMouse: "Clic : révéler. Pas de drapeau dans ce mode.", hintNoflagTouch: "Tap : révéler. Pas de drapeau dans ce mode.",
       minesLeft: "Mines restantes", time: "Temps", record: "Record", shovel: "Pelle", flag: "Drapeau", tapAction: "Action d'un tap", newGame: "Nouvelle partie",
       replay: "Rejouer", changeLevel: "Changer de niveau", go: "C'est parti", cancel: "Annuler",
       grid: "Grille", mines: "Mines", pickTop: "À battre : ", pickTopTime: " en {t}",
@@ -88,7 +88,7 @@
       pageTitle: "Minesweeper - Lucas Boles", skip: "Skip to the game", back: "Back to the portfolio",
       title: "Minesweeper", lead: "Find every safe cell without hitting a mine.",
       levels: "Difficulty", easy: "Sandbox", medium: "Slippery slope", hard: "Minefield", noflag: "No flags",
-      closedCell: "Closed cell", hintNoflagMouse: "Click: reveal. No flags in this mode.", hintNoflagTouch: "Tap: reveal. No flags in this mode.",
+      closedCell: "Closed cell", puzzle: "Puzzle: dig every safe cell", puzzleMine: "Mine", hintNoflagMouse: "Click: reveal. No flags in this mode.", hintNoflagTouch: "Tap: reveal. No flags in this mode.",
       minesLeft: "Mines left", time: "Time", record: "Best", shovel: "Shovel", flag: "Flag", tapAction: "What a tap does", newGame: "New game",
       replay: "Play again", changeLevel: "Change level", go: "Let's go", cancel: "Cancel",
       grid: "Grid", mines: "Mines", pickTop: "To beat: ", pickTopTime: " in {t}",
@@ -1184,7 +1184,13 @@
   var pickHeat = pick.querySelector(".ms-pick-heat"), pickW = 0;
   var HEAT = [[47, 158, 110], [224, 138, 30], [210, 52, 44]], NOFLAG_HEAT = "rgb(124 58 237)";
   // hauteur du rail principal et du chemin parallèle, au centre du curseur (voir le CSS)
-  var RAIL_Y = 28, BRANCH_Y = 72;
+  var RAIL_Y = 28, BRANCH_Y = 114;
+  // énigme : 5 colonnes × 4 lignes sous le cran du milieu (cases de 24 px, pas de 26 px).
+  // M : mine ; P : case du chemin, sûre, à creuser ; o : déjà creusée. Tout se déduit des
+  // chiffres, sans deviner. Le chemin part sous le rail et ressort à droite (ligne 3).
+  var PUZZLE = ["oMPoo", "oPPMo", "oPMPP", "MPPPo"], PZ_TOP = 50, PZ_STEP = 26;
+  var PZ_PATH = [[0, 2], [1, 2], [1, 1], [2, 1], [3, 1], [3, 2], [3, 3], [2, 3], [2, 4]];
+  var pzDug = {}, pzBusy = false;
   // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là ;
   // 3 = mode Sans drapeau). onBranch : curseur sur le chemin parallèle.
   var pickAt = 0, pickGoal = null, pickShown = -1, snapRaf = 0, rolls = {}, onBranch = false;
@@ -1235,7 +1241,11 @@
       if (k < 1) snapRaf = requestAnimationFrame(step);
     })(t0);
   }
-  // vers le mode Sans drapeau : jusqu'au cran du milieu, on descend, puis à droite
+  // centres des cases du chemin, dans l'ordre, en pixels dans le slider
+  function pathPoints() {
+    return PZ_PATH.map(function (p) { return [pickW / 2 - 64 + p[1] * PZ_STEP + 12, PZ_TOP + p[0] * PZ_STEP + 12]; });
+  }
+  // vers le mode Sans drapeau : jusqu'au cran du milieu, puis le long du chemin de l'énigme
   function goBranch() {
     if (!unlocked || onBranch) return;
     var x0 = notchX(Math.max(0, Math.min(2, pickAt)));
@@ -1245,7 +1255,7 @@
     pick.classList.add("is-branch");
     paintMain(1);
     showPick(3);
-    travel([[x0, RAIL_Y], [pickW / 2, RAIL_Y], [pickW / 2, BRANCH_Y], [pickW - 24, BRANCH_Y]]);
+    travel([[x0, RAIL_Y], [pickW / 2, RAIL_Y]].concat(pathPoints(), [[pickW - 24, BRANCH_Y]]));
   }
   // retour sur le rail principal, au cran n, par le même chemin
   function leaveBranch(n, instant) {
@@ -1256,7 +1266,7 @@
     pickAt = n;
     paintMain(n);
     showPick(n);
-    travel([[pickW - 24, BRANCH_Y], [pickW / 2, BRANCH_Y], [pickW / 2, RAIL_Y], [notchX(n), RAIL_Y]]);
+    travel([[pickW - 24, BRANCH_Y]].concat(pathPoints().reverse(), [[pickW / 2, RAIL_Y], [notchX(n), RAIL_Y]]));
   }
   function showPick(n) {
     var lvl = LEVEL_KEYS[n], L = MSCore.LEVELS[lvl], first = pickShown < 0;
@@ -1383,33 +1393,85 @@
     pickRange.focus();
   }
 
-  // la case qui barre le chemin : les chiffres prouvent qu'elle est sûre (un « 1 »
-  // touche les deux cases de gauche, l'autre « 1 » les trois : la mine est à gauche).
-  // Creusée, elle s'ouvre et le chemin vers le mode Sans drapeau apparaît.
-  function renderUnlock() {
-    var key = $("ms-pick-key");
-    pick.classList.toggle("is-unlocked", unlocked);
-    key.textContent = unlocked ? "1" : "";
-    key.setAttribute("aria-label", unlocked ? TEXT.noflag : TEXT.closedCell);
-    $("ms-pick-nf").hidden = !unlocked;
+  // l'énigme : une mini-grille de démineur sous le rail. Toutes les cases sûres creusées,
+  // elles dessinent le chemin vers le mode Sans drapeau ; une mine, et tout recommence.
+  function pzMines(r, c) {
+    var n = 0;
+    for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) {
+      var row = PUZZLE[r + dr];
+      if ((dr || dc) && row && row[c + dc] === "M") n++;
+    }
+    return n;
   }
-  pick.querySelectorAll("[data-dig]").forEach(function (cell) {
-    cell.addEventListener("click", function () {
-      if (cell.dataset.dig === "no") {
-        // case incertaine : elle refuse de s'ouvrir
-        cell.classList.remove("is-nope");
-        void cell.offsetWidth;
-        cell.classList.add("is-nope");
-        return;
-      }
-      if (unlocked) { goBranch(); return; }
-      unlocked = true;
-      save("ms-noflag-v1", true);
-      keepStorage();
-      pick.classList.add("is-digging");
-      renderUnlock();
-      setTimeout(function () { pick.classList.remove("is-digging"); goBranch(); }, reduceMotion.matches ? 0 : 700);
+  function buildPuzzle() {
+    var box = pick.querySelector(".ms-pick-dig");
+    box.textContent = "";
+    PUZZLE.forEach(function (row, r) {
+      row.split("").forEach(function (kind, c) {
+        var open = kind === "o" || (kind === "P" && (unlocked || pzDug[r + "," + c]));
+        var el;
+        if (open) {
+          el = document.createElement("span");
+          var n = pzMines(r, c);
+          el.className = "ms-pick-cell is-open" + (n ? " n" + n : "") + (kind === "P" ? " is-path" : "");
+          el.textContent = n || "";
+          el.setAttribute("aria-label", String(n));
+        } else if (unlocked) {
+          // énigme résolue : les mines restent fermées, sans réaction
+          el = document.createElement("span");
+          el.className = "ms-pick-cell";
+          el.setAttribute("aria-hidden", "true");
+        } else {
+          el = document.createElement("button");
+          el.type = "button";
+          el.className = "ms-pick-cell";
+          el.dataset.r = r;
+          el.dataset.c = c;
+          el.setAttribute("aria-label", TEXT.closedCell);
+        }
+        box.appendChild(el);
+      });
     });
+  }
+  function renderUnlock() {
+    pick.classList.toggle("is-unlocked", unlocked);
+    $("ms-pick-nf").hidden = !unlocked;
+    buildPuzzle();
+  }
+  pick.querySelector(".ms-pick-dig").addEventListener("click", function (e) {
+    var cell = e.target.closest(".ms-pick-cell");
+    if (!cell) return;
+    if (unlocked) { if (cell.classList.contains("is-path")) goBranch(); return; }
+    if (pzBusy || cell.tagName !== "BUTTON") return;
+    var r = Number(cell.dataset.r), c = Number(cell.dataset.c), box = cell.parentNode;
+    if (PUZZLE[r][c] === "M") {
+      // une mine : elle s'affiche, la grille tremble, puis tout revient au départ
+      pzBusy = true;
+      cell.classList.add("is-boom");
+      cell.textContent = "✹";
+      cell.setAttribute("aria-label", TEXT.puzzleMine);
+      box.classList.remove("is-nope");
+      void box.offsetWidth;
+      box.classList.add("is-nope");
+      setTimeout(function () { pzDug = {}; pzBusy = false; box.classList.remove("is-nope"); buildPuzzle(); }, reduceMotion.matches ? 200 : 900);
+      return;
+    }
+    pzDug[r + "," + c] = true;
+    var done = PZ_PATH.every(function (p) { return pzDug[p[0] + "," + p[1]]; });
+    if (!done) {
+      buildPuzzle();
+      var next = box.querySelector("button.ms-pick-cell");
+      if (next) next.focus();
+      return;
+    }
+    // tout le chemin est creusé : il s'éclaire, puis le curseur le parcourt
+    unlocked = true;
+    save("ms-noflag-v1", true);
+    keepStorage();
+    pick.classList.add("is-digging");
+    renderUnlock();
+    pickRange.focus();
+    setTimeout(function () { pick.classList.remove("is-digging"); goBranch(); }, reduceMotion.matches ? 0 : 700);
   });
   $("ms-pick-nf").addEventListener("click", function () { if (!branchDragged) goBranch(); });
   // sur le chemin parallèle, le curseur est dessiné sous le rail principal, hors de la
@@ -1467,7 +1529,7 @@
   window.addEventListener("pointermove", function (e) {
     if (!rangeDown || !unlocked || onBranch || branchLock || !pick.open) return;
     var r = pickSlider.getBoundingClientRect();
-    if (e.clientY - r.top > BRANCH_Y - 12) { branchLock = true; goBranch(); }
+    if (e.clientY - r.top > PZ_TOP + 14) { branchLock = true; goBranch(); }
   });
   function releaseBranchLock() { rangeDown = false; branchLock = false; }
   window.addEventListener("pointerup", releaseBranchLock);
