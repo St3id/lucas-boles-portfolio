@@ -1187,53 +1187,113 @@
   var HEAT = [[47, 158, 110], [224, 138, 30], [210, 52, 44]], NOFLAG_HEAT = "rgb(124 58 237)";
   // hauteur du rail principal et du chemin parallèle, au centre du curseur (voir le CSS)
   var RAIL_Y = 28, BRANCH_Y = 82;
-  // énigme : 10 colonnes × 4 lignes (cases de 20 px, pas de 22 px) ; la 6e colonne est sous
-  // le cran du milieu. Une grille tirée au hasard à chaque ouverture, dans une réserve
-  // cherchée par tools/puzzle_pool.py (python tools/puzzle_pool.py <graine> <essais> <nombre>) : chacune
-  // se résout sans deviner, en croisant des chiffres, et son chemin serpente (3 virages au
-  // moins). M : mine ; o : creusée au départ ; . : fermée et sûre. Le chemin, ce sont les 0
-  // reliés côte à côte depuis la case sous le cran jusqu'au bord droit : il est calculé ici.
+  // énigme : un petit démineur de 10 colonnes × 5 lignes (cases de 20 px, pas de 22 px), la
+  // 6e colonne sous le cran du milieu. Une grille tirée au hasard à chaque ouverture, dans une
+  // réserve cherchée par tools/puzzle_pool.py : chacune se résout sans deviner, en croisant
+  // des chiffres. Les cases sûres à creuser forment un serpent, d'une case du haut jusqu'au
+  // bord droit, qui passe partout ; les mines sont dans ses creux. Résolue, le serpent perd
+  // ses chiffres et devient le chemin. M : mine ; P : chemin, fermé ; p : chemin, creusé au
+  // départ ; o : creusée au départ ; . : sûre, fermée.
   var PZ_POOL = [
-    ["ooMMo...MM", ".M.Mo..o.M", ".M...o...o", "..MMM....."],
-    [".MoM......", "..Mo...oMM", "oMM.......", "o..MM....."],
-    [".Mo.o..oM.", "M..Mo...Mo", "M..oo.....", "...MM....."],
-    ["..MMo...oo", "M.Moo...M.", "M..M...o..", "M.M.M....."],
-    [".o.Mo..oo.", ".MMM....Mo", "M...o...o.", "oM..M....."],
-    ["M.oMo.....", ".M..o...M.", "..M.o..o..", "MM..Mo...."],
-    ["MM.Mo...oM", "MMoMo....M", "M.........", "o..MM....."],
-    [".oMMo...MM", ".o.oo..o.M", ".M...o....", "..MoM....."],
-    ["oM.oo....o", "M..Mo....M", "o.Mo.o....", "M..MM....."],
-    ["MMo.o.....", ".o.Mo....M", ".M...o..o.", ".MoMMM...."],
-    ["M........o", "MMM.....Mo", "..M..o..o.", "..oMM....."],
-    ["..M....ooo", "..MMo...M.", "..M....o..", "MMoMMo...."],
-    [".M.Mo...M.", "MoM.o..o.M", "o.........", "..M.Mo...."],
-    ["MM......oM", "...M.....M", "oM..o...o.", "o..MMo...."],
-    [".o..o....M", "oMoMo...Mo", "MM.oo.....", ".MM.M....."],
-    ["M..Mo....M", "M.o.o....M", "M..o......", "o..MMo...."],
-    ["MMooo...oo", "MM.M...oM.", "...M......", ".MoMM....."],
-    [".o.o.....M", "M.MM....MM", "oMo......o", "oo..M....."],
-    ["M........M", "o.......oM", "MMoM.....o", ".Mo.MM...."],
-    [".M.o......", "..MM.....M", ".MMoM...o.", "...o.M...."],
-    ["MM.o....M.", "..Mo....Mo", "M..oo...o.", "M...M....."],
-    ["...M.....M", "...Mo....M", "oM.Moo....", "o...MMo..."],
-    ["M.MMo....M", "...o....oM", ".o.M......", ".M.ooM...."],
-    ["Mo..o...oM", ".MMMo....M", "..M.......", "M..o.M...."],
-    ["M..o...o.M", "MoM.o...Mo", "..MM....o.", ".o..Mo...."],
-    ["oM.oo....o", ".MMM....Mo", "M.M..o..o.", "o..MM....."],
-    ["oMMM......", "M.o.....M.", "Mo..o.....", "oMoMM....."],
-    [".MMo.....o", "..oo....MM", "MM.o....o.", ".Mo.M....."],
-    ["Mo..o....M", "o..Mo....M", "MMMM.o....", "..o..M...."],
-    ["..oM....o.", "M.M.o....M", ".Mo.M.o...", "o.MooM...."],
-    [".Mo.o.....", "oM.Mo....M", "M..o....o.", "M.MMMo...."],
-    ["M.MMo...Mo", "oM.o....M.", "...o...o..", ".M.oM....."],
-    [".ooM.....M", "..MMoo...M", "..M.Mo....", "M.oo.M...."],
-    ["M.MMo....M", ".M..o...M.", "M...o.....", "...oM....."],
-    ["MMMo......", "o..o.....M", "M.oM.o....", "M.ooMM...."],
-    ["M.MM....M.", "....o..o.M", ".M.Mo.....", "oo.MMo...."],
-    ["MM.M.....o", "oooMoo...M", "..o.M.....", "MM.o.M...."]
+    ["PMMPPPPooM", "PoPPoMPoPP", "PoPMMPPoPo", "PMPooPMPPM", "PPPMMPPPoM"],
+    ["MPPMPPPPoM", "ooPoPoMPPM", "PPPoPPoMPo", "PMooMPooPP", "PPPPPPoMoM"],
+    ["PPMPPpMopP", "PoMPMPMMPo", "PMMPMPMoPo", "PPPPoPPPPM", "oMMMoooMMM"],
+    ["PPPPPPPPPM", "PooMMooMMo", "PMoMPPPooM", "PPMPPMPppP", "oPPPooooMo"],
+    ["PPPMPMPPPP", "PMPPPMPooM", "PMoMooPPPM", "PMPPPPMMPo", "PPPMMPPPPo"],
+    ["opPPoMMooo", "PPMMPPPMPP", "PooPPMPoPM", "PPMPMoPMPo", "MPPPooPPPM"],
+    ["MooPPPooPP", "PPPPMMoMPM", "PoMoMMoMPo", "PPMMoMPPPo", "oPPPPPPMoM"],
+    ["ooMPPPMoPo", "MPPPMPPPPM", "oPMMoMoMMo", "MpPoPPPPoM", "oMpPPoMPPP"],
+    ["PPPPMoPPPo", "MMoPMoPoPM", "PPPPMMpMpo", "PMMoPPPMPP", "PPPPPMMooM"],
+    ["PMPPPooMMM", "PoPMPPPMPP", "PMPPooPoPo", "PPoPMoPMPo", "MPPPMoPPPM"],
+    ["PPPoPPPPPM", "PMoPPMMMPM", "PooPoPPPPo", "PPMPMPMoMM", "MPPPoPPPPP"],
+    ["MPPPPPPPPM", "PPoMooMooM", "PMPPPoMoMo", "PPPMPoMPPP", "MoMoPPPPoM"],
+    ["PMMPPPMMPP", "PMPPMPooPo", "PMPooPoMPM", "PPPoMPPMPM", "ooMooMPppM"],
+    ["oMoPMPPPPP", "PPPPoPMMoo", "PoMMopPPPM", "PPPMMooMPM", "MoPPPPPPPM"],
+    ["MPPPMoPoPP", "MPMPpPPMPM", "MPooMMoMPo", "MPpPPMoMPo", "MMMMPPPPPM"],
+    ["PooMoMoMPP", "PoMPPPooPM", "PMMPoPPoPM", "PPoPMMPMPo", "MPpPMMPPPM"],
+    ["oMMPPPPMMo", "MPPPoMoMPP", "oPMoMoMMPM", "MPPPPMPPPM", "oMMMPPPooo"],
+    ["oMMooMPPPM", "MPPPPPPMMM", "MPMMooooPP", "MPPMPPPPPM", "ooPPPMoooo"],
+    ["PPPPMPPPoM", "MoMPoPoPPM", "PPpPMPMMPM", "PMMoPPoMPP", "PPPPPMooMo"],
+    ["PPMPPPMMPP", "oPMPMPPMPM", "MPoPoMPoPM", "oPPPoMPPPo", "MMMoMoMoMM"],
+    ["MPpPPoPPPP", "PPMoMMPMoo", "PMMMooPPPM", "PPPPPoMoPM", "MooMPPPPPM"],
+    ["MoPPPPPMPP", "oPPoMoooPo", "MPMPPPMMpM", "opPPMPMPPM", "ooMMMPPPoo"],
+    ["PPMPPPMPPP", "PMoPMPMPoo", "PoPpoPoPPM", "PMPMoPPMPM", "PPPMoMPPPo"],
+    ["oPMMPPPoPP", "PPMPPMPMPM", "PMoPMPPoPo", "PoPPoPMpPo", "PPPMMPPPoM"],
+    ["oPPPPMoPPM", "MPoMPPPPMM", "oPooMMooPp", "MPPMMoPPpM", "MMPPPPPoMM"],
+    ["oPPPoPPPpM", "oPMoMPMMPo", "PPoMoPoMPo", "PMPPPPooPM", "PPPMoMoMPP"],
+    ["ooMoPPPPPo", "MPPPPoMMMM", "PPMMoPPPPo", "PMoPPPMMPP", "PpPPMMMooo"],
+    ["oPPPPoPPPM", "PPMMoPPMPM", "PooMPPMPPo", "PPPMPooPMM", "MoPPPMoPPP"],
+    ["PMPPPooPPP", "PMPopPMPMo", "PMPPMPMPPM", "PMMPoPPMpM", "PPPPooPPPM"],
+    ["MMPpPPoooo", "PPPMoMMoPP", "PMoMPPPMPM", "PPPMPMPMPo", "MopPPMPPPo"],
+    ["PPPPMMMMMo", "PMMoMPPPPM", "PMoMoPooPM", "PMPPPPoMPM", "PPPMoMoMPP"],
+    ["PPPPoMPPPM", "ooMPMpPoPM", "PPPPoPMoPo", "PMMMMPMMPM", "PPPPpPMoPP"],
+    ["PPPPPMMMoo", "oMMMPoPPPM", "PPPPPMPoPM", "PMoMoPPMPo", "PPPPpPMMPp"],
+    ["PPPPPPMPPP", "PoMoooopoM", "PMPpPPoPPo", "PMPoMPPMPM", "PPPMMoPPPM"],
+    ["MMMPPPPPPo", "oPPPoMMoMo", "oPMoMoPPPM", "oPPPMMPoPM", "oMMPPPPMPP"],
+    ["PPPPMooMoo", "ooMPMMPPPo", "oPPPMoPMPo", "MPoMPPPMPP", "MPPPPMMMoM"],
+    ["PPMPPPPpPM", "oPMPMMooPM", "MPoPPPooPM", "MPPMMpoMPP", "MoPPPPoMMo"],
+    ["MPPPMoPoPP", "PPMPoMPMPM", "PoMpPPPMPo", "PPMMooMpPM", "oPPPPPPPoo"],
+    ["oooMPPPMPo", "PPPPPMPPPo", "PMMoooMMoM", "PPooMMMPPP", "oPPPPPPPoM"],
+    ["MPPPoPPPPP", "MoMPMPoMoo", "MPPPoPPPpM", "oPMoMMMoPo", "MPPPPPPPPM"],
+    ["MoMPMoPPPo", "MPPPoMPMPo", "MPoMMMPMPo", "oPoMoMPoPP", "oPPPPPPoMM"],
+    ["oMPMoMPPPo", "MPPMMPPMPM", "MPoooPoMPo", "MPMPPPMMPM", "MPPPMMMoPP"],
+    ["oMPPPPPMPP", "oPPoMooMPo", "MPMPPPoMPo", "oPPPoPMoPM", "MMoMMPpPPo"],
+    ["PPMpPPPMoM", "MPMPooPPPo", "oPoPPPMMPo", "MPPMMPMoPM", "MoPPPPoMPP"],
+    ["MPooPPPoPP", "oPoMPMPMPM", "PPMoPMPMPM", "pMPPPoPPpo", "PPPMoMoooo"],
+    ["oPPPPoPPMo", "MPMoPopMPP", "MPMMPPPMPM", "MPooMoMPPM", "MPPPPPPPMo"],
+    ["oMMooPPMPP", "PPPooMPoPo", "PMPPPPPMPM", "PPoMooMPPo", "MPPPPPPPoM"],
+    ["MPPPPPMPPM", "MPooMPPPoM", "oPMooMooPP", "oPMPpPPPPM", "MPPPMoMMMo"],
+    ["oPPpMMPPPo", "ooMPMoPoPo", "MPPPoPPoPM", "MPMMMPMMPM", "MPpPPPMoPP"],
+    ["MMPMMoooMM", "PPPMMPPPPo", "PoMooPoMPM", "PPPopPMMPP", "MMPPPMMMMM"],
+    ["oPPPPPPPPo", "oPooMoMoMo", "oPMMoPPPoo", "oPPPPPoPPP", "ooMMoMMooM"],
+    ["oMPPpMPPPM", "oPPMoPPMPo", "oPooMPMopo", "oPMPPPMMPP", "MPPPMMMMoo"],
+    ["MPPPoPMooM", "PPMPPPMMPP", "pMooMoMoPM", "PPPPMMMPPM", "oMoPPPPPoM"],
+    ["MoPoPPPPPP", "PPPMPMooMM", "PMooPPPPPM", "PPooMoMMPo", "MPPPPPPPPo"],
+    ["PPoMPPPPMo", "oPooPoMPPM", "oPMMPPMoPM", "MPPPMPMMPP", "oooPPpMooM"],
+    ["PPPPPMMMoM", "PoMoMPPPPM", "PPoooPMMPM", "MPMMPPooPP", "MPPPPoMoMo"],
+    ["PPPoMPPPPM", "PMPPooMoPo", "PooPPPPPPo", "PMMoMMMoMM", "pPPPPPPPPP"],
+    ["PMMMPPPoMM", "PPooPMPoPP", "MPoMPoPMPM", "opPMPMPoPM", "oMPPPMPPPM"],
+    ["MMPPPPMMMM", "PPPooMooPP", "PMoPPPMoPM", "PPPPMPMPPo", "ooMMMPPPMM"],
+    ["MMPMPPPMMo", "PPPoPoPMPP", "PMoMPoPMPM", "PPoMPMPPPo", "MPPPPMMoMM"],
+    ["PPPPoPPPPo", "PMooMPMMPM", "PooMPPMPPo", "PPoPPMoPMo", "MPPPMooPPP"],
+    ["oPPMPPPMoM", "MPooPoPMPP", "MPMPPoPMPM", "MPPPMMPoPM", "oMMMMMPPPM"],
+    ["PPoMooMMoM", "PoPPPMPPPM", "PMPMPoPMPM", "PMPoPPPoPM", "PPPoooMMPP"],
+    ["PPPoPPPoMo", "PMMoPMPMPP", "PPoPPMPMPM", "MPPPoMPPPo", "oooMMoMooM"],
+    ["oMoPpPpPPM", "MPPPMooMMM", "MPooooPPPo", "oPMMPPPMPM", "MPPPPMMoPP"],
+    ["MPPPMMPMPP", "oPMPoMPoPo", "oPMPPPPMPM", "oPMMoooMPM", "oPPPPPPPPM"],
+    ["oPPPPPooPP", "PPMMooMMPM", "poPPPoMMPo", "PPPoPPPMPM", "MooMMoPPpM"],
+    ["oPoPPPPMMo", "MPMPMoPMPP", "pPoPMPPoPo", "PMPPoPMPPM", "PPPooPPPMM"],
+    ["PPMPPPpooo", "MPMPMoPMPP", "MPoPPMPMPM", "MPPMPMPPPM", "oopPPooooM"],
+    ["MoPPPPMMoM", "PPPMooPPPM", "PooMoPpoPM", "PpPPMPMoPM", "oMMPPPooPP"],
+    ["oPPPPMoooM", "PPMoooPPPM", "PoPPPMPoPo", "PMPMPPPoPP", "PPPoMoooMo"],
+    ["MoPPPPoMPP", "oPPMoMMoPM", "oPMoMoMMpo", "oPPpPoPPPM", "oooMPPPMoo"],
+    ["PpPPPPPoMo", "PoMoMooMPP", "pooPPPoMPo", "PMMPoPoMPM", "PPPPMPPPPM"],
+    ["oPoPPPMMPP", "MPMPoPPoPo", "MPMPMMPoPM", "oPPPooPMPM", "oooMMoPPPo"],
+    ["MoPMMoPPPM", "PPPooPPMPM", "PoMoMPoMPo", "pPPoPPMoPP", "oMPPPMMMMo"],
+    ["PPPPPPMooM", "PMMMoMPPPM", "PoooooPMPM", "PMMPPPPoPM", "PPPPMoMopP"],
+    ["oPPPooPPMM", "MPMPPPPMPP", "PPoMooMoPo", "PoMMMPPPPo", "PPPPPPoooM"],
+    ["PPPoPPPMoo", "PMPoMMPoPP", "PMPPPPPMPM", "PoMoMMoMPM", "PPPPPPPPPM"],
+    ["PPPoooMMMo", "PMMMPPPoPP", "PMoPPMPMPM", "PoMPooPoPM", "pPPPMMPPPM"],
+    ["MPPpoMPPPM", "oPMPPPPMoM", "MPMoMoooMo", "MPPoMPPPPP", "MoPPPPMooM"],
+    ["MMPPpPMoMM", "oPPooMPPPM", "oPMMoMPopM", "MPPMPPPMPM", "MoPPPoMMPP"],
+    ["MMPMMPPPPP", "oPPMoPoMMo", "MPoMMPPPPo", "oPPPPMMMPM", "MMMoPPPPPo"],
+    ["oooopPPpoo", "oPPPPoMoPP", "MPooMMooPM", "MPPPPPPPPM", "MMMoMMoMoM"],
+    ["oMPoooPPPo", "oPPoMPPMPM", "oPMoMPMPPo", "oPMMPPoPoM", "oPPPPooPPP"],
+    ["oPPMPPPooM", "MoPMPopoPP", "oPPMPMPoPM", "MPMPPMPPPM", "oPPPoMMMoM"],
+    ["PPPPMoMoPo", "PMoPPPPPPM", "PPoMMooooo", "oPoMPPPPoM", "MPPPPMoPPP"],
+    ["MMPPPMoPPo", "oPPMPooMPo", "MPooPPPPPM", "oPpooMooMo", "oMPPPPPPPP"],
+    ["MoPPMMooPP", "oPPMPPPoPM", "oPoopMPoPo", "MPPMPoPMPM", "MoPPpoPPPM"],
+    ["PopPpPMoPP", "PoPMoPoMPo", "PMPPMPMMPo", "PMoPMPPPPM", "PPPPooMMoM"],
+    ["PooPPPoMoo", "PoPPMPMoPP", "PMPMPPMoPM", "PPPMPoMoPM", "oooMPPPPPM"],
+    ["oMooPPooMM", "PPPMPoMMPp", "PoPPPMooPM", "PPMooMMPPM", "MPPPPPPPMo"],
+    ["PPoMooMoMo", "oPMPPPPoPP", "PPoPooPoPM", "PMMPoMPMpo", "PPPPMoPPPM"],
+    ["oPoPPPPPPo", "MPMPoMMMPM", "MPoPPPoPPo", "oPPMoPMPoM", "MMPPPPMPPP"],
+    ["PPMMMooMPP", "oPMPPPMoPM", "MPMPoPoMPM", "oPpPMpPMPo", "MMooMMPPPM"],
+    ["PPPoMooMPP", "oMPoPPPMPo", "MPPoPMPMPM", "MPoMPoPPPM", "MPPPPooooo"],
+    ["MoMoMPPoPP", "oPpPpoPMPo", "MPoMPPPoPM", "MPPPoMMoPM", "ooMPPPPPPo"]
   ];
-  var PZ_TOP = 50, PZ_STEP = 22, PZ_ENTRY = [0, 5];
-  var PUZZLE = PZ_POOL[0], PZ_PATH = [], pzZero = {}, pzIndex = 0;
+  var PZ_TOP = 50, PZ_STEP = 22;
+  var PUZZLE = PZ_POOL[0], PZ_PATH = [], pzPath = {}, pzIndex = 0;
   var pzDug = {}, pzBusy = false;
   // pickGoal : cran visé pendant que le curseur glisse vers lui (Entrée lance ce niveau-là ;
   // 3 = mode Sans drapeau). onBranch : curseur sur le chemin parallèle.
@@ -1275,7 +1335,7 @@
     }
     var end = pts[pts.length - 1];
     if (reduceMotion.matches || !total) { placeThumb(end[0], end[1]); return; }
-    var dur = Math.min(800, 300 + total * 1.3), t0 = performance.now();
+    var dur = Math.min(1400, 300 + total * 1.3), t0 = performance.now();
     (function step(now) {
       var k = Math.max(0, Math.min(1, (now - t0) / dur));
       var d = (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2) * total;
@@ -1289,7 +1349,8 @@
   function pathPoints() {
     return PZ_PATH.map(function (p) { return [pickW / 2 - 120 + p[1] * PZ_STEP + 10, PZ_TOP + p[0] * PZ_STEP + 10]; });
   }
-  // vers le mode Sans drapeau : jusqu'au cran du milieu, puis le long du chemin de l'énigme
+  // vers le mode Sans drapeau : le long du rail jusqu'au-dessus de l'entrée, puis le long du
+  // chemin de l'énigme
   function goBranch() {
     if (!unlocked || onBranch) return;
     var x0 = notchX(Math.max(0, Math.min(2, pickAt)));
@@ -1299,7 +1360,8 @@
     pick.classList.add("is-branch");
     paintMain(1);
     showPick(3);
-    travel([[x0, RAIL_Y], [pickW / 2, RAIL_Y]].concat(pathPoints(), [[pickW - 24, BRANCH_Y]]));
+    var pts = pathPoints();
+    travel([[x0, RAIL_Y], [pts[0][0], RAIL_Y]].concat(pts, [[pickW - 24, BRANCH_Y]]));
   }
   // retour sur le rail principal, au cran n, par le même chemin
   function leaveBranch(n, instant) {
@@ -1310,7 +1372,8 @@
     pickAt = n;
     paintMain(n);
     showPick(n);
-    travel([[pickW - 24, BRANCH_Y]].concat(pathPoints().reverse(), [[pickW / 2, RAIL_Y], [notchX(n), RAIL_Y]]));
+    var pts = pathPoints().reverse();
+    travel([[pickW - 24, BRANCH_Y]].concat(pts, [[pts[pts.length - 1][0], RAIL_Y], [notchX(n), RAIL_Y]]));
   }
   function showPick(n) {
     var lvl = LEVEL_KEYS[n], L = MSCore.LEVELS[lvl], first = pickShown < 0;
@@ -1442,30 +1505,33 @@
     pickRange.focus();
   }
 
-  // l'énigme : une mini-grille de démineur sous le rail. Toutes les cases sûres creusées,
-  // elles dessinent le chemin vers le mode Sans drapeau ; une mine, et tout recommence.
-  // choisit la grille n : calcule ses 0 reliés depuis l'entrée (le chemin), le plus court
-  // trajet jusqu'au bord droit (que le curseur suivra) et la hauteur de la sortie
+  // l'énigme : une mini-grille de démineur sous le rail. Toutes les cases sûres creusées, le
+  // chemin se dessine et mène au mode Sans drapeau ; une mine, et tout recommence.
+  // choisit la grille n : met son serpent dans l'ordre (le curseur le suivra), de l'entrée,
+  // sur la ligne du haut, à la sortie, sur le bord droit, et place la sortie
   function choosePuzzle(n) {
     pzIndex = n;
     PUZZLE = PZ_POOL[n];
-    pzZero = {};
-    var start = PZ_ENTRY[0] + "," + PZ_ENTRY[1], prev = {}, queue = [PZ_ENTRY], exit = null;
-    pzZero[start] = true;
-    prev[start] = null;
-    while (queue.length) {
-      var x = queue.shift();
-      if (x[1] === 9 && !exit) exit = x;
-      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
-        var r = x[0] + d[0], c = x[1] + d[1], k = r + "," + c;
-        if (r < 0 || r > 3 || c < 0 || c > 9 || pzZero[k] || PUZZLE[r][c] === "M" || pzMines(r, c)) return;
-        pzZero[k] = true;
-        prev[k] = x;
-        queue.push([r, c]);
+    pzPath = {};
+    var cells = [], ends = [];
+    PUZZLE.forEach(function (row, r) {
+      row.split("").forEach(function (kind, c) {
+        if (kind === "P" || kind === "p") { pzPath[r + "," + c] = true; cells.push([r, c]); }
       });
-    }
+    });
+    var side = function (x) {
+      return [[1, 0], [-1, 0], [0, 1], [0, -1]].map(function (d) { return [x[0] + d[0], x[1] + d[1]]; })
+        .filter(function (y) { return pzPath[y[0] + "," + y[1]]; });
+    };
+    cells.forEach(function (x) { if (side(x).length === 1) ends.push(x); });
+    var exit = ends[0][1] === 9 ? ends[0] : ends[1];
+    var x = exit === ends[0] ? ends[1] : ends[0], seen = {};
     PZ_PATH = [];
-    for (var p = exit; p; p = prev[p[0] + "," + p[1]]) PZ_PATH.unshift(p);
+    while (x) {
+      PZ_PATH.push(x);
+      seen[x[0] + "," + x[1]] = true;
+      x = side(x).filter(function (y) { return !seen[y[0] + "," + y[1]]; })[0];
+    }
     BRANCH_Y = PZ_TOP + exit[0] * PZ_STEP + 10;
     pick.querySelector(".ms-pick-end").style.top = (BRANCH_Y - 4) + "px";
     pick.querySelector(".ms-pick-stop").style.top = (BRANCH_Y - 6) + "px";
@@ -1484,12 +1550,13 @@
     box.textContent = "";
     PUZZLE.forEach(function (row, r) {
       row.split("").forEach(function (kind, c) {
-        var onPath = pzZero[r + "," + c];
-        var open = kind === "o" || (kind !== "M" && pzDug[r + "," + c]) || (onPath && unlocked);
+        var onPath = pzPath[r + "," + c];
+        var open = kind === "o" || kind === "p" || (kind !== "M" && (pzDug[r + "," + c] || unlocked));
         var el;
         if (open) {
           el = document.createElement("span");
-          var n = pzMines(r, c);
+          // énigme résolue : le serpent perd ses chiffres, c'est le chemin
+          var n = onPath && unlocked ? 0 : pzMines(r, c);
           el.className = "ms-pick-cell is-open" + (n ? " n" + n : "") + (onPath ? " is-path" : "");
           el.textContent = n || "";
           el.setAttribute("aria-label", String(n));
@@ -1535,14 +1602,16 @@
       return;
     }
     pzDug[r + "," + c] = true;
-    var done = Object.keys(pzZero).every(function (k) { return pzDug[k]; });
+    var done = PUZZLE.every(function (row, r) {
+      return row.split("").every(function (kind, c) { return kind !== "P" && kind !== "." || pzDug[r + "," + c]; });
+    });
     if (!done) {
       buildPuzzle();
       var next = box.querySelector("button.ms-pick-cell");
       if (next) next.focus();
       return;
     }
-    // tout le chemin est creusé : il s'éclaire, puis le curseur le parcourt
+    // toutes les cases sûres sont creusées : le chemin s'éclaire, puis le curseur le parcourt
     unlocked = true;
     save("ms-noflag-v1", true);
     // la grille résolue est gardée : c'est elle qu'on retrouve, chemin éclairé
@@ -1833,5 +1902,9 @@
 
   // mode développeur uniquement : lecture de la partie en cours pour les tests
   if (devMock) window.__ms = { game: function () { return game; }, level: function () { return level; }, api: api, podium: function () { podiumCache = {}; loadPodium(); },
-    puzzle: function () { return { rows: PUZZLE, path: Object.keys(pzZero) }; } };
+    puzzle: function () {
+      var safe = [];
+      PUZZLE.forEach(function (row, r) { row.split("").forEach(function (k, c) { if (k === "P" || k === ".") safe.push(r + "," + c); }); });
+      return { rows: PUZZLE, path: PZ_PATH.map(function (p) { return p.join(","); }), safe: safe };
+    } };
 })();

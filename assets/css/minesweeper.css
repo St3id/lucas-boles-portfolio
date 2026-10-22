@@ -1345,12 +1345,12 @@
 
 /* le slider : un vrai curseur HTML (clavier, lecteurs d'écran) posé invisible
    par-dessus le dessin ; le curseur dessiné est une case du jeu */
-/* rail principal centré à 28px du haut ; l'énigme (10 × 4 cases de 20px) commence à 50px.
+/* rail principal centré à 28px du haut ; l'énigme (10 × 5 cases de 20px) commence à 50px.
    Le chemin parallèle sort à la hauteur de la sortie de la grille tirée : sa position est
    posée par minesweeper.js (BRANCH_Y) */
 .ms-pick-slider {
   position: relative;
-  height: 140px;
+  height: 162px;
   margin-top: 18px;
 }
 
@@ -1518,7 +1518,7 @@
   background: rgb(124 58 237);
 }
 
-/* l'énigme : mini-grille de 10 × 4, sa 6e colonne sous le cran du milieu */
+/* l'énigme : mini-grille de 10 × 5, sa 6e colonne sous le cran du milieu */
 .ms-pick-dig {
   position: absolute;
   left: calc(50% - 120px);
