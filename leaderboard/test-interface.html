@@ -122,6 +122,9 @@ f.onload = async function () {
   var pz = w.__ms.puzzle();
   ok(pz && pz.rows.length === 5 && pz.path.length >= 20 && pz.path[0].split(",")[0] === "0" && pz.path[pz.path.length - 1].split(",")[1] === "9" && pz.path.every(function (k) { var p = k.split(","); return pz.rows[p[0]][p[1]] === "P"; }), "énigme : grille tirée au premier coup, serpent d'une case du haut au bord droit (" + (pz && pz.path.length) + " cases)");
   ok(!btn(w.__ms.puzzleStart()) && !d.querySelector(".ms-pick-dig .is-boom"), "énigme : le premier coup est sûr");
+  var cm = new w.MouseEvent("contextmenu", { bubbles: true, cancelable: true });
+  d.querySelector(".ms-pick-dig button").dispatchEvent(cm);
+  ok(cm.defaultPrevented && !d.querySelector(".ms-pick-dig .is-flag"), "énigme : le clic droit ne fait rien");
   dig(mineAt(pz.rows));
   await wait(1200);
   ok(closedAll() && w.__ms.puzzle() === null && !pick.classList.contains("is-unlocked"), "énigme : une mine, tout recommence, fermé");

@@ -1749,6 +1749,8 @@
     document.querySelector('[data-rank-level="noflag"]').hidden = !unlocked;
     buildPuzzle();
   }
+  // pas de drapeau dans l'énigme : le clic droit ne fait rien
+  pick.querySelector(".ms-pick-dig").addEventListener("contextmenu", function (e) { e.preventDefault(); });
   pick.querySelector(".ms-pick-dig").addEventListener("click", function (e) {
     var cell = e.target.closest(".ms-pick-cell");
     if (!cell) return;
