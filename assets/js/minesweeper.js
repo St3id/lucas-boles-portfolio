@@ -18,7 +18,7 @@
       pageTitle: "Démineur - Lucas Boles", skip: "Aller au jeu", back: "Retour au portfolio",
       title: "Démineur", lead: "Trouver toutes les cases sûres sans toucher une mine.",
       levels: "Difficulté", easy: "Bac à sable", medium: "Terrain glissant", hard: "Champ de mines", noflag: "Sans drapeau",
-      closedCell: "Case fermée", puzzle: "Énigme : creuser toutes les cases sûres", puzzleMine: "Mine", hintNoflagMouse: "Clic : révéler. Pas de drapeau dans ce mode.", hintNoflagTouch: "Tap : révéler. Pas de drapeau dans ce mode.",
+      fullscreen: "Plein écran", fullscreenExit: "Quitter", closedCell: "Case fermée", puzzle: "Énigme : creuser toutes les cases sûres", puzzleMine: "Mine", hintNoflagMouse: "Clic : révéler. Pas de drapeau dans ce mode.", hintNoflagTouch: "Tap : révéler. Pas de drapeau dans ce mode.",
       minesLeft: "Mines restantes", time: "Temps", record: "Record", shovel: "Pelle", flag: "Drapeau", tapAction: "Action d'un tap", newGame: "Nouvelle partie",
       replay: "Rejouer", changeLevel: "Changer de niveau", go: "C'est parti", cancel: "Annuler",
       grid: "Grille", mines: "Mines", pickTop: "À battre : ", pickTopTime: " en {t}",
@@ -88,7 +88,7 @@
       pageTitle: "Minesweeper - Lucas Boles", skip: "Skip to the game", back: "Back to the portfolio",
       title: "Minesweeper", lead: "Find every safe cell without hitting a mine.",
       levels: "Difficulty", easy: "Sandbox", medium: "Slippery slope", hard: "Minefield", noflag: "No flags",
-      closedCell: "Closed cell", puzzle: "Puzzle: dig every safe cell", puzzleMine: "Mine", hintNoflagMouse: "Click: reveal. No flags in this mode.", hintNoflagTouch: "Tap: reveal. No flags in this mode.",
+      fullscreen: "Full screen", fullscreenExit: "Exit", closedCell: "Closed cell", puzzle: "Puzzle: dig every safe cell", puzzleMine: "Mine", hintNoflagMouse: "Click: reveal. No flags in this mode.", hintNoflagTouch: "Tap: reveal. No flags in this mode.",
       minesLeft: "Mines left", time: "Time", record: "Best", shovel: "Shovel", flag: "Flag", tapAction: "What a tap does", newGame: "New game",
       replay: "Play again", changeLevel: "Change level", go: "Let's go", cancel: "Cancel",
       grid: "Grid", mines: "Mines", pickTop: "To beat: ", pickTopTime: " in {t}",
@@ -295,12 +295,15 @@
   function fitCells(fresh) {
     var gaps = (size - 1) * 3;
     var cell = Math.floor((boardEl.parentNode.clientWidth - 4 - gaps) / size);
-    if (wide.matches) {
+    if (full && wide.matches) {
+      // plein écran sur ordinateur : la grille tient dans le cadre, qui prend la place libre
+      cell = Math.max(20, Math.min(72, cell, Math.floor((wrapEl.clientHeight - 4 - gaps) / size)));
+    } else if (wide.matches) {
       // hauteur libre sous le haut du panneau, page en haut (en-tête et titre compris)
       var stage = boardEl.closest(".ms-stage"), cs = getComputedStyle(stage);
       var pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
       var top = stage.getBoundingClientRect().top + window.scrollY;
-      var gap = parseFloat(cs.rowGap) || 0, above = $("ms-stage-level").offsetHeight + gap;
+      var gap = parseFloat(cs.rowGap) || 0, above = stage.querySelector(".ms-stage-head").offsetHeight + gap;
       var below = toolEl.hidden ? 0 : toolEl.offsetHeight + gap;
       var tall = window.innerHeight - top - pad - 16 - above - below;
       cell = Math.max(20, Math.min(72, cell, Math.floor((tall - gaps) / size)));
@@ -315,10 +318,15 @@
   /* --- Grille : la déplacer et la zoomer comme une carte ----------------------
      Un doigt (ou la souris) qui glisse déplace la grille dans tous les sens, deux
      doigts pincent pour zoomer ; sur ordinateur, Ctrl + molette (ou le pincement du
-     pavé tactile) zoome et la molette déplace. Arrivée en butée en haut ou en bas,
-     la grille laisse défiler la page. Un tap sans glisser reste un clic sur la case. */
+     pavé tactile) zoome et la molette déplace. Sur ordinateur, arrivée en butée en haut
+     ou en bas, la grille laisse défiler la page ; sur téléphone, son cadre ne dépasse pas
+     la hauteur de l'écran (CSS) et un glissé sur la grille ne fait jamais bouger la page,
+     même lancé vite. Un tap sans glisser reste un clic sur la case. */
   var wrapEl = boardEl.parentNode;
   var view = { s: 1, x: 0, y: 0, w: 0, h: 0 }, MAX_ZOOM = 3, flingRaf = 0;
+  // fondu sur les bords du cadre derrière lesquels la grille continue
+  var edgeEl = wrapEl.querySelector(".ms-board-edge");
+  var EDGES = ["inset 0 26px 18px -18px", "inset 26px 0 18px -18px", "inset 0 -26px 18px -18px", "inset -26px 0 18px -18px"];
   var touches = {}, gesture = null;
   function minZoom() { return Math.min(1, wrapEl.clientWidth / view.w, wrapEl.clientHeight / view.h); }
   // plus petite que le cadre : centrée ; plus grande : ses bords ne laissent pas de vide
@@ -328,6 +336,8 @@
     view.x = clampAxis(view.x, view.w * view.s, wrapEl.clientWidth);
     view.y = clampAxis(view.y, view.h * view.s, wrapEl.clientHeight);
     boardEl.style.transform = "translate(" + view.x.toFixed(1) + "px, " + view.y.toFixed(1) + "px) scale(" + view.s.toFixed(4) + ")";
+    var more = [view.y < -0.5, view.x < -0.5, view.y + view.h * view.s > wrapEl.clientHeight + 0.5, view.x + view.w * view.s > wrapEl.clientWidth + 0.5];
+    edgeEl.style.boxShadow = EDGES.filter(function (e, i) { return more[i]; }).map(function (e) { return e + " rgb(0 0 0 / 0.55)"; }).join(", ") || "none";
   }
   // vue de départ : zoom 1, grille centrée ; le cadre prend la hauteur de la grille
   function resetView() {
@@ -359,11 +369,35 @@
   // deviendrait une animation coupée par la suivante et la page suivrait le doigt au ralenti
   var rootStyle = document.documentElement.style;
   function scrollPage(dy) {
-    if (Math.abs(dy) <= 0.5) return;
+    if (Math.abs(dy) <= 0.5 || !wide.matches) return;
     rootStyle.scrollBehavior = "auto";
     window.scrollBy(0, -dy);
     rootStyle.scrollBehavior = "";
   }
+  // plein écran : la scène (compteurs, grille, commutateur) couvre l'écran et la page ne défile
+  // plus ; le vrai plein écran du navigateur quand il existe (pas sur iPhone, où la scène
+  // couvre seulement la page)
+  var stageEl = boardEl.closest(".ms-stage"), fullBtn = $("ms-full"), full = false;
+  var statsEl = document.querySelector(".ms-stats"), statsHome = statsEl.parentNode, statsNext = statsEl.nextSibling;
+  function setFull(on) {
+    if (on === full) return;
+    full = on;
+    stageEl.classList.toggle("is-full", on);
+    document.documentElement.classList.toggle("ms-full-on", on);
+    if (on) stageEl.insertBefore(statsEl, wrapEl); else statsHome.insertBefore(statsEl, statsNext);
+    var label = fullBtn.querySelector("span");
+    label.dataset.i18n = on ? "fullscreenExit" : "fullscreen";
+    label.textContent = TEXT[label.dataset.i18n];
+    fullBtn.setAttribute("aria-pressed", String(on));
+    if (on && stageEl.requestFullscreen) stageEl.requestFullscreen().catch(function () {});
+    if (!on && document.fullscreenElement) document.exitFullscreen().catch(function () {});
+    fitCells(true);
+  }
+  fullBtn.addEventListener("click", function () { setFull(!full); });
+  // le cadre ne prend sa taille de plein écran qu'après coup : la grille se recale dessus
+  if (window.ResizeObserver) new ResizeObserver(function () { if (full) fitCells(false); }).observe(wrapEl);
+  // sortie par Échap ou le geste retour du téléphone
+  document.addEventListener("fullscreenchange", function () { if (!document.fullscreenElement && full) setFull(false); });
   function points() { return Object.keys(touches).map(function (k) { return touches[k]; }); }
   function pinchOf(p) {
     return { mode: "pinch", d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) || 1, mx: (p[0].x + p[1].x) / 2, my: (p[0].y + p[1].y) / 2 };

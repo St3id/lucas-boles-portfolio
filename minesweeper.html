@@ -20,9 +20,9 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/main.css?v=53e58f5c">
-  <link rel="stylesheet" href="assets/css/minesweeper.css?v=5165c846">
+  <link rel="stylesheet" href="assets/css/minesweeper.css?v=92a1cdbb">
   <script src="assets/js/ms-core.js?v=651d1067" defer></script>
-  <script src="assets/js/minesweeper.js?v=60994ebc" defer></script>
+  <script src="assets/js/minesweeper.js?v=9c6c58fb" defer></script>
 </head>
 <body class="ms-page">
   <a class="skip-link" href="#jeu" data-i18n="skip">Aller au jeu</a>
@@ -74,9 +74,13 @@
       </div>
 
       <div class="ms-stage">
-        <p class="ms-stage-level" id="ms-stage-level"></p>
+        <div class="ms-stage-head">
+          <p class="ms-stage-level" id="ms-stage-level"></p>
+          <button type="button" class="ms-full" id="ms-full" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg><span data-i18n="fullscreen">Plein écran</span></button>
+        </div>
         <div class="ms-board-wrap">
           <div class="ms-board" id="ms-board" role="group" aria-label="Grille du démineur" data-i18n-aria="board"></div>
+          <span class="ms-board-edge" aria-hidden="true"></span>
         </div>
         <!-- écran tactile : ce que fait un tap, sous la grille, à portée de pouce -->
         <div class="ms-tool" id="ms-tool" role="group" aria-label="Action d'un tap" data-i18n-aria="tapAction">
